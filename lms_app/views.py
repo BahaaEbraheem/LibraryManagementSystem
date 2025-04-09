@@ -1,8 +1,8 @@
 from django.shortcuts import render
 
 # Create your views here.
-def demo(request):
-    return render(request,'pages/books.html')
+def index(request):
+    return render(request,'pages/index.html')
 
 def books(request):
     return render(request,'pages/books.html')
