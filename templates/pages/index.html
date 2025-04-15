@@ -153,36 +153,49 @@
                             </div>
                         </div>
 
-                        <div class="widget-user-header bg-info">
+                        <div style="background: url({{book.photo_book.url}}); background-size: cover;"
+                            class="widget-user-header bg-info">
                             <h3 class="widget-user-username"> {{book.title}}</h3>
                             <h5 class="widget-user-desc">{{book.author}}</h5>
                         </div>
                         <div class="widget-user-image">
+                            {% if book.photo_author %}
                             <img style="width:100px; height: 100px;" class="img-circle elevation-2"
-                                src="{{book.photo_book.url}}" alt="User Avatar">
+                                src="{{book.photo_author.url}}" alt="User Avatar">
+                            {% endif %}
                         </div>
                         <div class="card-footer">
                             <div class="row">
                                 <div class="col-sm-4 border-right">
                                     <div class="description-block">
-                                        <h5 class="description-header">{{book.pages}}</h5>
                                         <span class="description-text">صفحة</span>
+
+                                        <h5 class="description-header">{{book.pages}}</h5>
                                     </div>
                                     <!-- /.description-block -->
                                 </div>
                                 <!-- /.col -->
                                 <div class="col-sm-4 border-right">
                                     <div class="description-block">
-                                        <h5 class="description-header">{{book.price}}</h5>
                                         <span class="description-text">السعر</span>
+
+                                        <h5 class="description-header">${{book.price}}</h5>
                                     </div>
                                     <!-- /.description-block -->
                                 </div>
                                 <!-- /.col -->
                                 <div class="col-sm-4">
                                     <div class="description-block">
-                                        <h5 class="description-header text-dark">{{book.status}}</h5>
                                         <span class="description-text">الحالة</span>
+
+                                        {% if book.status == 'available' %}
+                                        <h5 class="description-header text-success">{{book.status}}</h5>
+                                        {% elif book.status == 'rental' %}
+                                        <h5 class="description-header text-warning">{{book.status}}</h5>
+                                        {% elif book.status == 'sold' %}
+                                        <h5 class="description-header text-red">{{book.status}}</h5>
+
+                                        {% endif %}
                                     </div>
                                     <!-- /.description-block -->
                                 </div>
