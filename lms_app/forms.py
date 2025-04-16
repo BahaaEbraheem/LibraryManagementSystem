@@ -1,5 +1,5 @@
 from django import forms
-from .models import Book
+from .models import Book,Category
 
 
 class bookForm(forms.ModelForm):
@@ -12,4 +12,9 @@ class bookForm(forms.ModelForm):
         #     'photo_book':forms.FileField(attrs={'class':'form-control'}),
         #     'category':forms.Select(attrs={'class':'form-control'}),
         # }
-        
+
+
+class CategoryForm(forms.ModelForm):
+      class Meta:
+           model = Category
+           fields = '__all__'
