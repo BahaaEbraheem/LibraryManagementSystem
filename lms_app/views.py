@@ -15,7 +15,6 @@ def index(request):
         else:
               print("❌ أخطاء في نموذج الكتاب:", add_book.errors)
 
-     if request.method == 'POST':
         add_category = CategoryForm(request.POST, request.FILES)
         if add_category.is_valid():
            add_category.save()
