@@ -117,6 +117,22 @@
         });
 
     </script>
+
+
+    <script>
+        function calculateTotalRental() {
+            const price = parseFloat(document.getElementById('id_retal_price_day').value) || 0;
+            const period = parseFloat(document.getElementById('id_retal_period').value) || 0;
+            const total = price * period;
+
+            document.getElementById('id_total_rental').value = total.toFixed(2);
+        }
+
+        document.getElementById('id_retal_price_day').addEventListener('input', calculateTotalRental);
+        document.getElementById('id_retal_period').addEventListener('input', calculateTotalRental);
+    </script>
+
+
     <script>
         $(document).ready(function () {
             $('#myModal').on('shown.bs.modal', function () {
