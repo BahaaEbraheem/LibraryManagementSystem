@@ -120,8 +120,9 @@
                 <div class="col-4 ">
                     <ul class="nav">
                         {% for category in categories %}
-                        <li class="nav-item ">
-                            <a id="" class="nav-link bg-primary" href="#">{{category.name}}</a>
+                        <li class="nav-item category{{category.id}}">
+                            <a data-category-id="{{ category.id }}" class="nav-link bg-primary category-btn"
+                                href="#">{{category.name}}</a>
                         </li>
                         {% endfor %}
                     </ul>
@@ -132,7 +133,8 @@
             <div class="row">
                 {% for book in books %}
                 <!-- الكتب -->
-                <div id="" class="col-md-4">
+                <div class="col-md-4 bookhide book-item" data-category-id="{{ book.category.id }}"
+                    data-status="{{ book.status }}">
                     <!-- Widget: user widget style 1 -->
                     <div id="" class="card card-widget widget-user ">
                         <!-- Add the bg color to the header using any of the bg-* classes -->

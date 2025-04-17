@@ -64,6 +64,58 @@
             $('#cat').hide()
         });
 
+
+        // $(document).ready(function () {
+        //     // Hide all books by default or keep them visible
+        //     $('.bookhide').show();
+
+        //     $('.category-btn').on('click', function (e) {
+        //         e.preventDefault();
+
+        //         const selectedCategory = $(this).data('category-id');
+
+        //         if (selectedCategory === 'all') {
+        //             $('.bookhide').show(); // Show all books
+        //         } else {
+        //             $('.bookhide').hide(); // Hide all first
+        //             $('.book-item[data-category-id="' + selectedCategory + '"]').show(); // Show matching
+        //         }
+        //     });
+        // });
+        $(document).ready(function () {
+            let selectedCategory = null;
+            let selectedStatus = null;
+
+            function filterBooks() {
+                $('.book-item').hide().filter(function () {
+                    const bookCategory = $(this).data('category-id').toString();
+                    const bookStatus = $(this).data('status').toString();
+
+                    const categoryMatch = selectedCategory === null || bookCategory === selectedCategory.toString();
+                    const statusMatch = selectedStatus === null || bookStatus === selectedStatus.toString();
+
+                    return categoryMatch && statusMatch;
+                }).show();
+            }
+
+            $('.category-btn').on('click', function (e) {
+                e.preventDefault();
+                selectedCategory = $(this).data('category-id');
+                filterBooks();
+            });
+
+            $('.status-btn').on('click', function () {
+                selectedStatus = $(this).data('status');
+                filterBooks();
+            });
+            $('#reset-filters').click(function (e) {
+                e.preventDefault();
+                selectedCategory = null;
+                selectedStatus = null;
+                $('.book-item').show();
+            });
+        });
+
     </script>
     <script>
         $(document).ready(function () {

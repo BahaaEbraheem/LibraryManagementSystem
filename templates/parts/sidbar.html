@@ -55,11 +55,12 @@
                         </form>
                         {% for category in categories %}
                         <li style="cursor: pointer;" class="nav-item">
-                            <a id="" class="nav-link">
+                            <a data-category-id="{{ category.id }}" class="nav-link category-btn">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>{{category.name}}</p>
                             </a>
                         </li>
+
                         {% endfor %}
 
 
@@ -69,24 +70,31 @@
 
                 <li class="nav-header">الكتب المستعارة</li>
 
-                <li style="cursor: pointer;" class="nav-item">
+                <li style="cursor: pointer;" class="nav-item" data-status="sold">
                     <a id="statusSold" class="nav-link">
                         <i class="nav-icon far fa-circle text-danger"></i>
                         <p class="text">تم بيعه</p>
                     </a>
                 </li>
-                <li style="cursor: pointer;" class="nav-item">
+                <li style="cursor: pointer;" class="nav-item status-btn" data-status="rental">
                     <a id="" class="nav-link">
                         <i class="nav-icon far fa-circle text-warning"></i>
                         <p>تم استعارته</p>
                     </a>
                 </li>
-                <li style="cursor: pointer;" class="nav-item">
+                <li style="cursor: pointer;" class="nav-item status-btn" data-status="available">
                     <a id="" class="nav-link">
                         <i class="nav-icon far fa-circle text-info"></i>
                         <p>متاح</p>
                     </a>
                 </li>
+                <li style="cursor: pointer;" class="nav-item">
+                    <a id="reset-filters" class="nav-link">
+                        <i class="nav-icon far fa-circle text-success"></i>
+                        <p>عرض الكل</p>
+                    </a>
+                </li>
+
             </ul>
         </nav>
         <!-- /.sidebar-menu -->
