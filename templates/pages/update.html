@@ -14,23 +14,57 @@
             <!-- /.card-header -->
             <!-- form start -->
             <form method="POST" enctype="multipart/form-data">
-
+                {% csrf_token %}
                 <div class="card-body">
+                    <div class="form-group">
+                        {{ form.title.label_tag }} {{ form.title }}
+                    </div>
 
-                    <input type="text" class="form-control" placeholder="input text">
-                    <input type="text" class="form-control" placeholder="input text">
-                    <input type="text" class="form-control" placeholder="input text">
-                    <input type="text" class="form-control" placeholder="input text">
-                    <input type="text" class="form-control" placeholder="input text">
-                    <input type="text" class="form-control" placeholder="input text">
-                    <input type="text" class="form-control" placeholder="input text">
+                    <div class="form-group">
+                        {{ form.author.label_tag }} {{ form.author }}
+                    </div>
 
-                    <small id='totalrente' class="form-text text-muted"></small>
+                    <div class="form-group">
+                        {{ form.photo_book.label_tag }} {{ form.photo_book }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.photo_author.label_tag }} {{ form.photo_author }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.pages.label_tag }} {{ form.pages }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.price.label_tag }} {{ form.price }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.retal_price_day.label_tag }} {{ form.retal_price_day }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.retal_period.label_tag }} {{ form.retal_period }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.active.label_tag }} {{ form.active }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.status.label_tag }} {{ form.status }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.category.label_tag }} {{ form.category }}
+                    </div>
                 </div>
                 <!-- /.card-body -->
 
                 <div class="card-footer">
                     <button type="submit" class="btn btn-primary">حفظ</button>
+                    <a href="{% url 'index' %}" class="btn btn-primary">عودة</a>
                 </div>
             </form>
         </div>
