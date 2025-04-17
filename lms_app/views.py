@@ -25,6 +25,10 @@ def index(request):
           'categories':Category.objects.all(),
           'form' : bookForm(),
           'categoryForm' : CategoryForm(),
+          'allbooks' : Book.objects.filter(active=True).count,
+          'booksSoled' : Book.objects.filter(status='sold').count,
+          'booksRental' : Book.objects.filter(status='rental').count,
+          'booksAvailable' : Book.objects.filter(status='available').count
           }
      
      return render(request,'pages/index.html',context)
@@ -44,6 +48,7 @@ def update(request, id):
         edit_book = bookForm(request.POST, request.FILES, instance=book)
         if edit_book.is_valid():
             edit_book.save()
+            return redirect('/') 
         else:
             print("❌ أخطاء في نموذج الكتاب:", edit_book.errors)
     else:
