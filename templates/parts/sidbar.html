@@ -1,7 +1,7 @@
 <!-- Main Sidebar Container -->
 <aside style="position: fixed;" class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="#" class="brand-link">
+    <a href="{% url 'index' %}" class="brand-link">
         <span class="brand-text font-weight-light">NOUVIL</span>
     </a>
 
@@ -12,7 +12,7 @@
             <div class="image">
             </div>
             <div class="info">
-                <a href="#" class="d-block">Bahaa Ebraheem</a>
+                <a href="{% url 'index' %}" class="d-block">Bahaa Ebraheem</a>
             </div>
         </div>
 
@@ -21,10 +21,10 @@
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{% url 'books' %}" class="nav-link">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
-                            New Books
+                            Books
                         </p>
                     </a>
                 </li>
