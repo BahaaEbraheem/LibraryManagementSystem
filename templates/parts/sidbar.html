@@ -54,11 +54,16 @@
                             <button id="backcat" class="btn btn-primary ">back</button>
                         </form>
                         {% for category in categories %}
-                        <li style="cursor: pointer;" class="nav-item">
+                        <!-- <li style="cursor: pointer;" class="nav-item category{{category.id}}">
                             <a data-category-id="{{ category.id }}" class="nav-link category-btn">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>{{category.name}}</p>
                             </a>
+                        </li> -->
+
+                        <li class="nav-item category{{category.id}}">
+                            <a data-category-id="{{ category.id }}" class="nav-link category-btn"
+                                href="#">{{category.name}}</a>
                         </li>
 
                         {% endfor %}
