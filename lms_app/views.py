@@ -4,7 +4,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from .forms import bookForm,CategoryForm
 from .models import Book, Category
-
+from django.db.models import Q
 
 # Create your views here.
 def index(request):
@@ -34,12 +34,20 @@ def index(request):
      return render(request,'pages/index.html',context)
 
 def books(request):
-     context = {   
-          'books':Book.objects.all(),
+    search_term = request.GET.get('search_name', '')
+    print('search_term '+search_term)
+    if search_term:
+        books = Book.objects.filter(Q(title__icontains=search_term) | Q(category__name__icontains=search_term))
+
+    else:
+        books = Book.objects.all()
+
+    context = {   
+          'books':books,
           'categories':Category.objects.all(),
           }
      
-     return render(request,'pages/books.html',context)
+    return render(request,'pages/books.html',context)
 
 def update(request, id):
     book = get_object_or_404(Book, id=id)
