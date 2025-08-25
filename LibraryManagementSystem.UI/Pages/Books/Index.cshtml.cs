@@ -1,6 +1,7 @@
 using LibraryManagementSystem.BLL.Services;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.DTOs;
+using LibraryManagementSystem.DAL.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -328,6 +329,19 @@ namespace LibraryManagementSystem.UI.Pages.Books
                         borrowResult.Data);
 
                     TempData["SuccessMessage"] = $"تم استعارة الكتاب بنجاح! رقم الاستعارة: {borrowResult.Data} - Book borrowed successfully! Borrowing ID: {borrowResult.Data}";
+
+                    // إعادة توجيه مع الحفاظ على معايير البحث الحالية
+                    // Redirect while preserving current search criteria
+                    return RedirectToPage(new
+                    {
+                        searchTerm = SearchCriteria.SearchTerm,
+                        genre = SearchCriteria.Genre,
+                        availableOnly = SearchCriteria.AvailableOnly,
+                        pageNumber = SearchCriteria.PageNumber,
+                        pageSize = SearchCriteria.PageSize,
+                        sortBy = SearchCriteria.SortBy,
+                        sortDescending = SearchCriteria.SortDescending
+                    });
                 }
                 else
                 {

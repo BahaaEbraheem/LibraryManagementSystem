@@ -4,6 +4,9 @@
     ViewData["Title"] = "إدارة الاستعارات - Manage Borrowings";
 }
 
+@* Anti-forgery token for AJAX requests *@
+@Html.AntiForgeryToken()
+
 <div class="container-fluid" dir="rtl">
     <div class="row">
         <div class="col-12">
@@ -313,8 +316,14 @@ function extendBorrowing(borrowingId, bookTitle) {
 function confirmReturn() {
     const form = document.getElementById('returnForm');
     const formData = new FormData(form);
-    
-    fetch('/Borrowings/Return', {
+
+    // Add anti-forgery token
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    if (token) {
+        formData.append('__RequestVerificationToken', token);
+    }
+
+    fetch('/Borrowings?handler=Return', {
         method: 'POST',
         body: formData
     })
@@ -330,15 +339,21 @@ function confirmReturn() {
         alert('حدث خطأ أثناء الإرجاع');
         console.error('Error:', error);
     });
-    
+
     bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
 }
 
 function confirmExtend() {
     const form = document.getElementById('extendForm');
     const formData = new FormData(form);
-    
-    fetch('/Borrowings/Extend', {
+
+    // Add anti-forgery token
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    if (token) {
+        formData.append('__RequestVerificationToken', token);
+    }
+
+    fetch('/Borrowings?handler=Extend', {
         method: 'POST',
         body: formData
     })
@@ -354,7 +369,7 @@ function confirmExtend() {
         alert('حدث خطأ أثناء التمديد');
         console.error('Error:', error);
     });
-    
+
     bootstrap.Modal.getInstance(document.getElementById('extendModal')).hide();
 }
 </script>

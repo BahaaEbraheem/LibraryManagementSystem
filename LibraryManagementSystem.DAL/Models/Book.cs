@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using LibraryManagementSystem.DAL.Models.Enums;
 
 namespace LibraryManagementSystem.DAL.Models
 {
@@ -99,6 +100,13 @@ namespace LibraryManagementSystem.DAL.Models
         public bool IsAvailable => AvailableCopies > 0;
 
         /// <summary>
+        /// حالة توفر الكتاب
+        /// Book availability status
+        /// </summary>
+        public BookAvailabilityStatus AvailabilityStatus =>
+            BookAvailabilityStatusExtensions.DetermineStatus(TotalCopies, AvailableCopies);
+
+        /// <summary>
         /// خاصية محسوبة لعدد النسخ المستعارة
         /// Computed property for number of borrowed copies
         /// </summary>
@@ -111,11 +119,17 @@ namespace LibraryManagementSystem.DAL.Models
         public string DisplayTitle => $"{Title} by {Author}";
 
         /// <summary>
-        /// خاصية محسوبة لحالة التوفر
-        /// Computed property for availability status
+        /// خاصية محسوبة لحالة التوفر كنص
+        /// Computed property for availability status as text
         /// </summary>
-        public string AvailabilityStatus => IsAvailable
-            ? $"Available ({AvailableCopies} of {TotalCopies})"
-            : "Not Available";
+        public string AvailabilityStatusText => AvailabilityStatus.GetDescription();
+
+        /// <summary>
+        /// خاصية محسوبة لحالة التوفر مع تفاصيل النسخ
+        /// Computed property for availability status with copy details
+        /// </summary>
+        public string AvailabilityStatusWithDetails => IsAvailable
+            ? $"{AvailabilityStatus.GetDescription()} ({AvailableCopies} من {TotalCopies})"
+            : AvailabilityStatus.GetDescription();
     }
 }
