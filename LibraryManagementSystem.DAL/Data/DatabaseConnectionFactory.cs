@@ -296,7 +296,9 @@ namespace LibraryManagementSystem.DAL.Data
             }
 
             var result = await ((SqlCommand)command).ExecuteScalarAsync();
-            return result == null || result == DBNull.Value ? default(T) : (T)result;
+            return result == null || result == DBNull.Value
+                ? default(T)
+                : (T)Convert.ChangeType(result, typeof(T));
         }
 
         /// <summary>
