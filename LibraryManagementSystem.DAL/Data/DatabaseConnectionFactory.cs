@@ -139,39 +139,51 @@ namespace LibraryManagementSystem.DAL.Data
                 // Create Users table
                 Console.WriteLine("Creating Users table...");
                 await ExecuteSqlAsync(connection, @"
-                    IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Users')
-                    BEGIN
-                        CREATE TABLE Users (
-                            UserId INT IDENTITY(1,1) PRIMARY KEY,
-                            FirstName NVARCHAR(50) NOT NULL,
-                            LastName NVARCHAR(50) NOT NULL,
-                            Email NVARCHAR(100) NOT NULL UNIQUE,
-                            PhoneNumber NVARCHAR(15),
-                            Address NVARCHAR(200),
-                            MembershipDate DATETIME2 NOT NULL DEFAULT GETDATE(),
-                            IsActive BIT NOT NULL DEFAULT 1,
-                            PasswordHash NVARCHAR(255) NOT NULL DEFAULT '',
-                            Role INT NOT NULL DEFAULT 1,
-                            CreatedDate DATETIME2 NOT NULL DEFAULT GETDATE(),
-                            ModifiedDate DATETIME2 NOT NULL DEFAULT GETDATE(),
+    IF NOT EXISTS (
+        SELECT * FROM INFORMATION_SCHEMA.TABLES 
+        WHERE TABLE_NAME = 'Users'
+    )
+    BEGIN
+        CREATE TABLE Users (
+            UserId INT IDENTITY(1,1) PRIMARY KEY,
+            FirstName NVARCHAR(50) NOT NULL,
+            LastName NVARCHAR(50) NOT NULL,
+            Email NVARCHAR(100) NOT NULL UNIQUE,
+            PhoneNumber NVARCHAR(15),
+            Address NVARCHAR(200),
+            MembershipDate DATETIME2 NOT NULL DEFAULT GETDATE(),
+            IsActive BIT NOT NULL DEFAULT 1,
+            PasswordHash NVARCHAR(255) NOT NULL DEFAULT '',
+            Role INT NOT NULL DEFAULT 1,
+            CreatedDate DATETIME2 NOT NULL DEFAULT GETDATE(),
+            ModifiedDate DATETIME2 NOT NULL DEFAULT GETDATE()
+            -- القيد CHK_Users_Role تمت إزالته مؤقتًا
+        );
+    END
+    ELSE
+    BEGIN
+        -- إضافة العمود PasswordHash إذا لم يكن موجودًا
+        IF NOT EXISTS (
+            SELECT * FROM sys.columns 
+            WHERE object_id = OBJECT_ID('Users') AND name = 'PasswordHash'
+        )
+        BEGIN
+            ALTER TABLE Users ADD PasswordHash NVARCHAR(255) NOT NULL DEFAULT '';
+        END
 
-                            CONSTRAINT CHK_Users_Role CHECK (Role IN (1, 2))
-                        );
-                    END
-                    ELSE
-                    BEGIN
-                        -- Add columns if they don't exist (for existing tables)
-                        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'PasswordHash')
-                        BEGIN
-                            ALTER TABLE Users ADD PasswordHash NVARCHAR(255) NOT NULL DEFAULT '';
-                        END
+        -- إضافة العمود Role إذا لم يكن موجودًا
+        IF NOT EXISTS (
+            SELECT * FROM sys.columns 
+            WHERE object_id = OBJECT_ID('Users') AND name = 'Role'
+        )
+        BEGIN
+            ALTER TABLE Users ADD Role INT NOT NULL DEFAULT 1;
+        END
 
-                        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Role')
-                        BEGIN
-                            ALTER TABLE Users ADD Role INT NOT NULL DEFAULT 1;
-                            ALTER TABLE Users ADD CONSTRAINT CHK_Users_Role CHECK (Role IN (1, 2));
-                        END
-                    END");
+        -- لا تضف القيد CHK_Users_Role الآن
+    END
+");
+
 
                 // Create Books table
                 await ExecuteSqlAsync(connection, @"
@@ -233,40 +245,7 @@ namespace LibraryManagementSystem.DAL.Data
             }
         }
 
-        //private async Task InsertInitialDataIfNeededAsync(IDbConnection connection)
-        //{
-        //    try
-        //    {
-        //        // Check if data already exists
-        //        var userCountSql = "SELECT COUNT(*) FROM Users";
-        //        using var userCountCmd = new SqlCommand(userCountSql, (SqlConnection)connection);
-        //        var userCount = (int)await userCountCmd.ExecuteScalarAsync();
-
-        //        if (userCount == 0)
-        //        {
-        //            // Insert initial users
-        //            await ExecuteSqlAsync(connection, @"
-        //                INSERT INTO Users (FirstName, LastName, Email, PhoneNumber, Address, IsActive)
-        //                VALUES
-        //                    ('Ahmed', 'Mohamed', 'ahmed.mohamed@email.com', '966501234567', 'Riyadh', 1),
-        //                    ('Fatima', 'Ali', 'fatima.ali@email.com', '966502345678', 'Jeddah', 1),
-        //                    ('Mohamed', 'Alsaeed', 'mohamed.alsaeed@email.com', '966503456789', 'Dammam', 1)");
-
-        //            // Insert initial books
-        //            await ExecuteSqlAsync(connection, @"
-        //                INSERT INTO Books (Title, Author, ISBN, Publisher, PublicationYear, Genre, TotalCopies, AvailableCopies, Description)
-        //                VALUES
-        //                    ('Clean Code', 'Robert C. Martin', '978-0132350884', 'Prentice Hall', 2008, 'Programming', 3, 3, 'A handbook of agile software craftsmanship'),
-        //                    ('Design Patterns', 'Gang of Four', '978-0201633612', 'Addison-Wesley', 1994, 'Programming', 2, 2, 'Elements of reusable object-oriented software'),
-        //                    ('The Pragmatic Programmer', 'Andrew Hunt', '978-0201616224', 'Addison-Wesley', 1999, 'Programming', 2, 2, 'From journeyman to master')");
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"Failed to insert initial data: {ex.Message}");
-        //        // Don't throw here, let the app continue
-        //    }
-        //}
+    
 
         private async Task ExecuteSqlAsync(IDbConnection connection, string sql)
         {

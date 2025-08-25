@@ -3,14 +3,13 @@
     This partial view contains client-side validation scripts
 *@
 
-@* Use CDN for jQuery Validation *@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
-        integrity="sha512-rstIgDs0xPgmG6RX1Aba4KV5cWJbAMcvRCVmglpam9SoHZiUCyQVDdH2LPlxoHtrv17XWblE/V/PP+Tr04hbtA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"
-        integrity="sha512-0+1ptyxIW5aWZ7kdcKk8ZX3gkZAqK/P2KqPe1gvkjn7dd8xTfqh8WmJKdpD8Mv3K+HwA2+M+/uNF0J3HcWrzvA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+
+<script src="~/lib/jquery-validation/dist/jquery-3.6.0.min.js"></script>
+<!-- ثم مكتبة التحقق -->
+
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
 <script>
     // تخصيص رسائل التحقق باللغة العربية
     // Customize validation messages in Arabic

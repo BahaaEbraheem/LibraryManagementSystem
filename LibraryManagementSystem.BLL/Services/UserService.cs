@@ -31,7 +31,7 @@ namespace LibraryManagementSystem.BLL.Services
             {
                 _logger.LogDebug("الحصول على جميع المستخدمين - Getting all users");
                 var users = await _userRepository.GetAllAsync();
-                _logger.LogDebug("تم الحصول على {Count} مستخدم - Retrieved {Count} users", users.Count());
+                _logger.LogDebug("تم الحصول على {Count} مستخدم - Retrieved  users", users.Count());
                 return users;
             }
             catch (Exception ex)
@@ -117,7 +117,7 @@ namespace LibraryManagementSystem.BLL.Services
             {
                 _logger.LogDebug("الحصول على المستخدمين النشطين - Getting active users");
                 var users = await _userRepository.GetActiveUsersAsync();
-                _logger.LogDebug("تم الحصول على {Count} مستخدم نشط - Retrieved {Count} active users", users.Count());
+                _logger.LogDebug("تم الحصول على {Count} مستخدم نشط - Retrieved active users", users.Count());
                 return users;
             }
             catch (Exception ex)
@@ -143,7 +143,7 @@ namespace LibraryManagementSystem.BLL.Services
 
                 _logger.LogDebug("البحث عن المستخدمين بالمصطلح: {SearchTerm} - Searching users with term", searchTerm);
                 var users = await _userRepository.SearchUsersAsync(searchTerm);
-                _logger.LogDebug("تم العثور على {Count} مستخدم - Found {Count} users", users.Count());
+                _logger.LogDebug("تم العثور على {Count} مستخدم - Found  users", users.Count());
                 return users;
             }
             catch (Exception ex)
