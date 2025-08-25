@@ -1,0 +1,374 @@
+@page
+@model LibraryManagementSystem.UI.Pages.Borrowings.IndexModel
+@{
+    ViewData["Title"] = "إدارة الاستعارات - Manage Borrowings";
+}
+
+<div class="container-fluid" dir="rtl">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-book-reader me-2"></i>
+                        إدارة الاستعارات - Manage Borrowings
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- رسائل التنبيه - Alert Messages -->
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @Model.SuccessMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <!-- فلاتر البحث - Search Filters -->
+                    <form method="get" class="mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="userId" class="form-label">معرف المستخدم - User ID</label>
+                                <input type="number" class="form-control" id="userId" name="userId" 
+                                       value="@Model.UserId" placeholder="ادخل معرف المستخدم">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="status" class="form-label">حالة الاستعارة - Status</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="">جميع الحالات - All Status</option>
+                                    <option value="active" selected="@(Model.Status == "active")">نشطة - Active</option>
+                                    <option value="overdue" selected="@(Model.Status == "overdue")">متأخرة - Overdue</option>
+                                    <option value="returned" selected="@(Model.Status == "returned")">مرجعة - Returned</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="sortBy" class="form-label">ترتيب حسب - Sort By</label>
+                                <select class="form-select" id="sortBy" name="sortBy">
+                                    <option value="BorrowDate" selected="@(Model.SortBy == "BorrowDate")">تاريخ الاستعارة - Borrow Date</option>
+                                    <option value="DueDate" selected="@(Model.SortBy == "DueDate")">تاريخ الاستحقاق - Due Date</option>
+                                    <option value="UserName" selected="@(Model.SortBy == "UserName")">اسم المستخدم - User Name</option>
+                                    <option value="BookTitle" selected="@(Model.SortBy == "BookTitle")">عنوان الكتاب - Book Title</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search me-1"></i>
+                                        بحث - Search
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-grid">
+                                    <a href="/Borrowings" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i>
+                                        مسح - Clear
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- إحصائيات سريعة - Quick Statistics -->
+                    @if (Model.Statistics != null)
+                    {
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">@Model.Statistics.ActiveBorrowings</h5>
+                                        <p class="card-text">استعارات نشطة - Active</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-dark">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">@Model.Statistics.OverdueBorrowings</h5>
+                                        <p class="card-text">استعارات متأخرة - Overdue</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">@Model.Statistics.ReturnedBorrowings</h5>
+                                        <p class="card-text">استعارات مرجعة - Returned</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">@Model.Statistics.TotalLateFees.ToString("C")</h5>
+                                        <p class="card-text">رسوم التأخير - Late Fees</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- قائمة الاستعارات - Borrowings List -->
+                    @if (Model.Borrowings != null && Model.Borrowings.Any())
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">
+                                قائمة الاستعارات - Borrowings List 
+                                <span class="badge bg-secondary">@Model.Borrowings.Count()</span>
+                            </h5>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>معرف الاستعارة - ID</th>
+                                        <th>المستخدم - User</th>
+                                        <th>الكتاب - Book</th>
+                                        <th>تاريخ الاستعارة - Borrow Date</th>
+                                        <th>تاريخ الاستحقاق - Due Date</th>
+                                        <th>الحالة - Status</th>
+                                        <th>الرسوم - Fees</th>
+                                        <th>الإجراءات - Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var borrowing in Model.Borrowings)
+                                    {
+                                        <tr class="@(borrowing.IsOverdue && !borrowing.IsReturned ? "table-warning" : "")">
+                                            <td>@borrowing.BorrowingId</td>
+                                            <td>
+                                                <strong>@borrowing.User?.FirstName @borrowing.User?.LastName</strong>
+                                                <br><small class="text-muted">@borrowing.User?.Email</small>
+                                            </td>
+                                            <td>
+                                                <strong>@borrowing.Book?.Title</strong>
+                                                <br><small class="text-muted">@borrowing.Book?.Author</small>
+                                            </td>
+                                            <td>@borrowing.BorrowDate.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                @borrowing.DueDate.ToString("dd/MM/yyyy")
+                                                @if (borrowing.IsOverdue && !borrowing.IsReturned)
+                                                {
+                                                    <br><small class="text-danger">متأخر @((DateTime.Now - borrowing.DueDate).Days) أيام</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (borrowing.IsReturned)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>
+                                                        مرجع - Returned
+                                                    </span>
+                                                    @if (borrowing.ReturnDate.HasValue)
+                                                    {
+                                                        <br><small class="text-muted">@borrowing.ReturnDate.Value.ToString("dd/MM/yyyy")</small>
+                                                    }
+                                                }
+                                                else if (borrowing.IsOverdue)
+                                                {
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                                        متأخر - Overdue
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-primary">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        نشط - Active
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (borrowing.LateFee > 0)
+                                                {
+                                                    <span class="text-danger fw-bold">@borrowing.LateFee.ToString("C")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    @if (!borrowing.IsReturned)
+                                                    {
+                                                        <button type="button" class="btn btn-success" 
+                                                                onclick="returnBook(@borrowing.BorrowingId, '@borrowing.Book?.Title')">
+                                                            <i class="fas fa-undo me-1"></i>
+                                                            إرجاع - Return
+                                                        </button>
+                                                        <button type="button" class="btn btn-warning" 
+                                                                onclick="extendBorrowing(@borrowing.BorrowingId, '@borrowing.Book?.Title')">
+                                                            <i class="fas fa-calendar-plus me-1"></i>
+                                                            تمديد - Extend
+                                                        </button>
+                                                    }
+                                                    <a href="/Borrowings/Details/@borrowing.BorrowingId" class="btn btn-outline-info">
+                                                        <i class="fas fa-eye"></i>
+                                                        تفاصيل - Details
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-book-reader fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">لا توجد استعارات - No borrowings found</h5>
+                            <p class="text-muted">لا توجد استعارات تطابق المعايير المحددة - No borrowings match the specified criteria</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- نافذة إرجاع الكتاب - Return Book Modal -->
+<div class="modal fade" id="returnModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إرجاع كتاب - Return Book</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="returnForm">
+                    <input type="hidden" id="returnBorrowingId" name="borrowingId" />
+                    <div class="mb-3">
+                        <label for="returnNotes" class="form-label">ملاحظات - Notes</label>
+                        <textarea class="form-control" id="returnNotes" name="notes" rows="3" 
+                                  placeholder="ملاحظات اختيارية حول حالة الكتاب..."></textarea>
+                    </div>
+                    <p>هل تريد إرجاع الكتاب: <strong id="returnBookTitle"></strong>؟</p>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء - Cancel</button>
+                <button type="button" class="btn btn-success" onclick="confirmReturn()">تأكيد الإرجاع - Confirm Return</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- نافذة تمديد الاستعارة - Extend Borrowing Modal -->
+<div class="modal fade" id="extendModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تمديد الاستعارة - Extend Borrowing</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="extendForm">
+                    <input type="hidden" id="extendBorrowingId" name="borrowingId" />
+                    <div class="mb-3">
+                        <label for="additionalDays" class="form-label">عدد الأيام الإضافية - Additional Days</label>
+                        <input type="number" class="form-control" id="additionalDays" name="additionalDays" 
+                               value="14" min="1" max="30" required>
+                    </div>
+                    <p>هل تريد تمديد استعارة الكتاب: <strong id="extendBookTitle"></strong>؟</p>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء - Cancel</button>
+                <button type="button" class="btn btn-warning" onclick="confirmExtend()">تأكيد التمديد - Confirm Extension</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function returnBook(borrowingId, bookTitle) {
+    document.getElementById('returnBorrowingId').value = borrowingId;
+    document.getElementById('returnBookTitle').textContent = bookTitle;
+    new bootstrap.Modal(document.getElementById('returnModal')).show();
+}
+
+function extendBorrowing(borrowingId, bookTitle) {
+    document.getElementById('extendBorrowingId').value = borrowingId;
+    document.getElementById('extendBookTitle').textContent = bookTitle;
+    new bootstrap.Modal(document.getElementById('extendModal')).show();
+}
+
+function confirmReturn() {
+    const form = document.getElementById('returnForm');
+    const formData = new FormData(form);
+    
+    fetch('/Borrowings/Return', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('خطأ في الإرجاع: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('حدث خطأ أثناء الإرجاع');
+        console.error('Error:', error);
+    });
+    
+    bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
+}
+
+function confirmExtend() {
+    const form = document.getElementById('extendForm');
+    const formData = new FormData(form);
+    
+    fetch('/Borrowings/Extend', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('خطأ في التمديد: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('حدث خطأ أثناء التمديد');
+        console.error('Error:', error);
+    });
+    
+    bootstrap.Modal.getInstance(document.getElementById('extendModal')).hide();
+}
+</script>
+
+<style>
+.table-warning {
+    --bs-table-bg: #fff3cd;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+</style>

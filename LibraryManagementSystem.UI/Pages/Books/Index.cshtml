@@ -1,0 +1,295 @@
+@page
+@model LibraryManagementSystem.UI.Pages.Books.IndexModel
+@{
+    ViewData["Title"] = "البحث عن الكتب - Search Books";
+}
+
+<div class="container-fluid" dir="rtl">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-search me-2"></i>
+                        البحث عن الكتب - Search Books
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- رسائل التنبيه - Alert Messages -->
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @Model.SuccessMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <!-- نموذج البحث - Search Form -->
+                    <form method="get" class="mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="searchTerm" class="form-label">البحث - Search</label>
+                                <input type="text" class="form-control" id="searchTerm" name="searchTerm"
+                                       value="@Model.SearchCriteria.SearchTerm"
+                                       placeholder="ابحث بالعنوان، المؤلف، أو الرقم المعياري...">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="genre" class="form-label">النوع - Genre</label>
+                                <select class="form-select" id="genre" name="genre">
+                                    <option value="">جميع الأنواع - All Genres</option>
+                                    <option value="أدب" selected="@(Model.SearchCriteria.Genre == "أدب")">أدب - Literature</option>
+                                    <option value="رواية" selected="@(Model.SearchCriteria.Genre == "رواية")">رواية - Novel</option>
+                                    <option value="خيال علمي" selected="@(Model.SearchCriteria.Genre == "خيال علمي")">خيال علمي - Science Fiction</option>
+                                    <option value="تاريخ" selected="@(Model.SearchCriteria.Genre == "تاريخ")">تاريخ - History</option>
+                                    <option value="فكر" selected="@(Model.SearchCriteria.Genre == "فكر")">فكر - Philosophy</option>
+                                    <option value="سيرة ذاتية" selected="@(Model.SearchCriteria.Genre == "سيرة ذاتية")">سيرة ذاتية - Biography</option>
+                                    <option value="قصص قصيرة" selected="@(Model.SearchCriteria.Genre == "قصص قصيرة")">قصص قصيرة - Short Stories</option>
+                                    <option value="إثارة" selected="@(Model.SearchCriteria.Genre == "إثارة")">إثارة - Thriller</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="availableOnly" class="form-label">التوفر - Availability</label>
+                                <select class="form-select" id="availableOnly" name="availableOnly">
+                                    <option value="false">جميع الكتب - All Books</option>
+                                    <option value="true" selected="@Model.SearchCriteria.AvailableOnly">المتاحة فقط - Available Only</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="sortBy" class="form-label">ترتيب حسب - Sort By</label>
+                                <select class="form-select" id="sortBy" name="sortBy">
+                                    <option value="Title" selected="@(Model.SearchCriteria.SortBy == "Title")">العنوان - Title</option>
+                                    <option value="Author" selected="@(Model.SearchCriteria.SortBy == "Author")">المؤلف - Author</option>
+                                    <option value="PublicationYear" selected="@(Model.SearchCriteria.SortBy == "PublicationYear")">سنة النشر - Publication Year</option>
+                                    <option value="Genre" selected="@(Model.SearchCriteria.SortBy == "Genre")">النوع - Genre</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search me-1"></i>
+                                        بحث - Search
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <a href="/Books" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-times me-1"></i>
+                                    مسح الفلاتر - Clear Filters
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+
+<!-- نتائج البحث - Search results -->
+@if (Model.SearchResults != null && Model.SearchResults.Items.Any())
+{
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h4>نتائج البحث</h4>
+            <p class="text-muted">
+                عرض @Model.SearchResults.Items.Count من أصل @Model.SearchResults.TotalCount كتاب
+                (الصفحة @Model.SearchResults.PageNumber من @Model.SearchResults.TotalPages)
+            </p>
+        </div>
+        <div class="col-md-6 text-end">
+            <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="sortBy" id="sortTitle" value="Title" 
+                       checked="@(Model.SearchCriteria.SortBy == "Title")" onchange="updateSort(this)">
+                <label class="btn btn-outline-primary" for="sortTitle">ترتيب بالعنوان</label>
+                
+                <input type="radio" class="btn-check" name="sortBy" id="sortAuthor" value="Author" 
+                       checked="@(Model.SearchCriteria.SortBy == "Author")" onchange="updateSort(this)">
+                <label class="btn btn-outline-primary" for="sortAuthor">ترتيب بالمؤلف</label>
+                
+                <input type="radio" class="btn-check" name="sortBy" id="sortYear" value="PublicationYear" 
+                       checked="@(Model.SearchCriteria.SortBy == "PublicationYear")" onchange="updateSort(this)">
+                <label class="btn btn-outline-primary" for="sortYear">ترتيب بالسنة</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول النتائج - Results table -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>العنوان</th>
+                            <th>المؤلف</th>
+                            <th>النوع</th>
+                            <th>سنة النشر</th>
+                            <th>التوفر</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var book in Model.SearchResults.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@book.Title</strong>
+                                    @if (!string.IsNullOrEmpty(book.Description))
+                                    {
+                                        <br><small class="text-muted">@book.Description.Substring(0, Math.Min(100, book.Description.Length))...</small>
+                                    }
+                                </td>
+                                <td>@book.Author</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(book.Genre))
+                                    {
+                                        <span class="badge bg-secondary">@book.Genre</span>
+                                    }
+                                </td>
+                                <td>@book.PublicationYear</td>
+                                <td>
+                                    @if (book.IsAvailable)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>
+                                            متاح (@book.AvailableCopies من @book.TotalCopies)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>
+                                            غير متاح
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/Books/Details/@book.BookId" class="btn btn-outline-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @if (book.IsAvailable)
+                                        {
+                                            <button type="button" class="btn btn-outline-primary" 
+                                                    onclick="borrowBook(@book.BookId, '@book.Title')">
+                                                <i class="fas fa-book"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- التنقل بين الصفحات - Pagination -->
+    @if (Model.SearchResults.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @if (Model.SearchResults.HasPreviousPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@GetPageUrl(Model.SearchResults.PageNumber - 1)">السابق</a>
+                    </li>
+                }
+                
+                @for (int i = Math.Max(1, Model.SearchResults.PageNumber - 2); 
+                      i <= Math.Min(Model.SearchResults.TotalPages, Model.SearchResults.PageNumber + 2); 
+                      i++)
+                {
+                    <li class="page-item @(i == Model.SearchResults.PageNumber ? "active" : "")">
+                        <a class="page-link" href="@GetPageUrl(i)">@i</a>
+                    </li>
+                }
+                
+                @if (Model.SearchResults.HasNextPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@GetPageUrl(Model.SearchResults.PageNumber + 1)">التالي</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+}
+else if (Model.SearchResults != null)
+{
+    <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle me-2"></i>
+        لم يتم العثور على كتب تطابق معايير البحث المحددة.
+    </div>
+}
+
+@functions {
+    private string GetPageUrl(int pageNumber)
+    {
+        var queryString = Request.QueryString.ToString();
+        if (queryString.Contains("pageNumber="))
+        {
+            queryString = System.Text.RegularExpressions.Regex.Replace(queryString, @"pageNumber=\d+", $"pageNumber={pageNumber}");
+        }
+        else
+        {
+            queryString += (queryString.Contains("?") ? "&" : "?") + $"pageNumber={pageNumber}";
+        }
+        return Request.Path + queryString;
+    }
+}
+
+@section Scripts {
+    <script>
+        // تحديث الترتيب
+        // Update sorting
+        function updateSort(element) {
+            const form = document.querySelector('form');
+            const sortInput = document.createElement('input');
+            sortInput.type = 'hidden';
+            sortInput.name = 'sortBy';
+            sortInput.value = element.value;
+            form.appendChild(sortInput);
+            form.submit();
+        }
+        
+        // استعارة كتاب
+        // Borrow book
+        function borrowBook(bookId, title) {
+            if (confirm(`هل تريد استعارة الكتاب: ${title}؟`)) {
+                // إرسال طلب الاستعارة
+                fetch('/api/borrowings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        bookId: bookId,
+                        userId: 1 // يجب الحصول على معرف المستخدم الحالي
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('تم استعارة الكتاب بنجاح!');
+                        location.reload();
+                    } else {
+                        alert('حدث خطأ في استعارة الكتاب: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('حدث خطأ في الاتصال بالخادم');
+                });
+            }
+        }
+    </script>
+}
