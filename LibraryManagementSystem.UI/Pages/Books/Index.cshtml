@@ -219,14 +219,28 @@
                                                     </td>
                                                     <td>
                                                         <div class="btn-group btn-group-sm">
-                                                            <a href="/Books/Details/@book.BookId" class="btn btn-outline-info">
-                                                                <i class="fas fa-eye"></i>
+                                                            <a href="/Books/Details/@book.BookId" class="btn btn-outline-info" title="عرض التفاصيل - View Details">
+                                                                <i class="fas fa-eye me-1"></i>
+                                                                تفاصيل
                                                             </a>
                                                             @if (book.IsAvailable)
                                                             {
-                                                                <button type="button" class="btn btn-outline-primary"
-                                                                        onclick="borrowBook(@book.BookId, '@book.Title')">
-                                                                    <i class="fas fa-book"></i>
+                                                                <form method="post" asp-page-handler="BorrowBook" class="d-inline">
+                                                                    <input type="hidden" name="bookId" value="@book.BookId" />
+                                                                    <button type="submit" class="btn btn-primary"
+                                                                            title="استعارة الكتاب - Borrow Book"
+                                                                            onclick="return confirm('هل تريد استعارة الكتاب: @book.Title؟\n\nفترة الاستعارة: 14 يوم\n\nDo you want to borrow: @book.Title?\nBorrowing period: 14 days')">
+                                                                        <i class="fas fa-book-reader me-1"></i>
+                                                                        استعارة
+                                                                    </button>
+                                                                </form>
+                                                            }
+                                                            else
+                                                            {
+                                                                <button type="button" class="btn btn-secondary" disabled
+                                                                        title="الكتاب غير متوفر للاستعارة - Book not available for borrowing">
+                                                                    <i class="fas fa-ban me-1"></i>
+                                                                    غير متوفر
                                                                 </button>
                                                             }
                                                         </div>
@@ -279,6 +293,7 @@ else if (Model.SearchResults != null)
 }
 
 
+
 @functions {
     private string GetPageUrl(int pageNumber)
     {
@@ -309,77 +324,8 @@ else if (Model.SearchResults != null)
                                 form.submit();
                             }
 
-                            // التحقق من صحة نموذج البحث
-                            // Validate search form
-                            document.addEventListener('DOMContentLoaded', function() {
-                                const searchForm = document.getElementById('searchForm');
-                                const searchButton = document.getElementById('searchButton');
-                                const searchTerm = document.getElementById('searchTerm');
-                                const genre = document.getElementById('genre');
-                                const availableOnly = document.getElementById('availableOnly');
 
-                                if (searchForm) {
-                                    searchForm.addEventListener('submit', function(e) {
-                                        const searchValue = searchTerm.value.trim();
 
-                                        // التحقق من طول نص البحث فقط إذا تم إدخاله
-                                        // Check search term length only if entered
-                                        if (searchValue && searchValue.length < 2) {
-                                            e.preventDefault();
-                                            alert('نص البحث يجب أن يكون حرفين على الأقل');
-                                            searchTerm.focus();
-                                            return false;
-                                        }
 
-                                        return true;
-                                    });
-
-                                    // إضافة تلميحات تفاعلية
-                                    // Add interactive hints
-                                    searchTerm.addEventListener('input', function() {
-                                        const value = this.value.trim();
-                                        if (value.length === 1) {
-                                            this.style.borderColor = '#ffc107';
-                                            this.title = 'يرجى إدخال حرف إضافي واحد على الأقل';
-                                        } else if (value.length >= 2) {
-                                            this.style.borderColor = '#198754';
-                                            this.title = 'جاهز للبحث!';
-                                        } else {
-                                            this.style.borderColor = '';
-                                            this.title = '';
-                                        }
-                                    });
-                                }
-                            });
-
-                            // استعارة كتاب
-                            // Borrow book
-                            function borrowBook(bookId, title) {
-                                if (confirm(`هل تريد استعارة الكتاب: ${title}؟`)) {
-                                    // إرسال طلب الاستعارة
-                                    fetch('/api/borrowings', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                        },
-                                        body: JSON.stringify({
-                                            bookId: bookId,
-                                            userId: 1 // يجب الحصول على معرف المستخدم الحالي
-                                        })
-                                    })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            alert('تم استعارة الكتاب بنجاح!');
-                                            location.reload();
-                                        } else {
-                                            alert('حدث خطأ في استعارة الكتاب: ' + data.message);
-                                        }
-                                    })
-                                    .catch(error => {
-                                        alert('حدث خطأ في الاتصال بالخادم');
-                                    });
-                                }
-                            }
                         </script>
 }
