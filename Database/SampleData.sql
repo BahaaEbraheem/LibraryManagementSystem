@@ -4,17 +4,21 @@
 USE LibraryManagementSystem;
 GO
 
--- Insert Sample Users
-INSERT INTO Users (FirstName, LastName, Email, PhoneNumber, Address, MembershipDate, IsActive)
-VALUES 
-    ('John', 'Doe', 'john.doe@email.com', '555-0101', '123 Main St, City, State 12345', '2023-01-15', 1),
-    ('Jane', 'Smith', 'jane.smith@email.com', '555-0102', '456 Oak Ave, City, State 12345', '2023-02-20', 1),
-    ('Michael', 'Johnson', 'michael.johnson@email.com', '555-0103', '789 Pine Rd, City, State 12345', '2023-03-10', 1),
-    ('Emily', 'Davis', 'emily.davis@email.com', '555-0104', '321 Elm St, City, State 12345', '2023-04-05', 1),
-    ('David', 'Wilson', 'david.wilson@email.com', '555-0105', '654 Maple Dr, City, State 12345', '2023-05-12', 1),
-    ('Sarah', 'Brown', 'sarah.brown@email.com', '555-0106', '987 Cedar Ln, City, State 12345', '2023-06-18', 1),
-    ('Robert', 'Taylor', 'robert.taylor@email.com', '555-0107', '147 Birch Way, City, State 12345', '2023-07-22', 1),
-    ('Lisa', 'Anderson', 'lisa.anderson@email.com', '555-0108', '258 Spruce St, City, State 12345', '2023-08-30', 1);
+-- Insert Sample Users (including admin)
+-- Note: Password for admin is 'admin123' (hashed)
+INSERT INTO Users (FirstName, LastName, Email, PhoneNumber, Address, MembershipDate, IsActive, PasswordHash, Role)
+VALUES
+    -- Administrator user (password: admin123)
+    ('مدير', 'النظام', 'admin@library.com', '555-0001', 'مكتب الإدارة', '2023-01-01', 1, 'jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=', 2),
+    -- Regular users (password: user123)
+    ('أحمد', 'محمد', 'ahmed.mohamed@email.com', '555-0101', '123 شارع الرئيسي، المدينة', '2023-01-15', 1, 'Et6pb+wgWTVmq9PtQ6Gi/qRvlzrS+Ph3/A6h81pNBSY=', 1),
+    ('فاطمة', 'علي', 'fatima.ali@email.com', '555-0102', '456 شارع البلوط، المدينة', '2023-02-20', 1, 'Et6pb+wgWTVmq9PtQ6Gi/qRvlzrS+Ph3/A6h81pNBSY=', 1),
+    ('محمد', 'أحمد', 'mohamed.ahmed@email.com', '555-0103', '789 شارع الصنوبر، المدينة', '2023-03-10', 1, 'Et6pb+wgWTVmq9PtQ6Gi/qRvlzrS+Ph3/A6h81pNBSY=', 1),
+    ('عائشة', 'حسن', 'aisha.hassan@email.com', '555-0104', '321 شارع الدردار، المدينة', '2023-04-05', 1, 'Et6pb+wgWTVmq9PtQ6Gi/qRvlzrS+Ph3/A6h81pNBSY=', 1),
+    ('عبدالله', 'سالم', 'abdullah.salem@email.com', '555-0105', '654 شارع القيقب، المدينة', '2023-05-12', 1, 'Et6pb+wgWTVmq9PtQ6Gi/qRvlzrS+Ph3/A6h81pNBSY=', 1),
+    ('مريم', 'خالد', 'mariam.khaled@email.com', '555-0106', '987 شارع الأرز، المدينة', '2023-06-18', 1, 'Et6pb+wgWTVmq9PtQ6Gi/qRvlzrS+Ph3/A6h81pNBSY=', 1),
+    ('يوسف', 'عمر', 'youssef.omar@email.com', '555-0107', '147 شارع البتولا، المدينة', '2023-07-22', 1, 'Et6pb+wgWTVmq9PtQ6Gi/qRvlzrS+Ph3/A6h81pNBSY=', 1),
+    ('زينب', 'ناصر', 'zeinab.nasser@email.com', '555-0108', '258 شارع التنوب، المدينة', '2023-08-30', 1, 'Et6pb+wgWTVmq9PtQ6Gi/qRvlzrS+Ph3/A6h81pNBSY=', 1);
 GO
 
 -- Insert Sample Books

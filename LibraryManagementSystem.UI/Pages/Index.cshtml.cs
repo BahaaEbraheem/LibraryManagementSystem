@@ -1,6 +1,7 @@
 using LibraryManagementSystem.BLL.Services;
 using LibraryManagementSystem.DAL.Models.DTOs;
 using LibraryManagementSystem.DAL.Repositories;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace LibraryManagementSystem.UI.Pages
@@ -63,31 +64,19 @@ namespace LibraryManagementSystem.UI.Pages
         /// معالج طلب GET - تحميل الصفحة الرئيسية
         /// GET request handler - load home page
         /// </summary>
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
-            try
+            // التحقق من تسجيل الدخول وإعادة التوجيه
+            // Check login status and redirect
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (!userId.HasValue)
             {
-                _logger.LogDebug("تحميل الصفحة الرئيسية - Loading home page");
-
-                // تحميل البيانات بشكل متوازي لتحسين الأداء
-                // Load data in parallel for better performance
-                var tasks = new List<Task>
-                {
-                    LoadBookStatisticsAsync(),
-                    LoadBorrowingStatisticsAsync(),
-                    LoadMostBorrowedBooksAsync(),
-                    LoadMostActiveUsersAsync()
-                };
-
-                await Task.WhenAll(tasks);
-
-                _logger.LogInformation("تم تحميل الصفحة الرئيسية بنجاح - Home page loaded successfully");
+                return RedirectToPage("/Auth/Login");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في تحميل الصفحة الرئيسية - Error loading home page");
-                ErrorMessage = "حدث خطأ أثناء تحميل البيانات - An error occurred while loading data";
-            }
+
+            // إعادة التوجيه إلى صفحة الكتب للمستخدمين المسجلين
+            // Redirect logged-in users to Books page
+            return RedirectToPage("/Books/Index");
         }
 
         /// <summary>
@@ -103,7 +92,7 @@ namespace LibraryManagementSystem.UI.Pages
                 {
                     BookStatistics = result.Data;
                 }
-               
+
             }
             catch (Exception ex)
             {
@@ -124,7 +113,7 @@ namespace LibraryManagementSystem.UI.Pages
                 {
                     BorrowingStatistics = result.Data;
                 }
-              
+
             }
             catch (Exception ex)
             {
@@ -145,7 +134,7 @@ namespace LibraryManagementSystem.UI.Pages
                 {
                     MostBorrowedBooks = result.Data;
                 }
-            
+
             }
             catch (Exception ex)
             {
@@ -167,7 +156,7 @@ namespace LibraryManagementSystem.UI.Pages
                     MostActiveUsers = result.Data;
                     _logger.LogDebug("تم تحميل المستخدمين الأكثر نشاطاً - Most active users loaded");
                 }
-            
+
             }
             catch (Exception ex)
             {

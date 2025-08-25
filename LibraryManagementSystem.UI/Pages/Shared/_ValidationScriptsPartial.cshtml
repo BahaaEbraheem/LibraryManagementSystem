@@ -1,0 +1,84 @@
+@*
+    Validation Scripts Partial View
+    This partial view contains client-side validation scripts
+*@
+
+@* Use CDN for jQuery Validation *@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
+        integrity="sha512-rstIgDs0xPgmG6RX1Aba4KV5cWJbAMcvRCVmglpam9SoHZiUCyQVDdH2LPlxoHtrv17XWblE/V/PP+Tr04hbtA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"
+        integrity="sha512-0+1ptyxIW5aWZ7kdcKk8ZX3gkZAqK/P2KqPe1gvkjn7dd8xTfqh8WmJKdpD8Mv3K+HwA2+M+/uNF0J3HcWrzvA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+    // تخصيص رسائل التحقق باللغة العربية
+    // Customize validation messages in Arabic
+    if ($.validator) {
+        $.validator.setDefaults({
+            errorClass: "is-invalid",
+            validClass: "is-valid",
+            errorElement: "div",
+            errorPlacement: function(error, element) {
+                error.addClass("invalid-feedback");
+                if (element.parent('.input-group').length) {
+                    error.insertAfter(element.parent());
+                } else {
+                    error.insertAfter(element);
+                }
+            },
+            highlight: function(element, errorClass, validClass) {
+                $(element).addClass(errorClass).removeClass(validClass);
+            },
+            unhighlight: function(element, errorClass, validClass) {
+                $(element).removeClass(errorClass).addClass(validClass);
+            }
+        });
+
+        // رسائل التحقق المخصصة
+        // Custom validation messages
+        $.validator.messages = {
+            required: "هذا الحقل مطلوب",
+            email: "يرجى إدخال عنوان بريد إلكتروني صحيح",
+            url: "يرجى إدخال رابط صحيح",
+            date: "يرجى إدخال تاريخ صحيح",
+            dateISO: "يرجى إدخال تاريخ صحيح (ISO)",
+            number: "يرجى إدخال رقم صحيح",
+            digits: "يرجى إدخال أرقام فقط",
+            creditcard: "يرجى إدخال رقم بطاقة ائتمان صحيح",
+            equalTo: "يرجى إدخال نفس القيمة مرة أخرى",
+            maxlength: $.validator.format("يرجى عدم إدخال أكثر من {0} حرف"),
+            minlength: $.validator.format("يرجى إدخال {0} أحرف على الأقل"),
+            rangelength: $.validator.format("يرجى إدخال قيمة بين {0} و {1} حرف"),
+            range: $.validator.format("يرجى إدخال قيمة بين {0} و {1}"),
+            max: $.validator.format("يرجى إدخال قيمة أقل من أو تساوي {0}"),
+            min: $.validator.format("يرجى إدخال قيمة أكبر من أو تساوي {0}")
+        };
+    }
+
+    // تفعيل التحقق التلقائي عند تحميل الصفحة
+    // Enable automatic validation on page load
+    $(document).ready(function() {
+        // إضافة تأثيرات بصرية للحقول
+        // Add visual effects for form fields
+        $('input, select, textarea').on('focus', function() {
+            $(this).parent().addClass('focused');
+        }).on('blur', function() {
+            $(this).parent().removeClass('focused');
+        });
+
+        // تحسين عرض رسائل الخطأ
+        // Improve error message display
+        $('form').each(function() {
+            var form = $(this);
+            form.find('.field-validation-error').each(function() {
+                var errorSpan = $(this);
+                var input = form.find('#' + errorSpan.attr('data-valmsg-for'));
+                if (input.length) {
+                    input.addClass('is-invalid');
+                    errorSpan.addClass('invalid-feedback');
+                }
+            });
+        });
+    });
+</script>

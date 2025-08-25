@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 using System.Data;
 
 namespace LibraryManagementSystem.DAL.Data
@@ -35,6 +36,7 @@ namespace LibraryManagementSystem.DAL.Data
     public class DatabaseConnectionFactory : IDatabaseConnectionFactory
     {
         private readonly string _connectionString;
+        private readonly ILogger<DatabaseConnectionFactory>? _logger;
 
         /// <summary>
         /// منشئ الفئة مع سلسلة الاتصال
@@ -44,6 +46,18 @@ namespace LibraryManagementSystem.DAL.Data
         public DatabaseConnectionFactory(string connectionString)
         {
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+        }
+
+        /// <summary>
+        /// منشئ الفئة مع سلسلة الاتصال والـ Logger
+        /// Constructor with connection string and logger
+        /// </summary>
+        /// <param name="connectionString">سلسلة الاتصال بقاعدة البيانات</param>
+        /// <param name="logger">Logger للتسجيل</param>
+        public DatabaseConnectionFactory(string connectionString, ILogger<DatabaseConnectionFactory> logger)
+        {
+            _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+            _logger = logger;
         }
 
         /// <summary>
@@ -136,9 +150,27 @@ namespace LibraryManagementSystem.DAL.Data
                             Address NVARCHAR(200),
                             MembershipDate DATETIME2 NOT NULL DEFAULT GETDATE(),
                             IsActive BIT NOT NULL DEFAULT 1,
+                            PasswordHash NVARCHAR(255) NOT NULL DEFAULT '',
+                            Role INT NOT NULL DEFAULT 1,
                             CreatedDate DATETIME2 NOT NULL DEFAULT GETDATE(),
-                            ModifiedDate DATETIME2 NOT NULL DEFAULT GETDATE()
+                            ModifiedDate DATETIME2 NOT NULL DEFAULT GETDATE(),
+
+                            CONSTRAINT CHK_Users_Role CHECK (Role IN (1, 2))
                         );
+                    END
+                    ELSE
+                    BEGIN
+                        -- Add columns if they don't exist (for existing tables)
+                        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'PasswordHash')
+                        BEGIN
+                            ALTER TABLE Users ADD PasswordHash NVARCHAR(255) NOT NULL DEFAULT '';
+                        END
+
+                        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Role')
+                        BEGIN
+                            ALTER TABLE Users ADD Role INT NOT NULL DEFAULT 1;
+                            ALTER TABLE Users ADD CONSTRAINT CHK_Users_Role CHECK (Role IN (1, 2));
+                        END
                     END");
 
                 // Create Books table
@@ -191,8 +223,8 @@ namespace LibraryManagementSystem.DAL.Data
                     IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Users_Email')
                         CREATE NONCLUSTERED INDEX IX_Users_Email ON Users(Email);");
 
-                // Insert initial data if tables are empty
-                await InsertInitialDataIfNeededAsync(connection);
+                //// Insert initial data if tables are empty
+                //await InsertInitialDataIfNeededAsync(connection);
             }
             catch (Exception ex)
             {
@@ -201,40 +233,40 @@ namespace LibraryManagementSystem.DAL.Data
             }
         }
 
-        private async Task InsertInitialDataIfNeededAsync(IDbConnection connection)
-        {
-            try
-            {
-                // Check if data already exists
-                var userCountSql = "SELECT COUNT(*) FROM Users";
-                using var userCountCmd = new SqlCommand(userCountSql, (SqlConnection)connection);
-                var userCount = (int)await userCountCmd.ExecuteScalarAsync();
+        //private async Task InsertInitialDataIfNeededAsync(IDbConnection connection)
+        //{
+        //    try
+        //    {
+        //        // Check if data already exists
+        //        var userCountSql = "SELECT COUNT(*) FROM Users";
+        //        using var userCountCmd = new SqlCommand(userCountSql, (SqlConnection)connection);
+        //        var userCount = (int)await userCountCmd.ExecuteScalarAsync();
 
-                if (userCount == 0)
-                {
-                    // Insert initial users
-                    await ExecuteSqlAsync(connection, @"
-                        INSERT INTO Users (FirstName, LastName, Email, PhoneNumber, Address, IsActive)
-                        VALUES
-                            ('Ahmed', 'Mohamed', 'ahmed.mohamed@email.com', '966501234567', 'Riyadh', 1),
-                            ('Fatima', 'Ali', 'fatima.ali@email.com', '966502345678', 'Jeddah', 1),
-                            ('Mohamed', 'Alsaeed', 'mohamed.alsaeed@email.com', '966503456789', 'Dammam', 1)");
+        //        if (userCount == 0)
+        //        {
+        //            // Insert initial users
+        //            await ExecuteSqlAsync(connection, @"
+        //                INSERT INTO Users (FirstName, LastName, Email, PhoneNumber, Address, IsActive)
+        //                VALUES
+        //                    ('Ahmed', 'Mohamed', 'ahmed.mohamed@email.com', '966501234567', 'Riyadh', 1),
+        //                    ('Fatima', 'Ali', 'fatima.ali@email.com', '966502345678', 'Jeddah', 1),
+        //                    ('Mohamed', 'Alsaeed', 'mohamed.alsaeed@email.com', '966503456789', 'Dammam', 1)");
 
-                    // Insert initial books
-                    await ExecuteSqlAsync(connection, @"
-                        INSERT INTO Books (Title, Author, ISBN, Publisher, PublicationYear, Genre, TotalCopies, AvailableCopies, Description)
-                        VALUES
-                            ('Clean Code', 'Robert C. Martin', '978-0132350884', 'Prentice Hall', 2008, 'Programming', 3, 3, 'A handbook of agile software craftsmanship'),
-                            ('Design Patterns', 'Gang of Four', '978-0201633612', 'Addison-Wesley', 1994, 'Programming', 2, 2, 'Elements of reusable object-oriented software'),
-                            ('The Pragmatic Programmer', 'Andrew Hunt', '978-0201616224', 'Addison-Wesley', 1999, 'Programming', 2, 2, 'From journeyman to master')");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to insert initial data: {ex.Message}");
-                // Don't throw here, let the app continue
-            }
-        }
+        //            // Insert initial books
+        //            await ExecuteSqlAsync(connection, @"
+        //                INSERT INTO Books (Title, Author, ISBN, Publisher, PublicationYear, Genre, TotalCopies, AvailableCopies, Description)
+        //                VALUES
+        //                    ('Clean Code', 'Robert C. Martin', '978-0132350884', 'Prentice Hall', 2008, 'Programming', 3, 3, 'A handbook of agile software craftsmanship'),
+        //                    ('Design Patterns', 'Gang of Four', '978-0201633612', 'Addison-Wesley', 1994, 'Programming', 2, 2, 'Elements of reusable object-oriented software'),
+        //                    ('The Pragmatic Programmer', 'Andrew Hunt', '978-0201616224', 'Addison-Wesley', 1999, 'Programming', 2, 2, 'From journeyman to master')");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Failed to insert initial data: {ex.Message}");
+        //        // Don't throw here, let the app continue
+        //    }
+        //}
 
         private async Task ExecuteSqlAsync(IDbConnection connection, string sql)
         {
@@ -265,9 +297,95 @@ namespace LibraryManagementSystem.DAL.Data
         /// </summary>
         public async Task InitializeDatabaseAsync()
         {
-            await EnsureDatabaseExistsAsync();
-            using var connection = await CreateConnectionAsync();
-            await EnsureTablesExistAsync(connection);
+            try
+            {
+                _logger?.LogInformation("بدء تهيئة قاعدة البيانات - Starting database initialization");
+
+                await EnsureDatabaseExistsAsync();
+                using var connection = await CreateConnectionAsync();
+                await EnsureTablesExistAsync(connection);
+
+                // إدراج البيانات الأولية
+                // Seed initial data
+                var seeder = new DatabaseSeeder(_connectionString);
+                await seeder.SeedAllDataAsync();
+
+                await SeedInitialDataAsync();
+
+                _logger?.LogInformation("تم إكمال تهيئة قاعدة البيانات بنجاح - Database initialization completed successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "خطأ في تهيئة قاعدة البيانات - Error during database initialization");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// إدراج البيانات الأولية
+        /// Seed initial data
+        /// </summary>
+        private async Task SeedInitialDataAsync()
+        {
+            try
+            {
+                // التحقق من وجود مستخدمين
+                // Check if users exist
+                using var connection = new Microsoft.Data.SqlClient.SqlConnection(_connectionString);
+                await connection.OpenAsync();
+
+                var checkUsersQuery = "SELECT COUNT(*) FROM Users";
+                using var checkCommand = new Microsoft.Data.SqlClient.SqlCommand(checkUsersQuery, connection);
+                var userCount = (int)await checkCommand.ExecuteScalarAsync();
+
+                if (userCount > 0)
+                {
+                    _logger?.LogInformation("البيانات الأولية موجودة مسبقاً - Initial data already exists");
+                    return;
+                }
+
+                _logger?.LogInformation("إدراج البيانات الأولية - Seeding initial data");
+
+                // إدراج المدير
+                // Insert administrator
+                var adminPasswordHash = HashPassword("admin123");
+                var insertAdminQuery = @"
+                    INSERT INTO Users (FirstName, LastName, Email, PhoneNumber, Address, MembershipDate, IsActive, PasswordHash, Role, CreatedDate, ModifiedDate)
+                    VALUES (@FirstName, @LastName, @Email, @PhoneNumber, @Address, @MembershipDate, @IsActive, @PasswordHash, @Role, @CreatedDate, @ModifiedDate)";
+
+                using var adminCommand = new Microsoft.Data.SqlClient.SqlCommand(insertAdminQuery, connection);
+                adminCommand.Parameters.AddWithValue("@FirstName", "Admin");
+                adminCommand.Parameters.AddWithValue("@LastName", "User");
+                adminCommand.Parameters.AddWithValue("@Email", "admin@library.com");
+                adminCommand.Parameters.AddWithValue("@PhoneNumber", "555-0001");
+                adminCommand.Parameters.AddWithValue("@Address", "Admin Office");
+                adminCommand.Parameters.AddWithValue("@MembershipDate", DateTime.Now);
+                adminCommand.Parameters.AddWithValue("@IsActive", true);
+                adminCommand.Parameters.AddWithValue("@PasswordHash", adminPasswordHash);
+                adminCommand.Parameters.AddWithValue("@Role", 2); // Administrator
+                adminCommand.Parameters.AddWithValue("@CreatedDate", DateTime.Now);
+                adminCommand.Parameters.AddWithValue("@ModifiedDate", DateTime.Now);
+
+                await adminCommand.ExecuteNonQueryAsync();
+
+                _logger?.LogInformation("تم إدراج المدير بنجاح - Admin user seeded successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "خطأ في إدراج البيانات الأولية - Error seeding initial data");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// تشفير كلمة المرور
+        /// Hash password
+        /// </summary>
+        private static string HashPassword(string password)
+        {
+            using var sha256 = System.Security.Cryptography.SHA256.Create();
+            var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password + "LibraryManagementSalt"));
+            return Convert.ToBase64String(hashedBytes);
         }
     }
 

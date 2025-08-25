@@ -23,9 +23,25 @@ BEGIN
         Address NVARCHAR(200),
         MembershipDate DATETIME2 NOT NULL DEFAULT GETDATE(),
         IsActive BIT NOT NULL DEFAULT 1,
+        PasswordHash NVARCHAR(255) NOT NULL DEFAULT '',
+        Role INT NOT NULL DEFAULT 1, -- 1 = User, 2 = Administrator
         CreatedDate DATETIME2 NOT NULL DEFAULT GETDATE(),
-        ModifiedDate DATETIME2 NOT NULL DEFAULT GETDATE()
+        ModifiedDate DATETIME2 NOT NULL DEFAULT GETDATE(),
+
+        CONSTRAINT CHK_Users_Role CHECK (Role IN (1, 2))
     );
+END
+
+-- Add columns if they don't exist (for existing databases)
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'PasswordHash')
+BEGIN
+    ALTER TABLE Users ADD PasswordHash NVARCHAR(255) NOT NULL DEFAULT '';
+END
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Role')
+BEGIN
+    ALTER TABLE Users ADD Role INT NOT NULL DEFAULT 1;
+    ALTER TABLE Users ADD CONSTRAINT CHK_Users_Role CHECK (Role IN (1, 2));
 END
 GO
 

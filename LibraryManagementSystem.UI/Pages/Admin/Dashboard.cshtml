@@ -1,0 +1,319 @@
+@page
+@using LibraryManagementSystem.DAL.Models.Enums
+@model LibraryManagementSystem.UI.Pages.Admin.DashboardModel
+@{
+    ViewData["Title"] = "لوحة تحكم المدير - Admin Dashboard";
+}
+
+<div class="container-fluid" dir="rtl">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-tachometer-alt me-2"></i>
+                        لوحة تحكم المدير - Admin Dashboard
+                    </h1>
+                    @if (Model.CurrentUser != null)
+                    {
+                        <p class="text-muted mb-0">مرحباً، @Model.CurrentUser.FullName - Welcome, @Model.CurrentUser.FullName</p>
+                    }
+                </div>
+                <div>
+                    <span class="badge @UserRole.Administrator.GetCssClass() fs-6">
+                        <i class="@UserRole.Administrator.GetIcon() me-1"></i>
+                        @UserRole.Administrator.GetDescription()
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- رسائل التنبيه - Alert Messages -->
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @Model.SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.Statistics != null)
+    {
+        <!-- إحصائيات سريعة - Quick Statistics -->
+        <div class="row mb-4">
+            <!-- إحصائيات المستخدمين - User Statistics -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    المستخدمين - Users
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    @Model.Statistics.TotalUsers
+                                </div>
+                                <div class="text-xs text-muted">
+                                    نشط: @Model.Statistics.ActiveUsers | مدير: @Model.Statistics.AdminUsers
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-users fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- إحصائيات الكتب - Book Statistics -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    الكتب - Books
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    @Model.Statistics.TotalBooks
+                                </div>
+                                <div class="text-xs text-muted">
+                                    متوفر: @Model.Statistics.AvailableBooks | نسخ: @Model.Statistics.TotalCopies
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-book fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- إحصائيات الاستعارات النشطة - Active Borrowings -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    استعارات نشطة - Active Borrowings
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    @Model.Statistics.ActiveBorrowings
+                                </div>
+                                <div class="text-xs text-muted">
+                                    متأخر: @Model.Statistics.OverdueBorrowings
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-book-reader fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الرسوم المتأخرة - Late Fees -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    رسوم التأخير - Late Fees
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    @Model.Statistics.TotalLateFees.ToString("C")
+                                </div>
+                                <div class="text-xs text-muted">
+                                    إجمالي الاستعارات: @Model.Statistics.TotalBorrowings
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- الإجراءات السريعة - Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-bolt me-2"></i>
+                            الإجراءات السريعة - Quick Actions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <a href="/Auth/Register" class="btn btn-primary btn-block">
+                                    <i class="fas fa-user-plus me-2"></i>
+                                    إضافة مستخدم جديد<br>
+                                    <small>Add New User</small>
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="/Books/Add" class="btn btn-success btn-block">
+                                    <i class="fas fa-book-medical me-2"></i>
+                                    إضافة كتاب جديد<br>
+                                    <small>Add New Book</small>
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="/Users" class="btn btn-info btn-block">
+                                    <i class="fas fa-users-cog me-2"></i>
+                                    إدارة المستخدمين<br>
+                                    <small>Manage Users</small>
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <a href="/Borrowings" class="btn btn-warning btn-block">
+                                    <i class="fas fa-tasks me-2"></i>
+                                    إدارة الاستعارات<br>
+                                    <small>Manage Borrowings</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- تفاصيل الإحصائيات - Detailed Statistics -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            توزيع المستخدمين - User Distribution
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-right">
+                                    <div class="h5 font-weight-bold text-success">@Model.Statistics.ActiveUsers</div>
+                                    <div class="text-xs text-uppercase text-muted">نشط - Active</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="h5 font-weight-bold text-danger">@Model.Statistics.InactiveUsers</div>
+                                <div class="text-xs text-uppercase text-muted">غير نشط - Inactive</div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-right">
+                                    <div class="h5 font-weight-bold text-primary">@Model.Statistics.RegularUsers</div>
+                                    <div class="text-xs text-uppercase text-muted">مستخدم عادي - Regular</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="h5 font-weight-bold text-warning">@Model.Statistics.AdminUsers</div>
+                                <div class="text-xs text-uppercase text-muted">مدير - Admin</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            حالة المكتبة - Library Status
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-right">
+                                    <div class="h5 font-weight-bold text-success">@Model.Statistics.AvailableCopies</div>
+                                    <div class="text-xs text-uppercase text-muted">نسخ متاحة - Available</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="h5 font-weight-bold text-info">@Model.Statistics.BorrowedCopies</div>
+                                <div class="text-xs text-uppercase text-muted">نسخ مُعارة - Borrowed</div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-right">
+                                    <div class="h5 font-weight-bold text-primary">@Model.Statistics.BorrowingRate.ToString("F1")%</div>
+                                    <div class="text-xs text-uppercase text-muted">معدل الاستعارة - Borrowing Rate</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="h5 font-weight-bold text-danger">@Model.Statistics.OverdueRate.ToString("F1")%</div>
+                                <div class="text-xs text-uppercase text-muted">معدل التأخير - Overdue Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-spinner fa-spin fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">جاري تحميل الإحصائيات... - Loading statistics...</h5>
+        </div>
+    }
+</div>
+
+<style>
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+    border-radius: 0.5rem;
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+</style>

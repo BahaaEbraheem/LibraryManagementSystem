@@ -13,11 +13,16 @@ namespace LibraryManagementSystem.BLL.Services
     public class BookService : IBookService
     {
         private readonly IBookRepository _bookRepository;
+        private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<BookService> _logger;
 
-        public BookService(IBookRepository bookRepository, ILogger<BookService> logger)
+        public BookService(
+            IBookRepository bookRepository,
+            IAuthorizationService authorizationService,
+            ILogger<BookService> logger)
         {
             _bookRepository = bookRepository ?? throw new ArgumentNullException(nameof(bookRepository));
+            _authorizationService = authorizationService ?? throw new ArgumentNullException(nameof(authorizationService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -537,6 +542,114 @@ namespace LibraryManagementSystem.BLL.Services
             }
 
             return errors.Any() ? ValidationResult.Invalid(errors) : ValidationResult.Valid();
+        }
+
+        /// <summary>
+        /// إضافة كتاب جديد مع التحقق من الصلاحيات
+        /// Add a new book with authorization check
+        /// </summary>
+        public async Task<ServiceResult<int>> AddBookAsync(Book book, int userId)
+        {
+            try
+            {
+                _logger.LogDebug("التحقق من صلاحية إضافة كتاب للمستخدم {UserId} - Checking book addition permission for user", userId);
+
+                // التحقق من الصلاحيات
+                // Check permissions
+                var authResult = await _authorizationService.CanManageBooksAsync(userId);
+                if (!authResult.IsSuccess)
+                {
+                    _logger.LogWarning("فشل في التحقق من صلاحيات المستخدم {UserId} - Failed to check user permissions", userId);
+                    return ServiceResult<int>.Failure(authResult.ErrorMessage ?? "فشل في التحقق من الصلاحيات");
+                }
+
+                if (!authResult.Data)
+                {
+                    _logger.LogWarning("المستخدم {UserId} ليس لديه صلاحية إضافة الكتب - User does not have permission to add books", userId);
+                    return ServiceResult<int>.Failure("ليس لديك صلاحية لإضافة الكتب");
+                }
+
+                // إضافة الكتاب
+                // Add the book
+                return await AddBookAsync(book);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في إضافة كتاب مع التحقق من الصلاحيات للمستخدم {UserId} - Error adding book with authorization check", userId);
+                return ServiceResult<int>.Failure("حدث خطأ أثناء إضافة الكتاب");
+            }
+        }
+
+        /// <summary>
+        /// تحديث كتاب موجود مع التحقق من الصلاحيات
+        /// Update an existing book with authorization check
+        /// </summary>
+        public async Task<ServiceResult<bool>> UpdateBookAsync(Book book, int userId)
+        {
+            try
+            {
+                _logger.LogDebug("التحقق من صلاحية تحديث كتاب للمستخدم {UserId} - Checking book update permission for user", userId);
+
+                // التحقق من الصلاحيات
+                // Check permissions
+                var authResult = await _authorizationService.CanManageBooksAsync(userId);
+                if (!authResult.IsSuccess)
+                {
+                    _logger.LogWarning("فشل في التحقق من صلاحيات المستخدم {UserId} - Failed to check user permissions", userId);
+                    return ServiceResult<bool>.Failure(authResult.ErrorMessage ?? "فشل في التحقق من الصلاحيات");
+                }
+
+                if (!authResult.Data)
+                {
+                    _logger.LogWarning("المستخدم {UserId} ليس لديه صلاحية تحديث الكتب - User does not have permission to update books", userId);
+                    return ServiceResult<bool>.Failure("ليس لديك صلاحية لتحديث الكتب");
+                }
+
+                // تحديث الكتاب
+                // Update the book
+                return await UpdateBookAsync(book);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في تحديث كتاب مع التحقق من الصلاحيات للمستخدم {UserId} - Error updating book with authorization check", userId);
+                return ServiceResult<bool>.Failure("حدث خطأ أثناء تحديث الكتاب");
+            }
+        }
+
+        /// <summary>
+        /// حذف كتاب مع التحقق من الصلاحيات
+        /// Delete a book with authorization check
+        /// </summary>
+        public async Task<ServiceResult<bool>> DeleteBookAsync(int id, int userId)
+        {
+            try
+            {
+                _logger.LogDebug("التحقق من صلاحية حذف كتاب للمستخدم {UserId} - Checking book deletion permission for user", userId);
+
+                // التحقق من الصلاحيات
+                // Check permissions
+                var authResult = await _authorizationService.CanManageBooksAsync(userId);
+                if (!authResult.IsSuccess)
+                {
+                    _logger.LogWarning("فشل في التحقق من صلاحيات المستخدم {UserId} - Failed to check user permissions", userId);
+                    return ServiceResult<bool>.Failure(authResult.ErrorMessage ?? "فشل في التحقق من الصلاحيات");
+                }
+
+                if (!authResult.Data)
+                {
+                    _logger.LogWarning("المستخدم {UserId} ليس لديه صلاحية حذف الكتب - User does not have permission to delete books", userId);
+                    return ServiceResult<bool>.Failure("ليس لديك صلاحية لحذف الكتب");
+                }
+
+                // حذف الكتاب
+                // Delete the book
+                return await DeleteBookAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في حذف كتاب مع التحقق من الصلاحيات للمستخدم {UserId} - Error deleting book with authorization check", userId);
+                return ServiceResult<bool>.Failure("حدث خطأ أثناء حذف الكتاب");
+            }
         }
     }
 }

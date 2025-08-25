@@ -43,6 +43,17 @@ namespace LibraryManagementSystem.UI
         /// </summary>
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
+            // إضافة خدمات Session
+            // Add Session services
+            services.AddDistributedMemoryCache();
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.Cookie.Name = "LibraryManagement.Session";
+            });
+
             // إضافة Razor Pages
             // Add Razor Pages
             services.AddRazorPages(options =>
@@ -77,6 +88,8 @@ namespace LibraryManagementSystem.UI
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<IBorrowingService, BorrowingService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IAuthorizationService, AuthorizationService>();
 
             // إضافة إعدادات المكتبة
             // Add library settings
@@ -160,6 +173,10 @@ namespace LibraryManagementSystem.UI
             // Routing
             app.UseRouting();
 
+            // الجلسة
+            // Session
+            app.UseSession();
+
             // التفويض
             // Authorization
             app.UseAuthorization();
@@ -170,7 +187,7 @@ namespace LibraryManagementSystem.UI
 
             // الصفحة الافتراضية
             // Default page
-            app.MapGet("/", () => Results.Redirect("/Index"));
+            app.MapGet("/", () => Results.Redirect("/Auth/Login"));
         }
     }
 }

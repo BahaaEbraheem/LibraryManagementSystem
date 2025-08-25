@@ -15,14 +15,16 @@ namespace LibraryManagementSystem.Tests.UnitTests
     public class BookServiceTests
     {
         private readonly Mock<IBookRepository> _mockBookRepository;
+        private readonly Mock<IAuthorizationService> _mockAuthorizationService;
         private readonly Mock<ILogger<BookService>> _mockLogger;
         private readonly BookService _bookService;
 
         public BookServiceTests()
         {
             _mockBookRepository = new Mock<IBookRepository>();
+            _mockAuthorizationService = new Mock<IAuthorizationService>();
             _mockLogger = new Mock<ILogger<BookService>>();
-            _bookService = new BookService(_mockBookRepository.Object, _mockLogger.Object);
+            _bookService = new BookService(_mockBookRepository.Object, _mockAuthorizationService.Object, _mockLogger.Object);
         }
 
         [Fact]

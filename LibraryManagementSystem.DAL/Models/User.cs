@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using LibraryManagementSystem.DAL.Models.Enums;
 
 namespace LibraryManagementSystem.DAL.Models
 {
@@ -79,9 +80,29 @@ namespace LibraryManagementSystem.DAL.Models
         public DateTime ModifiedDate { get; set; }
 
         /// <summary>
+        /// كلمة المرور المشفرة
+        /// Encrypted password
+        /// </summary>
+        [Required]
+        [StringLength(255)]
+        public string PasswordHash { get; set; } = string.Empty;
+
+        /// <summary>
+        /// دور المستخدم في النظام
+        /// User role in the system
+        /// </summary>
+        public UserRole Role { get; set; } = UserRole.User;
+
+        /// <summary>
         /// خاصية محسوبة للاسم الكامل
         /// Computed property for full name display
         /// </summary>
         public string FullName => $"{FirstName} {LastName}";
+
+        /// <summary>
+        /// خاصية محسوبة لوصف الدور
+        /// Computed property for role description
+        /// </summary>
+        public string RoleDescription => Role.GetDescription();
     }
 }

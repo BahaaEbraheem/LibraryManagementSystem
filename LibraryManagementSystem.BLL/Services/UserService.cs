@@ -1,6 +1,8 @@
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Repositories;
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace LibraryManagementSystem.BLL.Services
 {
@@ -180,14 +182,21 @@ namespace LibraryManagementSystem.BLL.Services
                 }
 
                 _logger.LogDebug("إضافة مستخدم جديد: {Email} - Adding new user", user.Email);
-                
+
+                // تشفير كلمة المرور إذا لم تكن مشفرة بالفعل
+                // Hash password if not already hashed
+                if (!string.IsNullOrEmpty(user.PasswordHash) && !IsPasswordHashed(user.PasswordHash))
+                {
+                    user.PasswordHash = HashPassword(user.PasswordHash);
+                }
+
                 user.MembershipDate = DateTime.Now;
                 user.CreatedDate = DateTime.Now;
                 user.ModifiedDate = DateTime.Now;
                 user.IsActive = true;
 
                 var userId = await _userRepository.AddAsync(user);
-                
+
                 _logger.LogInformation("تم إضافة مستخدم جديد بالمعرف {UserId} - New user added with ID", userId);
                 return ServiceResult<int>.Success(userId);
             }
@@ -236,10 +245,10 @@ namespace LibraryManagementSystem.BLL.Services
                 }
 
                 _logger.LogDebug("تحديث المستخدم {UserId} - Updating user", user.UserId);
-                
+
                 user.ModifiedDate = DateTime.Now;
                 var success = await _userRepository.UpdateAsync(user);
-                
+
                 if (success)
                 {
                     _logger.LogInformation("تم تحديث المستخدم {UserId} بنجاح - User updated successfully", user.UserId);
@@ -282,7 +291,7 @@ namespace LibraryManagementSystem.BLL.Services
 
                 _logger.LogDebug("حذف المستخدم {UserId} - Deleting user", id);
                 var success = await _userRepository.DeleteAsync(id);
-                
+
                 if (success)
                 {
                     _logger.LogInformation("تم حذف المستخدم {UserId} بنجاح - User deleted successfully", id);
@@ -317,7 +326,7 @@ namespace LibraryManagementSystem.BLL.Services
 
                 _logger.LogDebug("تغيير حالة المستخدم {UserId} إلى {IsActive} - Changing user status to", id, isActive);
                 var success = await _userRepository.SetActiveStatusAsync(id, isActive);
-                
+
                 if (success)
                 {
                     _logger.LogInformation("تم تغيير حالة المستخدم {UserId} إلى {IsActive} - User status changed to", id, isActive);
@@ -397,6 +406,41 @@ namespace LibraryManagementSystem.BLL.Services
             {
                 var addr = new System.Net.Mail.MailAddress(email);
                 return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// تشفير كلمة المرور
+        /// Hash password
+        /// </summary>
+        private string HashPassword(string password)
+        {
+            using var sha256 = SHA256.Create();
+            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password + "LibraryManagementSalt"));
+            return Convert.ToBase64String(hashedBytes);
+        }
+
+        /// <summary>
+        /// التحقق من كون كلمة المرور مشفرة بالفعل
+        /// Check if password is already hashed
+        /// </summary>
+        private bool IsPasswordHashed(string password)
+        {
+            // كلمة المرور المشفرة تكون عادة أطول من 40 حرف وتحتوي على أحرف Base64
+            // Hashed passwords are usually longer than 40 characters and contain Base64 characters
+            if (string.IsNullOrEmpty(password) || password.Length < 40)
+                return false;
+
+            try
+            {
+                // محاولة فك تشفير Base64 للتحقق من صحة التنسيق
+                // Try to decode Base64 to verify format
+                Convert.FromBase64String(password);
+                return true;
             }
             catch
             {

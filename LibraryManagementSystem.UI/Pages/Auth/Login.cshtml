@@ -1,0 +1,187 @@
+@page
+@using LibraryManagementSystem.DAL.Models.Enums
+@model LibraryManagementSystem.UI.Pages.Auth.LoginModel
+@{
+    ViewData["Title"] = "تسجيل الدخول - Login";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid vh-100" dir="rtl">
+    <div class="row h-100">
+        <!-- Left side - Login Form -->
+        <div class="col-md-6 d-flex align-items-center justify-content-center">
+            <div class="card shadow-lg border-0" style="width: 100%; max-width: 400px;">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        تسجيل الدخول - Login
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <!-- رسائل التنبيه - Alert Messages -->
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @Model.SuccessMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <!-- نموذج تسجيل الدخول - Login Form -->
+                    <form method="post">
+                        <input type="hidden" asp-for="ReturnUrl" />
+
+                        <div class="mb-3">
+                            <label asp-for="LoginData.Email" class="form-label">
+                                <i class="fas fa-envelope me-1"></i>
+                                البريد الإلكتروني - Email
+                            </label>
+                            <input asp-for="LoginData.Email" class="form-control"
+                                placeholder="أدخل البريد الإلكتروني - Enter email" autocomplete="email" />
+                            <span asp-validation-for="LoginData.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="LoginData.Password" class="form-label">
+                                <i class="fas fa-lock me-1"></i>
+                                كلمة المرور - Password
+                            </label>
+                            <div class="input-group">
+                                <input asp-for="LoginData.Password" class="form-control" type="password"
+                                    id="passwordInput" placeholder="أدخل كلمة المرور - Enter password"
+                                    autocomplete="current-password" />
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()"
+                                    id="togglePasswordBtn">
+                                    <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="LoginData.Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input asp-for="LoginData.RememberMe" class="form-check-input" />
+                            <label asp-for="LoginData.RememberMe" class="form-check-label">
+                                تذكرني - Remember me
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                تسجيل الدخول - Login
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="mb-2">ليس لديك حساب؟ - Don't have an account?</p>
+                        <a href="/Auth/Register" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-1"></i>
+                            إنشاء حساب جديد - Create Account
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right side - Welcome Message -->
+        <div class="col-md-6 bg-primary d-flex align-items-center justify-content-center text-white">
+            <div class="text-center">
+                <i class="fas fa-book-open fa-5x mb-4"></i>
+                <h1 class="display-4 mb-3">مرحباً بك</h1>
+                <h2 class="h3 mb-4">في نظام إدارة المكتبة</h2>
+                <p class="lead mb-4">
+                    نظام شامل لإدارة الكتب والاستعارات<br>
+                    Complete system for managing books and borrowings
+                </p>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <i class="fas fa-search fa-2x mb-2"></i>
+                        <p>البحث السريع<br>Quick Search</p>
+                    </div>
+                    <div class="col-4">
+                        <i class="fas fa-book-reader fa-2x mb-2"></i>
+                        <p>إدارة الاستعارات<br>Manage Borrowings</p>
+                    </div>
+                    <div class="col-4">
+                        <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                        <p>التقارير والإحصائيات<br>Reports & Statistics</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('passwordInput');
+        const toggleIcon = document.getElementById('togglePasswordIcon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+
+    // Auto-focus on email input
+    document.addEventListener('DOMContentLoaded', function () {
+        const emailInput = document.querySelector('input[type="email"]');
+        if (emailInput) {
+            emailInput.focus();
+        }
+    });
+</script>
+
+<style>
+    .vh-100 {
+        min-height: 100vh;
+    }
+
+    .card {
+        border-radius: 15px;
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+
+    .btn {
+        border-radius: 8px;
+    }
+
+    .form-control {
+        border-radius: 8px;
+    }
+
+    .bg-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+
+    @@media (max-width: 768px) {
+        .col-md-6:last-child {
+            display: none !important;
+        }
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

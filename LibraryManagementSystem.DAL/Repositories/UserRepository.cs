@@ -1,6 +1,7 @@
 using LibraryManagementSystem.DAL.Caching;
 using LibraryManagementSystem.DAL.Data;
 using LibraryManagementSystem.DAL.Models;
+using LibraryManagementSystem.DAL.Models.Enums;
 using Microsoft.Extensions.Logging;
 using System.Data;
 
@@ -49,9 +50,9 @@ namespace LibraryManagementSystem.DAL.Repositories
                 using var connection = await _connectionFactory.CreateConnectionAsync();
 
                 const string sql = @"
-                    SELECT UserId, FirstName, LastName, Email, PhoneNumber, Address, 
-                           MembershipDate, IsActive, CreatedDate, ModifiedDate
-                    FROM Users 
+                    SELECT UserId, FirstName, LastName, Email, PhoneNumber, Address,
+                           MembershipDate, IsActive, CreatedDate, ModifiedDate, PasswordHash, Role
+                    FROM Users
                     ORDER BY FirstName, LastName";
 
                 var users = new List<User>();
@@ -98,9 +99,9 @@ namespace LibraryManagementSystem.DAL.Repositories
                 using var connection = await _connectionFactory.CreateConnectionAsync();
 
                 const string sql = @"
-                    SELECT UserId, FirstName, LastName, Email, PhoneNumber, Address, 
-                           MembershipDate, IsActive, CreatedDate, ModifiedDate
-                    FROM Users 
+                    SELECT UserId, FirstName, LastName, Email, PhoneNumber, Address,
+                           MembershipDate, IsActive, CreatedDate, ModifiedDate, PasswordHash, Role
+                    FROM Users
                     WHERE UserId = @UserId";
 
                 using var reader = await DatabaseHelper.ExecuteReaderAsync(connection, sql, new { UserId = id });
@@ -148,9 +149,9 @@ namespace LibraryManagementSystem.DAL.Repositories
                 using var connection = await _connectionFactory.CreateConnectionAsync();
 
                 const string sql = @"
-                    SELECT UserId, FirstName, LastName, Email, PhoneNumber, Address, 
-                           MembershipDate, IsActive, CreatedDate, ModifiedDate
-                    FROM Users 
+                    SELECT UserId, FirstName, LastName, Email, PhoneNumber, Address,
+                           MembershipDate, IsActive, CreatedDate, ModifiedDate, PasswordHash, Role
+                    FROM Users
                     WHERE Email = @Email";
 
                 using var reader = await DatabaseHelper.ExecuteReaderAsync(connection, sql, new { Email = email });
@@ -196,9 +197,9 @@ namespace LibraryManagementSystem.DAL.Repositories
                 using var connection = await _connectionFactory.CreateConnectionAsync();
 
                 const string sql = @"
-                    SELECT UserId, FirstName, LastName, Email, PhoneNumber, Address, 
-                           MembershipDate, IsActive, CreatedDate, ModifiedDate
-                    FROM Users 
+                    SELECT UserId, FirstName, LastName, Email, PhoneNumber, Address,
+                           MembershipDate, IsActive, CreatedDate, ModifiedDate, PasswordHash, Role
+                    FROM Users
                     WHERE IsActive = 1
                     ORDER BY FirstName, LastName";
 
@@ -241,6 +242,8 @@ namespace LibraryManagementSystem.DAL.Repositories
             int isActiveIndex = reader.GetOrdinal("IsActive");
             int createdDateIndex = reader.GetOrdinal("CreatedDate");
             int modifiedDateIndex = reader.GetOrdinal("ModifiedDate");
+            int passwordHashIndex = reader.GetOrdinal("PasswordHash");
+            int roleIndex = reader.GetOrdinal("Role");
 
             return new User
             {
@@ -253,9 +256,14 @@ namespace LibraryManagementSystem.DAL.Repositories
                 MembershipDate = reader.GetDateTime(membershipDateIndex),
                 IsActive = reader.GetBoolean(isActiveIndex),
                 CreatedDate = reader.GetDateTime(createdDateIndex),
-                ModifiedDate = reader.GetDateTime(modifiedDateIndex)
+                ModifiedDate = reader.GetDateTime(modifiedDateIndex),
+                PasswordHash = reader.IsDBNull(passwordHashIndex) ? string.Empty : reader.GetString(passwordHashIndex),
+                Role = reader.IsDBNull(roleIndex)
+    ? UserRole.User
+    : (UserRole)reader.GetInt32(roleIndex)
             };
         }
+
 
         /// <summary>
         /// البحث عن المستخدمين
@@ -274,7 +282,7 @@ namespace LibraryManagementSystem.DAL.Repositories
 
                 const string sql = @"
                     SELECT UserId, FirstName, LastName, Email, PhoneNumber, Address,
-                           MembershipDate, IsActive, CreatedDate, ModifiedDate
+                           MembershipDate, IsActive, CreatedDate, ModifiedDate, PasswordHash, Role
                     FROM Users
                     WHERE FirstName LIKE @SearchTerm
                        OR LastName LIKE @SearchTerm
@@ -312,8 +320,8 @@ namespace LibraryManagementSystem.DAL.Repositories
                 using var connection = await _connectionFactory.CreateConnectionAsync();
 
                 const string sql = @"
-                    INSERT INTO Users (FirstName, LastName, Email, PhoneNumber, Address, MembershipDate, IsActive)
-                    VALUES (@FirstName, @LastName, @Email, @PhoneNumber, @Address, @MembershipDate, @IsActive);
+                    INSERT INTO Users (FirstName, LastName, Email, PhoneNumber, Address, MembershipDate, IsActive, PasswordHash, Role, CreatedDate, ModifiedDate)
+                    VALUES (@FirstName, @LastName, @Email, @PhoneNumber, @Address, @MembershipDate, @IsActive, @PasswordHash, @Role, @CreatedDate, @ModifiedDate);
                     SELECT SCOPE_IDENTITY();";
 
                 var userId = await DatabaseHelper.ExecuteScalarAsync<int>(connection, sql, new
@@ -324,7 +332,11 @@ namespace LibraryManagementSystem.DAL.Repositories
                     user.PhoneNumber,
                     user.Address,
                     user.MembershipDate,
-                    user.IsActive
+                    user.IsActive,
+                    user.PasswordHash,
+                    Role = user.Role.ToString(),
+                    user.CreatedDate,
+                    user.ModifiedDate
                 });
 
                 await InvalidateUserCacheAsync(userId, user.Email);
@@ -356,7 +368,10 @@ namespace LibraryManagementSystem.DAL.Repositories
                         Email = @Email,
                         PhoneNumber = @PhoneNumber,
                         Address = @Address,
-                        IsActive = @IsActive
+                        IsActive = @IsActive,
+                        PasswordHash = @PasswordHash,
+                        Role = @Role,
+                        ModifiedDate = @ModifiedDate
                     WHERE UserId = @UserId";
 
                 var rowsAffected = await DatabaseHelper.ExecuteNonQueryAsync(connection, sql, new
@@ -367,6 +382,9 @@ namespace LibraryManagementSystem.DAL.Repositories
                     user.PhoneNumber,
                     user.Address,
                     user.IsActive,
+                    user.PasswordHash,
+                    Role = user.Role.ToString(),
+                    user.ModifiedDate,
                     user.UserId
                 });
 

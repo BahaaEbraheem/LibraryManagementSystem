@@ -1,0 +1,235 @@
+@page
+@using LibraryManagementSystem.DAL.Models.Enums
+@model LibraryManagementSystem.UI.Pages.Auth.RegisterModel
+@{
+    ViewData["Title"] = "إنشاء حساب جديد - Create Account";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-user-plus me-2"></i>
+                        @if (Model.IsCurrentUserAdmin)
+                        {
+                            <span>إضافة مستخدم جديد - Add New User</span>
+                        }
+                        else
+                        {
+                            <span>إنشاء حساب جديد - Create New Account</span>
+                        }
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <!-- رسائل التنبيه - Alert Messages -->
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @Model.SuccessMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <!-- نموذج التسجيل - Registration Form -->
+                    <form method="post">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="RegisterData.FirstName" class="form-label">
+                                    <i class="fas fa-user me-1"></i>
+                                    الاسم الأول - First Name *
+                                </label>
+                                <input asp-for="RegisterData.FirstName" class="form-control" 
+                                       placeholder="أدخل الاسم الأول - Enter first name" />
+                                <span asp-validation-for="RegisterData.FirstName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="RegisterData.LastName" class="form-label">
+                                    <i class="fas fa-user me-1"></i>
+                                    الاسم الأخير - Last Name *
+                                </label>
+                                <input asp-for="RegisterData.LastName" class="form-control" 
+                                       placeholder="أدخل الاسم الأخير - Enter last name" />
+                                <span asp-validation-for="RegisterData.LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RegisterData.Email" class="form-label">
+                                <i class="fas fa-envelope me-1"></i>
+                                البريد الإلكتروني - Email *
+                            </label>
+                            <input asp-for="RegisterData.Email" class="form-control" 
+                                   placeholder="أدخل البريد الإلكتروني - Enter email" 
+                                   autocomplete="email" />
+                            <span asp-validation-for="RegisterData.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RegisterData.PhoneNumber" class="form-label">
+                                <i class="fas fa-phone me-1"></i>
+                                رقم الهاتف - Phone Number
+                            </label>
+                            <input asp-for="RegisterData.PhoneNumber" class="form-control" 
+                                   placeholder="أدخل رقم الهاتف - Enter phone number" 
+                                   autocomplete="tel" />
+                            <span asp-validation-for="RegisterData.PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RegisterData.Address" class="form-label">
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                العنوان - Address
+                            </label>
+                            <textarea asp-for="RegisterData.Address" class="form-control" rows="2"
+                                      placeholder="أدخل العنوان - Enter address"></textarea>
+                            <span asp-validation-for="RegisterData.Address" class="text-danger"></span>
+                        </div>
+
+                        @if (Model.IsCurrentUserAdmin)
+                        {
+                            <div class="mb-3">
+                                <label asp-for="RegisterData.Role" class="form-label">
+                                    <i class="fas fa-user-shield me-1"></i>
+                                    دور المستخدم - User Role
+                                </label>
+                                <select asp-for="RegisterData.Role" class="form-select">
+                                    <option value="@UserRole.User">@UserRole.User.GetDescription()</option>
+                                    <option value="@UserRole.Administrator">@UserRole.Administrator.GetDescription()</option>
+                                </select>
+                                <span asp-validation-for="RegisterData.Role" class="text-danger"></span>
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="RegisterData.Password" class="form-label">
+                                    <i class="fas fa-lock me-1"></i>
+                                    كلمة المرور - Password *
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="RegisterData.Password" class="form-control" 
+                                           type="password" id="passwordInput"
+                                           placeholder="أدخل كلمة المرور - Enter password" 
+                                           autocomplete="new-password" />
+                                    <button class="btn btn-outline-secondary" type="button" 
+                                            onclick="togglePassword('passwordInput', 'togglePasswordIcon1')">
+                                        <i class="fas fa-eye" id="togglePasswordIcon1"></i>
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted">
+                                    يجب أن تكون كلمة المرور 6 أحرف على الأقل - Password must be at least 6 characters
+                                </small>
+                                <span asp-validation-for="RegisterData.Password" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="RegisterData.ConfirmPassword" class="form-label">
+                                    <i class="fas fa-lock me-1"></i>
+                                    تأكيد كلمة المرور - Confirm Password *
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="RegisterData.ConfirmPassword" class="form-control" 
+                                           type="password" id="confirmPasswordInput"
+                                           placeholder="أعد إدخال كلمة المرور - Re-enter password" 
+                                           autocomplete="new-password" />
+                                    <button class="btn btn-outline-secondary" type="button" 
+                                            onclick="togglePassword('confirmPasswordInput', 'togglePasswordIcon2')">
+                                        <i class="fas fa-eye" id="togglePasswordIcon2"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="RegisterData.ConfirmPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>
+                                @if (Model.IsCurrentUserAdmin)
+                                {
+                                    <span>إضافة المستخدم - Add User</span>
+                                }
+                                else
+                                {
+                                    <span>إنشاء الحساب - Create Account</span>
+                                }
+                            </button>
+                        </div>
+                    </form>
+
+                    @if (!Model.IsCurrentUserAdmin)
+                    {
+                        <hr class="my-4">
+                        <div class="text-center">
+                            <p class="mb-2">لديك حساب بالفعل؟ - Already have an account?</p>
+                            <a href="/Auth/Login" class="btn btn-outline-primary">
+                                <i class="fas fa-sign-in-alt me-1"></i>
+                                تسجيل الدخول - Login
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword(inputId, iconId) {
+    const passwordInput = document.getElementById(inputId);
+    const toggleIcon = document.getElementById(iconId);
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+
+// Auto-focus on first name input
+document.addEventListener('DOMContentLoaded', function() {
+    const firstNameInput = document.querySelector('input[name="RegisterData.FirstName"]');
+    if (firstNameInput) {
+        firstNameInput.focus();
+    }
+});
+</script>
+
+<style>
+.card {
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.btn {
+    border-radius: 8px;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+}
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
