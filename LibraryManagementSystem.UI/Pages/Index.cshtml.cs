@@ -102,17 +102,12 @@ namespace LibraryManagementSystem.UI.Pages
                 if (result.IsSuccess)
                 {
                     BookStatistics = result.Data;
-                    _logger.LogDebug("تم تحميل إحصائيات الكتب - Book statistics loaded");
                 }
-                else
-                {
-                    _logger.LogWarning("فشل في تحميل إحصائيات الكتب: {Error} - Failed to load book statistics: {Error}",
-                        result.ErrorMessage);
-                }
+               
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في تحميل إحصائيات الكتب - Error loading book statistics");
+                Console.WriteLine(ex.Message, "خطأ في تحميل إحصائيات الكتب - Error loading book statistics");
             }
         }
 
@@ -128,13 +123,8 @@ namespace LibraryManagementSystem.UI.Pages
                 if (result.IsSuccess)
                 {
                     BorrowingStatistics = result.Data;
-                    _logger.LogDebug("تم تحميل إحصائيات الاستعارات - Borrowing statistics loaded");
                 }
-                else
-                {
-                    _logger.LogWarning("فشل في تحميل إحصائيات الاستعارات: {Error} - Failed to load borrowing statistics: {Error}",
-                        result.ErrorMessage);
-                }
+              
             }
             catch (Exception ex)
             {
@@ -154,13 +144,8 @@ namespace LibraryManagementSystem.UI.Pages
                 if (result.IsSuccess)
                 {
                     MostBorrowedBooks = result.Data;
-                    _logger.LogDebug("تم تحميل الكتب الأكثر استعارة - Most borrowed books loaded");
                 }
-                else
-                {
-                    _logger.LogWarning("فشل في تحميل الكتب الأكثر استعارة: {Error} - Failed to load most borrowed books: {Error}",
-                        result.ErrorMessage);
-                }
+            
             }
             catch (Exception ex)
             {
@@ -182,11 +167,7 @@ namespace LibraryManagementSystem.UI.Pages
                     MostActiveUsers = result.Data;
                     _logger.LogDebug("تم تحميل المستخدمين الأكثر نشاطاً - Most active users loaded");
                 }
-                else
-                {
-                    _logger.LogWarning("فشل في تحميل المستخدمين الأكثر نشاطاً: {Error} - Failed to load most active users: {Error}",
-                        result.ErrorMessage);
-                }
+            
             }
             catch (Exception ex)
             {

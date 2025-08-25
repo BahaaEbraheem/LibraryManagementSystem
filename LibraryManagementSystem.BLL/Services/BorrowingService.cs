@@ -39,8 +39,8 @@ namespace LibraryManagementSystem.BLL.Services
         {
             try
             {
-                _logger.LogDebug("بدء عملية استعارة الكتاب {BookId} للمستخدم {UserId} - Starting book borrowing {BookId} for user {UserId}",
-                    bookId, userId, bookId, userId);
+                _logger.LogDebug("بدء عملية استعارة الكتاب {BookId} للمستخدم {UserId} - Starting book borrowing for user",
+                    bookId, userId);
 
                 // التحقق من أهلية الاستعارة
                 // Check borrowing eligibility
@@ -48,8 +48,8 @@ namespace LibraryManagementSystem.BLL.Services
                 if (!eligibilityResult.IsSuccess || !eligibilityResult.Data!.CanBorrow)
                 {
                     var reason = eligibilityResult.Data?.Reason ?? "غير مؤهل للاستعارة - Not eligible for borrowing";
-                    _logger.LogWarning("المستخدم {UserId} غير مؤهل لاستعارة الكتاب {BookId}: {Reason} - User {UserId} not eligible to borrow book {BookId}: {Reason}",
-                        userId, bookId, reason, userId, bookId, reason);
+                    _logger.LogWarning("المستخدم {UserId} غير مؤهل لاستعارة الكتاب {BookId}: {Reason} - User not eligible to borrow book",
+                        userId, bookId, reason);
                     return ServiceResult<int>.Failure(reason);
                 }
 
@@ -68,15 +68,15 @@ namespace LibraryManagementSystem.BLL.Services
 
                 var borrowingId = await _borrowingRepository.AddAsync(borrowing);
 
-                _logger.LogInformation("تم إنشاء استعارة جديدة بنجاح: {BorrowingId} للمستخدم {UserId} والكتاب {BookId} - Successfully created new borrowing: {BorrowingId} for user {UserId} and book {BookId}",
-                    borrowingId, userId, bookId, borrowingId, userId, bookId);
+                _logger.LogInformation("تم إنشاء استعارة جديدة بنجاح: {BorrowingId} للمستخدم {UserId} والكتاب {BookId} - Successfully created new borrowing for user and book",
+                    borrowingId, userId, bookId);
 
                 return ServiceResult<int>.Success(borrowingId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في استعارة الكتاب {BookId} للمستخدم {UserId} - Error borrowing book {BookId} for user {UserId}",
-                    bookId, userId, bookId, userId);
+                _logger.LogError(ex, "خطأ في استعارة الكتاب {BookId} للمستخدم {UserId} - Error borrowing book for user",
+                    bookId, userId);
                 return ServiceResult<int>.Failure("حدث خطأ أثناء عملية الاستعارة - An error occurred during the borrowing process");
             }
         }
@@ -89,23 +89,23 @@ namespace LibraryManagementSystem.BLL.Services
         {
             try
             {
-                _logger.LogDebug("بدء عملية إرجاع الكتاب للاستعارة {BorrowingId} - Starting book return for borrowing {BorrowingId}",
-                    borrowingId, borrowingId);
+                _logger.LogDebug("بدء عملية إرجاع الكتاب للاستعارة {BorrowingId} - Starting book return for borrowing",
+                    borrowingId);
 
                 // الحصول على سجل الاستعارة
                 // Get borrowing record
                 var borrowing = await _borrowingRepository.GetByIdAsync(borrowingId);
                 if (borrowing == null)
                 {
-                    _logger.LogWarning("لم يتم العثور على سجل الاستعارة {BorrowingId} - Borrowing record {BorrowingId} not found",
-                        borrowingId, borrowingId);
+                    _logger.LogWarning("لم يتم العثور على سجل الاستعارة {BorrowingId} - Borrowing record not found",
+                        borrowingId);
                     return ServiceResult<bool>.Failure("لم يتم العثور على سجل الاستعارة - Borrowing record not found");
                 }
 
                 if (borrowing.IsReturned)
                 {
-                    _logger.LogWarning("الكتاب تم إرجاعه مسبقاً للاستعارة {BorrowingId} - Book already returned for borrowing {BorrowingId}",
-                        borrowingId, borrowingId);
+                    _logger.LogWarning("الكتاب تم إرجاعه مسبقاً للاستعارة {BorrowingId} - Book already returned for borrowing",
+                        borrowingId);
                     return ServiceResult<bool>.Failure("الكتاب تم إرجاعه مسبقاً - Book has already been returned");
                 }
 
@@ -121,21 +121,21 @@ namespace LibraryManagementSystem.BLL.Services
 
                 if (success)
                 {
-                    _logger.LogInformation("تم إرجاع الكتاب بنجاح للاستعارة {BorrowingId} برسوم تأخير {LateFee} - Successfully returned book for borrowing {BorrowingId} with late fee {LateFee}",
-                        borrowingId, lateFee, borrowingId, lateFee);
+                    _logger.LogInformation("تم إرجاع الكتاب بنجاح للاستعارة {BorrowingId} برسوم تأخير {LateFee} - Successfully returned book for borrowing with late fee",
+                        borrowingId, lateFee);
                 }
                 else
                 {
-                    _logger.LogWarning("فشل في إرجاع الكتاب للاستعارة {BorrowingId} - Failed to return book for borrowing {BorrowingId}",
-                        borrowingId, borrowingId);
+                    _logger.LogWarning("فشل في إرجاع الكتاب للاستعارة {BorrowingId} - Failed to return book for borrowing",
+                        borrowingId);
                 }
 
                 return ServiceResult<bool>.Success(success);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في إرجاع الكتاب للاستعارة {BorrowingId} - Error returning book for borrowing {BorrowingId}",
-                    borrowingId, borrowingId);
+                _logger.LogError(ex, "خطأ في إرجاع الكتاب للاستعارة {BorrowingId} - Error returning book for borrowing",
+                    borrowingId);
                 return ServiceResult<bool>.Failure("حدث خطأ أثناء عملية الإرجاع - An error occurred during the return process");
             }
         }
@@ -150,23 +150,23 @@ namespace LibraryManagementSystem.BLL.Services
             {
                 if (userId <= 0)
                 {
-                    _logger.LogWarning("تم تمرير معرف مستخدم غير صحيح: {UserId} - Invalid user ID provided: {UserId}", userId, userId);
+                    _logger.LogWarning("تم تمرير معرف مستخدم غير صحيح: {UserId} - Invalid user ID provided", userId);
                     return ServiceResult<IEnumerable<Borrowing>>.Failure("معرف المستخدم غير صحيح - Invalid user ID");
                 }
 
-                _logger.LogDebug("الحصول على الاستعارات النشطة للمستخدم {UserId} - Getting active borrowings for user {UserId}", userId, userId);
+                _logger.LogDebug("الحصول على الاستعارات النشطة للمستخدم {UserId} - Getting active borrowings for user", userId);
 
                 var borrowings = await _borrowingRepository.GetActiveUserBorrowingsAsync(userId);
 
-                _logger.LogDebug("تم الحصول على {Count} استعارة نشطة للمستخدم {UserId} - Retrieved {Count} active borrowings for user {UserId}",
-                    borrowings.Count(), userId, borrowings.Count(), userId);
+                _logger.LogDebug("تم الحصول على {Count} استعارة نشطة للمستخدم {UserId} - Retrieved active borrowings for user",
+                    borrowings.Count(), userId);
 
                 return ServiceResult<IEnumerable<Borrowing>>.Success(borrowings);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في الحصول على الاستعارات النشطة للمستخدم {UserId} - Error getting active borrowings for user {UserId}",
-                    userId, userId);
+                _logger.LogError(ex, "خطأ في الحصول على الاستعارات النشطة للمستخدم {UserId} - Error getting active borrowings for user",
+                    userId);
                 return ServiceResult<IEnumerable<Borrowing>>.Failure("حدث خطأ أثناء الحصول على الاستعارات النشطة - An error occurred while retrieving active borrowings");
             }
         }
@@ -181,23 +181,23 @@ namespace LibraryManagementSystem.BLL.Services
             {
                 if (userId <= 0)
                 {
-                    _logger.LogWarning("تم تمرير معرف مستخدم غير صحيح: {UserId} - Invalid user ID provided: {UserId}", userId, userId);
+                    _logger.LogWarning("تم تمرير معرف مستخدم غير صحيح: {UserId} - Invalid user ID provided", userId);
                     return ServiceResult<IEnumerable<Borrowing>>.Failure("معرف المستخدم غير صحيح - Invalid user ID");
                 }
 
-                _logger.LogDebug("الحصول على جميع استعارات المستخدم {UserId} - Getting all borrowings for user {UserId}", userId, userId);
+                _logger.LogDebug("الحصول على جميع استعارات المستخدم {UserId} - Getting all borrowings for user", userId);
 
                 var borrowings = await _borrowingRepository.GetUserBorrowingsAsync(userId);
 
-                _logger.LogDebug("تم الحصول على {Count} استعارة للمستخدم {UserId} - Retrieved {Count} borrowings for user {UserId}",
-                    borrowings.Count(), userId, borrowings.Count(), userId);
+                _logger.LogDebug("تم الحصول على {Count} استعارة للمستخدم {UserId} - Retrieved borrowings for user",
+                    borrowings.Count(), userId);
 
                 return ServiceResult<IEnumerable<Borrowing>>.Success(borrowings);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في الحصول على استعارات المستخدم {UserId} - Error getting borrowings for user {UserId}",
-                    userId, userId);
+                _logger.LogError(ex, "خطأ في الحصول على استعارات المستخدم {UserId} - Error getting borrowings for user",
+                    userId);
                 return ServiceResult<IEnumerable<Borrowing>>.Failure("حدث خطأ أثناء الحصول على الاستعارات - An error occurred while retrieving borrowings");
             }
         }
@@ -214,7 +214,7 @@ namespace LibraryManagementSystem.BLL.Services
 
                 var borrowings = await _borrowingRepository.GetOverdueBorrowingsAsync();
 
-                _logger.LogDebug("تم الحصول على {Count} استعارة متأخرة - Retrieved {Count} overdue borrowings",
+                _logger.LogDebug("تم الحصول على {Count} استعارة متأخرة - Retrieved overdue borrowings",
                     borrowings.Count());
 
                 return ServiceResult<IEnumerable<Borrowing>>.Success(borrowings);
@@ -238,7 +238,7 @@ namespace LibraryManagementSystem.BLL.Services
 
                 var borrowings = await _borrowingRepository.GetActiveBorrowingsAsync();
 
-                _logger.LogDebug("تم الحصول على {Count} استعارة نشطة - Retrieved {Count} active borrowings",
+                _logger.LogDebug("تم الحصول على {Count} استعارة نشطة - Retrieved active borrowings",
                     borrowings.Count());
 
                 return ServiceResult<IEnumerable<Borrowing>>.Success(borrowings);
@@ -260,27 +260,27 @@ namespace LibraryManagementSystem.BLL.Services
             {
                 if (borrowingId <= 0)
                 {
-                    _logger.LogWarning("تم تمرير معرف استعارة غير صحيح: {BorrowingId} - Invalid borrowing ID provided: {BorrowingId}", borrowingId, borrowingId);
+                    _logger.LogWarning("تم تمرير معرف استعارة غير صحيح: {BorrowingId} - Invalid borrowing ID provided", borrowingId);
                     return ServiceResult<Borrowing>.Failure("معرف الاستعارة غير صحيح - Invalid borrowing ID");
                 }
 
-                _logger.LogDebug("الحصول على الاستعارة {BorrowingId} - Getting borrowing {BorrowingId}", borrowingId, borrowingId);
+                _logger.LogDebug("الحصول على الاستعارة {BorrowingId} - Getting borrowing", borrowingId);
 
                 var borrowing = await _borrowingRepository.GetByIdAsync(borrowingId);
 
                 if (borrowing == null)
                 {
-                    _logger.LogWarning("لم يتم العثور على الاستعارة {BorrowingId} - Borrowing {BorrowingId} not found", borrowingId, borrowingId);
+                    _logger.LogWarning("لم يتم العثور على الاستعارة {BorrowingId} - Borrowing not found", borrowingId);
                     return ServiceResult<Borrowing>.Failure("لم يتم العثور على الاستعارة - Borrowing not found");
                 }
 
-                _logger.LogDebug("تم العثور على الاستعارة {BorrowingId} بنجاح - Successfully found borrowing {BorrowingId}", borrowingId, borrowingId);
+                _logger.LogDebug("تم العثور على الاستعارة {BorrowingId} بنجاح - Successfully found borrowing", borrowingId);
 
                 return ServiceResult<Borrowing>.Success(borrowing);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في الحصول على الاستعارة {BorrowingId} - Error getting borrowing {BorrowingId}", borrowingId, borrowingId);
+                _logger.LogError(ex, "خطأ في الحصول على الاستعارة {BorrowingId} - Error getting borrowing", borrowingId);
                 return ServiceResult<Borrowing>.Failure("حدث خطأ أثناء الحصول على الاستعارة - An error occurred while retrieving the borrowing");
             }
         }
@@ -293,12 +293,12 @@ namespace LibraryManagementSystem.BLL.Services
         {
             try
             {
-                _logger.LogDebug("حساب الرسوم المتأخرة للاستعارة {BorrowingId} - Calculating late fees for borrowing {BorrowingId}", borrowingId, borrowingId);
+                _logger.LogDebug("حساب الرسوم المتأخرة للاستعارة {BorrowingId} - Calculating late fees for borrowing", borrowingId);
 
                 var borrowing = await _borrowingRepository.GetByIdAsync(borrowingId);
                 if (borrowing == null)
                 {
-                    _logger.LogWarning("لم يتم العثور على الاستعارة {BorrowingId} - Borrowing {BorrowingId} not found", borrowingId, borrowingId);
+                    _logger.LogWarning("لم يتم العثور على الاستعارة {BorrowingId} - Borrowing not found", borrowingId);
                     return ServiceResult<decimal>.Failure("لم يتم العثور على الاستعارة - Borrowing not found");
                 }
 
@@ -321,14 +321,14 @@ namespace LibraryManagementSystem.BLL.Services
 
                 var lateFee = daysLate * _librarySettings.LateFeePerDay;
 
-                _logger.LogDebug("الرسوم المتأخرة للاستعارة {BorrowingId}: {LateFee} ({DaysLate} أيام) - Late fees for borrowing {BorrowingId}: {LateFee} ({DaysLate} days)",
+                _logger.LogDebug("الرسوم المتأخرة للاستعارة {BorrowingId}: {LateFee} ({DaysLate} أيام) - Late fees for borrowing",
                     borrowingId, lateFee, daysLate);
 
                 return ServiceResult<decimal>.Success(lateFee);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في حساب الرسوم المتأخرة للاستعارة {BorrowingId} - Error calculating late fees for borrowing {BorrowingId}", borrowingId, borrowingId);
+                _logger.LogError(ex, "خطأ في حساب الرسوم المتأخرة للاستعارة {BorrowingId} - Error calculating late fees for borrowing", borrowingId);
                 return ServiceResult<decimal>.Failure("حدث خطأ أثناء حساب الرسوم المتأخرة - An error occurred while calculating late fees");
             }
         }
@@ -341,7 +341,7 @@ namespace LibraryManagementSystem.BLL.Services
         {
             try
             {
-                _logger.LogDebug("فحص أهلية الاستعارة للمستخدم {UserId} والكتاب {BookId} - Checking borrowing eligibility for user {UserId} and book {BookId}",
+                _logger.LogDebug("فحص أهلية الاستعارة للمستخدم {UserId} والكتاب {BookId} - Checking borrowing eligibility for user and book",
                     userId, bookId);
 
                 var eligibility = new BorrowingEligibility();
@@ -415,14 +415,14 @@ namespace LibraryManagementSystem.BLL.Services
                 // All conditions met
                 eligibility.CanBorrow = true;
 
-                _logger.LogDebug("المستخدم {UserId} مؤهل لاستعارة الكتاب {BookId} - User {UserId} is eligible to borrow book {BookId}",
+                _logger.LogDebug("المستخدم {UserId} مؤهل لاستعارة الكتاب {BookId} - User is eligible to borrow book",
                     userId, bookId);
 
                 return ServiceResult<BorrowingEligibility>.Success(eligibility);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في فحص أهلية الاستعارة للمستخدم {UserId} والكتاب {BookId} - Error checking borrowing eligibility for user {UserId} and book {BookId}",
+                _logger.LogError(ex, "خطأ في فحص أهلية الاستعارة للمستخدم {UserId} والكتاب {BookId} - Error checking borrowing eligibility for user and book",
                     userId, bookId);
                 return ServiceResult<BorrowingEligibility>.Failure("حدث خطأ أثناء فحص أهلية الاستعارة - An error occurred while checking borrowing eligibility");
             }
@@ -459,11 +459,11 @@ namespace LibraryManagementSystem.BLL.Services
         {
             try
             {
-                _logger.LogDebug("الحصول على أكثر {TopCount} كتاب استعارة - Getting top {TopCount} most borrowed books", topCount, topCount);
+                _logger.LogDebug("الحصول على أكثر {TopCount} كتاب استعارة - Getting top most borrowed books", topCount);
 
                 var books = await _borrowingRepository.GetMostBorrowedBooksAsync(topCount);
 
-                _logger.LogDebug("تم الحصول على {Count} كتاب من الأكثر استعارة - Retrieved {Count} most borrowed books", books.Count(), books.Count());
+                _logger.LogDebug("تم الحصول على {Count} كتاب من الأكثر استعارة - Retrieved most borrowed books", books.Count());
 
                 return ServiceResult<IEnumerable<MostBorrowedBook>>.Success(books);
             }
@@ -482,11 +482,11 @@ namespace LibraryManagementSystem.BLL.Services
         {
             try
             {
-                _logger.LogDebug("الحصول على أكثر {TopCount} مستخدم نشاطاً - Getting top {TopCount} most active users", topCount, topCount);
+                _logger.LogDebug("الحصول على أكثر {TopCount} مستخدم نشاطاً - Getting top most active users", topCount);
 
                 var users = await _borrowingRepository.GetMostActiveUsersAsync(topCount);
 
-                _logger.LogDebug("تم الحصول على {Count} مستخدم من الأكثر نشاطاً - Retrieved {Count} most active users", users.Count(), users.Count());
+                _logger.LogDebug("تم الحصول على {Count} مستخدم من الأكثر نشاطاً - Retrieved most active users", users.Count());
 
                 return ServiceResult<IEnumerable<MostActiveUser>>.Success(users);
             }
@@ -505,7 +505,7 @@ namespace LibraryManagementSystem.BLL.Services
         {
             try
             {
-                _logger.LogDebug("تمديد فترة الاستعارة {BorrowingId} بـ {AdditionalDays} أيام - Extending borrowing {BorrowingId} by {AdditionalDays} days",
+                _logger.LogDebug("تمديد فترة الاستعارة {BorrowingId} بـ {AdditionalDays} أيام - Extending borrowing by days",
                     borrowingId, additionalDays);
 
                 if (additionalDays <= 0)
@@ -529,14 +529,14 @@ namespace LibraryManagementSystem.BLL.Services
 
                 if (success)
                 {
-                    _logger.LogInformation("تم تمديد فترة الاستعارة {BorrowingId} بنجاح - Successfully extended borrowing {BorrowingId}", borrowingId, borrowingId);
+                    _logger.LogInformation("تم تمديد فترة الاستعارة {BorrowingId} بنجاح - Successfully extended borrowing", borrowingId);
                 }
 
                 return ServiceResult<bool>.Success(success);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في تمديد فترة الاستعارة {BorrowingId} - Error extending borrowing {BorrowingId}", borrowingId, borrowingId);
+                _logger.LogError(ex, "خطأ في تمديد فترة الاستعارة {BorrowingId} - Error extending borrowing", borrowingId);
                 return ServiceResult<bool>.Failure("حدث خطأ أثناء تمديد فترة الاستعارة - An error occurred while extending the borrowing period");
             }
         }
@@ -549,13 +549,13 @@ namespace LibraryManagementSystem.BLL.Services
         {
             try
             {
-                _logger.LogDebug("تجديد الاستعارة {BorrowingId} - Renewing borrowing {BorrowingId}", borrowingId, borrowingId);
+                _logger.LogDebug("تجديد الاستعارة {BorrowingId} - Renewing borrowing", borrowingId);
 
                 return await ExtendBorrowingAsync(borrowingId, _librarySettings.RenewalDays);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في تجديد الاستعارة {BorrowingId} - Error renewing borrowing {BorrowingId}", borrowingId, borrowingId);
+                _logger.LogError(ex, "خطأ في تجديد الاستعارة {BorrowingId} - Error renewing borrowing", borrowingId);
                 return ServiceResult<bool>.Failure("حدث خطأ أثناء تجديد الاستعارة - An error occurred while renewing the borrowing");
             }
         }
@@ -568,7 +568,7 @@ namespace LibraryManagementSystem.BLL.Services
         {
             try
             {
-                _logger.LogDebug("إلغاء الاستعارة {BorrowingId} - Cancelling borrowing {BorrowingId}", borrowingId, borrowingId);
+                _logger.LogDebug("إلغاء الاستعارة {BorrowingId} - Cancelling borrowing", borrowingId);
 
                 var borrowing = await _borrowingRepository.GetByIdAsync(borrowingId);
                 if (borrowing == null)
@@ -585,14 +585,14 @@ namespace LibraryManagementSystem.BLL.Services
 
                 if (success)
                 {
-                    _logger.LogInformation("تم إلغاء الاستعارة {BorrowingId} بنجاح - Successfully cancelled borrowing {BorrowingId}", borrowingId, borrowingId);
+                    _logger.LogInformation("تم إلغاء الاستعارة {BorrowingId} بنجاح - Successfully cancelled borrowing", borrowingId);
                 }
 
                 return ServiceResult<bool>.Success(success);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في إلغاء الاستعارة {BorrowingId} - Error cancelling borrowing {BorrowingId}", borrowingId, borrowingId);
+                _logger.LogError(ex, "خطأ في إلغاء الاستعارة {BorrowingId} - Error cancelling borrowing", borrowingId);
                 return ServiceResult<bool>.Failure("حدث خطأ أثناء إلغاء الاستعارة - An error occurred while cancelling the borrowing");
             }
         }

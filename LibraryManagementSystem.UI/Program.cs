@@ -58,15 +58,13 @@ namespace LibraryManagementSystem.UI
             // إضافة خدمات قاعدة البيانات
             // Add database services
             var connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? "Server=.;Database=LibraryManagementSystem;Trusted_Connection=true;TrustServerCertificate=True;MultipleActiveResultSets=true";
+                ?? "Server=(localdb)\\mssqllocaldb;Database=LibraryManagementSystem;Trusted_Connection=true;MultipleActiveResultSets=true";
 
             services.AddScoped<IDatabaseConnectionFactory>(provider =>
                 new DatabaseConnectionFactory(connectionString));
 
             // إضافة خدمة تهيئة قاعدة البيانات
-            // Add database initialization service
-            services.AddScoped<DatabaseInitializer>(provider =>
-                new DatabaseInitializer(connectionString, provider.GetRequiredService<ILogger<DatabaseInitializer>>()));
+            // Database initialization is handled by DatabaseConnectionFactory
 
             // إضافة المستودعات
             // Add repositories
@@ -78,6 +76,7 @@ namespace LibraryManagementSystem.UI
             // Add business logic services
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<IBorrowingService, BorrowingService>();
+            services.AddScoped<IUserService, UserService>();
 
             // إضافة إعدادات المكتبة
             // Add library settings
@@ -112,14 +111,14 @@ namespace LibraryManagementSystem.UI
             try
             {
                 using var scope = app.Services.CreateScope();
-                var databaseInitializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializer>();
+                var connectionFactory = scope.ServiceProvider.GetRequiredService<IDatabaseConnectionFactory>();
                 var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
                 logger.LogInformation("بدء تهيئة قاعدة البيانات - Starting database initialization");
 
                 // تشغيل تهيئة قاعدة البيانات بشكل متزامن عند بدء التطبيق
                 // Run database initialization synchronously at application startup
-                databaseInitializer.InitializeDatabaseAsync().GetAwaiter().GetResult();
+                connectionFactory.InitializeDatabaseAsync().GetAwaiter().GetResult();
 
                 logger.LogInformation("تم إكمال تهيئة قاعدة البيانات بنجاح - Database initialization completed successfully");
             }

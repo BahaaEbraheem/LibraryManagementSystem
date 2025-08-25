@@ -69,7 +69,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                 // Store results in cache
                 await _cacheService.SetAsync(CacheKeys.Borrowings.All, borrowings, _cacheExpiration);
 
-                _logger.LogDebug("تم الحصول على {Count} استعارة من قاعدة البيانات - Retrieved {Count} borrowings from database", borrowings.Count, borrowings.Count);
+                _logger.LogDebug("تم الحصول على {Count} استعارة من قاعدة البيانات - Retrieved borrowings from database", borrowings.Count);
                 return borrowings;
             }
             catch (Exception ex)
@@ -94,7 +94,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                 var cachedBorrowing = await _cacheService.GetAsync<Borrowing>(cacheKey);
                 if (cachedBorrowing != null)
                 {
-                    _logger.LogDebug("تم الحصول على الاستعارة {BorrowingId} من التخزين المؤقت - Retrieved borrowing {BorrowingId} from cache", id, id);
+                    _logger.LogDebug("تم الحصول على الاستعارة {BorrowingId} من التخزين المؤقت - Retrieved borrowing from cache", id);
                     return cachedBorrowing;
                 }
 
@@ -121,7 +121,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                     // Store result in cache
                     await _cacheService.SetAsync(cacheKey, borrowing, _cacheExpiration);
 
-                    _logger.LogDebug("تم الحصول على الاستعارة {BorrowingId} من قاعدة البيانات - Retrieved borrowing {BorrowingId} from database", id, id);
+                    _logger.LogDebug("تم الحصول على الاستعارة {BorrowingId} من قاعدة البيانات - Retrieved borrowing from database", id);
                     return borrowing;
                 }
 
@@ -129,7 +129,7 @@ namespace LibraryManagementSystem.DAL.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في الحصول على الاستعارة بالمعرف {BorrowingId} - Error getting borrowing by ID {BorrowingId}", id, id);
+                _logger.LogError(ex, "خطأ في الحصول على الاستعارة بالمعرف {BorrowingId} - Error getting borrowing by ID ", id);
                 throw;
             }
         }
@@ -177,7 +177,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                 // Store results in cache
                 await _cacheService.SetAsync(CacheKeys.Borrowings.Active, borrowings, _cacheExpiration);
 
-                _logger.LogDebug("تم الحصول على {Count} استعارة نشطة - Retrieved {Count} active borrowings", borrowings.Count, borrowings.Count);
+                _logger.LogDebug("تم الحصول على {Count} استعارة نشطة - Retrieved active borrowings", borrowings.Count);
                 return borrowings;
             }
             catch (Exception ex)
@@ -230,7 +230,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                 // Store results in cache
                 await _cacheService.SetAsync(CacheKeys.Borrowings.Overdue, borrowings, _cacheExpiration);
 
-                _logger.LogDebug("تم الحصول على {Count} استعارة متأخرة - Retrieved {Count} overdue borrowings", borrowings.Count, borrowings.Count);
+                _logger.LogDebug("تم الحصول على {Count} استعارة متأخرة - Retrieved overdue borrowings", borrowings.Count);
                 return borrowings;
             }
             catch (Exception ex)
@@ -255,7 +255,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                 var cachedBorrowings = await _cacheService.GetAsync<List<Borrowing>>(cacheKey);
                 if (cachedBorrowings != null)
                 {
-                    _logger.LogDebug("تم الحصول على استعارات المستخدم {UserId} من التخزين المؤقت - Retrieved user {UserId} borrowings from cache", userId, userId);
+                    _logger.LogDebug("تم الحصول على استعارات المستخدم {UserId} من التخزين المؤقت - Retrieved user borrowings from cache", userId);
                     return cachedBorrowings;
                 }
 
@@ -285,12 +285,12 @@ namespace LibraryManagementSystem.DAL.Repositories
                 // Store results in cache
                 await _cacheService.SetAsync(cacheKey, borrowings, _cacheExpiration);
 
-                _logger.LogDebug("تم الحصول على {Count} استعارة للمستخدم {UserId} - Retrieved {Count} borrowings for user {UserId}", borrowings.Count, userId, borrowings.Count, userId);
+                _logger.LogDebug("تم الحصول على {Count} استعارة للمستخدم {UserId} - Retrieved borrowings for user", borrowings.Count, userId);
                 return borrowings;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في الحصول على استعارات المستخدم {UserId} - Error getting user {UserId} borrowings", userId, userId);
+                _logger.LogError(ex, "خطأ في الحصول على استعارات المستخدم {UserId} - Error getting userborrowings", userId);
                 throw;
             }
         }
@@ -310,7 +310,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                 var cachedBorrowings = await _cacheService.GetAsync<List<Borrowing>>(cacheKey);
                 if (cachedBorrowings != null)
                 {
-                    _logger.LogDebug("تم الحصول على الاستعارات النشطة للمستخدم {UserId} من التخزين المؤقت - Retrieved active borrowings for user {UserId} from cache", userId, userId);
+                    _logger.LogDebug("تم الحصول على الاستعارات النشطة للمستخدم {UserId} من التخزين المؤقت - Retrieved active borrowings for user from cache", userId);
                     return cachedBorrowings;
                 }
 
@@ -340,12 +340,12 @@ namespace LibraryManagementSystem.DAL.Repositories
                 // Store results in cache
                 await _cacheService.SetAsync(cacheKey, borrowings, _cacheExpiration);
 
-                _logger.LogDebug("تم الحصول على {Count} استعارة نشطة للمستخدم {UserId} - Retrieved {Count} active borrowings for user {UserId}", borrowings.Count, userId, borrowings.Count, userId);
+                _logger.LogDebug("تم الحصول على {Count} استعارة نشطة للمستخدم {UserId} - Retrieved active borrowings for user", borrowings.Count, userId);
                 return borrowings;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في الحصول على الاستعارات النشطة للمستخدم {UserId} - Error getting active borrowings for user {UserId}", userId, userId);
+                _logger.LogError(ex, "خطأ في الحصول على الاستعارات النشطة للمستخدم {UserId} - Error getting active borrowings for user", userId);
                 throw;
             }
         }
@@ -365,7 +365,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                 var cachedBorrowings = await _cacheService.GetAsync<List<Borrowing>>(cacheKey);
                 if (cachedBorrowings != null)
                 {
-                    _logger.LogDebug("تم الحصول على استعارات الكتاب {BookId} من التخزين المؤقت - Retrieved book {BookId} borrowings from cache", bookId, bookId);
+                    _logger.LogDebug("تم الحصول على استعارات الكتاب {BookId} من التخزين المؤقت - Retrieved book borrowings from cache", bookId);
                     return cachedBorrowings;
                 }
 
@@ -395,12 +395,12 @@ namespace LibraryManagementSystem.DAL.Repositories
                 // Store results in cache
                 await _cacheService.SetAsync(cacheKey, borrowings, _cacheExpiration);
 
-                _logger.LogDebug("تم الحصول على {Count} استعارة للكتاب {BookId} - Retrieved {Count} borrowings for book {BookId}", borrowings.Count, bookId, borrowings.Count, bookId);
+                _logger.LogDebug("تم الحصول على {Count} استعارة للكتاب  - Retrieved {Count} borrowings for book ", borrowings.Count, bookId);
                 return borrowings;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في الحصول على استعارات الكتاب {BookId} - Error getting book {BookId} borrowings", bookId, bookId);
+                _logger.LogError(ex, "خطأ في الحصول على استعارات الكتاب {BookId} - Error getting bookborrowings", bookId);
                 throw;
             }
         }
@@ -432,7 +432,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                 });
 
                 await InvalidateBorrowingCacheAsync(borrowingId, borrowing.UserId, borrowing.BookId);
-                _logger.LogDebug("تم إضافة استعارة جديدة بالمعرف {BorrowingId} - Added new borrowing with ID {BorrowingId}", borrowingId, borrowingId);
+                _logger.LogDebug("تم إضافة استعارة جديدة بالمعرف {BorrowingId} - Added new borrowing with ID ", borrowingId);
 
                 return borrowingId;
             }
@@ -475,14 +475,14 @@ namespace LibraryManagementSystem.DAL.Repositories
                 if (rowsAffected > 0)
                 {
                     await InvalidateBorrowingCacheAsync(borrowing.BorrowingId, borrowing.UserId, borrowing.BookId);
-                    _logger.LogDebug("تم تحديث الاستعارة {BorrowingId} - Updated borrowing {BorrowingId}", borrowing.BorrowingId, borrowing.BorrowingId);
+                    _logger.LogDebug("تم تحديث الاستعارة");
                 }
 
                 return rowsAffected > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في تحديث الاستعارة {BorrowingId} - Error updating borrowing {BorrowingId}", borrowing.BorrowingId, borrowing.BorrowingId);
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -522,14 +522,12 @@ namespace LibraryManagementSystem.DAL.Repositories
                         await InvalidateBorrowingCacheAsync(borrowingId, borrowing.UserId, borrowing.BookId);
                     }
 
-                    _logger.LogDebug("تم إرجاع الكتاب للاستعارة {BorrowingId} - Returned book for borrowing {BorrowingId}", borrowingId, borrowingId);
                 }
 
                 return rowsAffected > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في إرجاع الكتاب للاستعارة {BorrowingId} - Error returning book for borrowing {BorrowingId}", borrowingId, borrowingId);
                 throw;
             }
         }
@@ -554,14 +552,12 @@ namespace LibraryManagementSystem.DAL.Repositories
                 if (rowsAffected > 0)
                 {
                     await InvalidateBorrowingCacheAsync(id, borrowing.UserId, borrowing.BookId);
-                    _logger.LogDebug("تم حذف الاستعارة {BorrowingId} - Deleted borrowing {BorrowingId}", id, id);
                 }
 
                 return rowsAffected > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في حذف الاستعارة {BorrowingId} - Error deleting borrowing {BorrowingId}", id, id);
                 throw;
             }
         }
@@ -633,7 +629,6 @@ namespace LibraryManagementSystem.DAL.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في التحقق من إمكانية استعارة الكتاب {BookId} للمستخدم {UserId} - Error checking if book {BookId} can be borrowed by user {UserId}", bookId, userId, bookId, userId);
                 throw;
             }
         }
@@ -655,7 +650,6 @@ namespace LibraryManagementSystem.DAL.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في الحصول على عدد الكتب المستعارة للمستخدم {UserId} - Error getting borrowed books count for user {UserId}", userId, userId);
                 throw;
             }
         }
@@ -696,14 +690,14 @@ namespace LibraryManagementSystem.DAL.Repositories
                 var statistics = new BorrowingStatistics();
                 if (reader.Read())
                 {
-                    statistics.TotalBorrowings = reader.GetInt32(reader.GetOrdinal("TotalBorrowings"));
-                    statistics.ActiveBorrowings = reader.GetInt32(reader.GetOrdinal("ActiveBorrowings"));
-                    statistics.OverdueBorrowings = reader.GetInt32(reader.GetOrdinal("OverdueBorrowings"));
-                    statistics.ReturnedBorrowings = reader.GetInt32(reader.GetOrdinal("ReturnedBorrowings"));
-                    statistics.TotalLateFees = reader.GetDecimal(reader.GetOrdinal("TotalLateFees"));
+                    statistics.TotalBorrowings = reader.IsDBNull(reader.GetOrdinal("TotalBorrowings")) ? 0 : reader.GetInt32(reader.GetOrdinal("TotalBorrowings"));
+                    statistics.ActiveBorrowings = reader.IsDBNull(reader.GetOrdinal("ActiveBorrowings")) ? 0 : reader.GetInt32(reader.GetOrdinal("ActiveBorrowings"));
+                    statistics.OverdueBorrowings = reader.IsDBNull(reader.GetOrdinal("OverdueBorrowings")) ? 0 : reader.GetInt32(reader.GetOrdinal("OverdueBorrowings"));
+                    statistics.ReturnedBorrowings = reader.IsDBNull(reader.GetOrdinal("ReturnedBorrowings")) ? 0 : reader.GetInt32(reader.GetOrdinal("ReturnedBorrowings"));
+                    statistics.TotalLateFees = reader.IsDBNull(reader.GetOrdinal("TotalLateFees")) ? 0 : reader.GetDecimal(reader.GetOrdinal("TotalLateFees"));
                     statistics.AverageBorrowingPeriod = reader.IsDBNull(reader.GetOrdinal("AverageBorrowingPeriod")) ? 0 : reader.GetDouble(reader.GetOrdinal("AverageBorrowingPeriod"));
-                    statistics.BorrowingsThisMonth = reader.GetInt32(reader.GetOrdinal("BorrowingsThisMonth"));
-                    statistics.ReturnsThisMonth = reader.GetInt32(reader.GetOrdinal("ReturnsThisMonth"));
+                    statistics.BorrowingsThisMonth = reader.IsDBNull(reader.GetOrdinal("BorrowingsThisMonth")) ? 0 : reader.GetInt32(reader.GetOrdinal("BorrowingsThisMonth"));
+                    statistics.ReturnsThisMonth = reader.IsDBNull(reader.GetOrdinal("ReturnsThisMonth")) ? 0 : reader.GetInt32(reader.GetOrdinal("ReturnsThisMonth"));
                 }
 
                 // تخزين النتائج في التخزين المؤقت
@@ -759,7 +753,6 @@ namespace LibraryManagementSystem.DAL.Repositories
                     });
                 }
 
-                _logger.LogDebug("تم الحصول على {Count} كتاب من الأكثر استعارة - Retrieved {Count} most borrowed books", books.Count, books.Count);
                 return books;
             }
             catch (Exception ex)
@@ -809,7 +802,6 @@ namespace LibraryManagementSystem.DAL.Repositories
                     });
                 }
 
-                _logger.LogDebug("تم الحصول على {Count} مستخدم من الأكثر نشاطاً - Retrieved {Count} most active users", users.Count, users.Count);
                 return users;
             }
             catch (Exception ex)

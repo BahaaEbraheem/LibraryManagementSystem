@@ -144,13 +144,8 @@ namespace LibraryManagementSystem.BLL.Services
                     return ServiceResult<PagedResult<Book>>.ValidationFailure(validationResult.Errors);
                 }
 
-                _logger.LogDebug("بدء البحث عن الكتب بالمعايير: {SearchTerm} - Starting to search books with criteria: {SearchTerm}",
-                    searchDto.SearchTerm ?? "جميع الكتب");
-
                 var result = await _bookRepository.SearchAsync(searchDto);
 
-                _logger.LogDebug("تم العثور على {Count} كتاب من أصل {Total} - Found {Count} books out of {Total}",
-                    result.Items.Count(), result.TotalCount);
 
                 return ServiceResult<PagedResult<Book>>.Success(result);
             }

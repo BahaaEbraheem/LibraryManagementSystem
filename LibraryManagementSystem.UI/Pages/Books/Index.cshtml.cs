@@ -96,7 +96,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
 
                     // تسجيل النتائج
                     // Log results
-                    _logger.LogInformation("تم العثور على {Count} كتاب من أصل {Total} - Found {Count} books out of {Total}",
+                    _logger.LogInformation("تم العثور على {Count} كتاب من أصل {Total} - Found books out of",
                         SearchResults!.Items.Count(), SearchResults.TotalCount);
 
                     // إضافة رسالة معلوماتية إذا لم يتم العثور على نتائج
@@ -226,14 +226,14 @@ namespace LibraryManagementSystem.UI.Pages.Books
 
                 if (result.IsSuccess)
                 {
-                    _logger.LogInformation("تم استعارة الكتاب {BookId} بواسطة المستخدم {UserId} - Book {BookId} borrowed by user {UserId}",
+                    _logger.LogInformation("تم استعارة الكتاب {BookId} بواسطة المستخدم {UserId} ",
                         bookId, userId);
 
                     return new JsonResult(new { success = true, message = "تم استعارة الكتاب بنجاح - Book borrowed successfully" });
                 }
                 else
                 {
-                    _logger.LogWarning("فشل في استعارة الكتاب {BookId} بواسطة المستخدم {UserId}: {Error} - Failed to borrow book {BookId} by user {UserId}: {Error}",
+                    _logger.LogWarning("فشل في استعارة الكتاب {BookId} بواسطة المستخدم {UserId}: {Error} - Failed to borrow book by user",
                         bookId, userId, result.ErrorMessage);
 
                     return new JsonResult(new { success = false, message = result.ErrorMessage });

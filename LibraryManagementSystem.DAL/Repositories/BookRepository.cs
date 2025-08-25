@@ -271,8 +271,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                 // Store results in cache
                 await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(15));
 
-                _logger.LogDebug("تم البحث عن {Count} كتاب من أصل {Total} - Found {Count} books out of {Total}",
-                    books.Count, totalCount, books.Count, totalCount);
+
 
                 return result;
             }
