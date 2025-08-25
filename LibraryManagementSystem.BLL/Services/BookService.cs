@@ -135,12 +135,12 @@ namespace LibraryManagementSystem.BLL.Services
                     return ServiceResult<PagedResult<Book>>.Failure("معايير البحث مطلوبة - Search criteria is required");
                 }
 
-                // التحقق من صحة معايير البحث
-                // Validate search criteria
-                var validationResult = ValidateSearchCriteria(searchDto);
+                // التحقق من صحة معايير التقسيم فقط
+                // Validate pagination criteria only
+                var validationResult = ValidatePaginationCriteria(searchDto);
                 if (!validationResult.IsValid)
                 {
-                    _logger.LogWarning("معايير البحث غير صحيحة - Invalid search criteria");
+                    _logger.LogWarning("معايير التقسيم غير صحيحة - Invalid pagination criteria");
                     return ServiceResult<PagedResult<Book>>.ValidationFailure(validationResult.Errors);
                 }
 
@@ -214,7 +214,7 @@ namespace LibraryManagementSystem.BLL.Services
 
                 var bookId = await _bookRepository.AddAsync(book);
 
-                _logger.LogInformation("تم إضافة كتاب جديد بنجاح: {BookTitle} بالمعرف {BookId} - Successfully added new book: {BookTitle} with ID {BookId}",
+                _logger.LogInformation("تم إضافة كتاب جديد بنجاح: {BookTitle} بالمعرف {BookId} - Successfully added new book",
                     book.Title, bookId);
 
                 return ServiceResult<int>.Success(bookId);
@@ -381,7 +381,7 @@ namespace LibraryManagementSystem.BLL.Services
 
                 var isAvailable = book.AvailableCopies > 0;
 
-                _logger.LogDebug("حالة توفر الكتاب {BookId}: {IsAvailable} - Book {BookId} availability status: {IsAvailable}",
+                _logger.LogDebug("حالة توفر الكتاب {BookId}:  Book {BookId} availability status",
                     bookId, isAvailable);
 
                 return ServiceResult<bool>.Success(isAvailable);
@@ -519,10 +519,10 @@ namespace LibraryManagementSystem.BLL.Services
         }
 
         /// <summary>
-        /// التحقق من صحة معايير البحث
-        /// Validate search criteria
+        /// التحقق من صحة معايير التقسيم
+        /// Validate pagination criteria
         /// </summary>
-        private static ValidationResult ValidateSearchCriteria(BookSearchDto searchDto)
+        private static ValidationResult ValidatePaginationCriteria(BookSearchDto searchDto)
         {
             var errors = new List<string>();
 

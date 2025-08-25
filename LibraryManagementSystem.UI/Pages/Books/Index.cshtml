@@ -35,13 +35,21 @@
                     }
 
                     <!-- نموذج البحث - Search Form -->
-                    <form method="get" class="mb-4">
+                    <form method="get" class="mb-4" id="searchForm">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label for="searchTerm" class="form-label">البحث - Search</label>
+                                <label for="searchTerm" class="form-label">
+                                    البحث - Search
+                                    <small class="text-muted">(اختياري - optional)</small>
+                                </label>
                                 <input type="text" class="form-control" id="searchTerm" name="searchTerm"
                                        value="@Model.SearchCriteria.SearchTerm"
-                                       placeholder="ابحث بالعنوان، المؤلف، أو الرقم المعياري...">
+                                       placeholder="ابحث بالعنوان، المؤلف، أو الرقم المعياري... (اتركه فارغاً لعرض جميع الكتب)"
+                                       title="ابحث بالعنوان، المؤلف، أو الرقم المعياري، أو اتركه فارغاً لعرض جميع الكتب">
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    البحث في العنوان، المؤلف، الرقم المعياري، والوصف - أو اتركه فارغاً لعرض جميع الكتب
+                                </div>
                             </div>
                             <div class="col-md-2">
                                 <label for="genre" class="form-label">النوع - Genre</label>
@@ -76,10 +84,16 @@
                             <div class="col-md-2">
                                 <label class="form-label">&nbsp;</label>
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary">
+                                    <button type="submit" class="btn btn-primary" id="searchButton">
                                         <i class="fas fa-search me-1"></i>
                                         بحث - Search
                                     </button>
+                                </div>
+                                <div class="form-text text-center mt-1">
+                                    <small class="text-muted">
+                                        <i class="fas fa-lightbulb me-1"></i>
+                                        نصيحة: استخدم كلمات مفتاحية محددة
+                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -158,17 +172,36 @@
                                 <td>
                                     @if (book.IsAvailable)
                                     {
-                                        <span class="badge bg-success">
-                                            <i class="fas fa-check me-1"></i>
-                                            متاح (@book.AvailableCopies من @book.TotalCopies)
-                                        </span>
+                                        <div class="d-flex flex-column">
+                                            <span class="badge bg-success mb-1">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                متوفر - Available
+                                            </span>
+                                            <small class="text-success">
+                                                <i class="fas fa-books me-1"></i>
+                                                @book.AvailableCopies من @book.TotalCopies نسخة متاحة
+                                            </small>
+                                            @if (book.BorrowedCopies > 0)
+                                            {
+                                                <small class="text-warning">
+                                                    <i class="fas fa-user-clock me-1"></i>
+                                                    @book.BorrowedCopies نسخة مُعارة
+                                                </small>
+                                            }
+                                        </div>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-danger">
-                                            <i class="fas fa-times me-1"></i>
-                                            غير متاح
-                                        </span>
+                                        <div class="d-flex flex-column">
+                                            <span class="badge bg-danger mb-1">
+                                                <i class="fas fa-times-circle me-1"></i>
+                                                مُعار بالكامل - Fully Borrowed
+                                            </span>
+                                            <small class="text-danger">
+                                                <i class="fas fa-ban me-1"></i>
+                                                جميع النسخ (@book.TotalCopies) مُعارة
+                                            </small>
+                                        </div>
                                     }
                                 </td>
                                 <td>
@@ -232,6 +265,7 @@ else if (Model.SearchResults != null)
     </div>
 }
 
+
 @functions {
     private string GetPageUrl(int pageNumber)
     {
@@ -261,6 +295,49 @@ else if (Model.SearchResults != null)
             form.appendChild(sortInput);
             form.submit();
         }
+
+        // التحقق من صحة نموذج البحث
+        // Validate search form
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('searchForm');
+            const searchButton = document.getElementById('searchButton');
+            const searchTerm = document.getElementById('searchTerm');
+            const genre = document.getElementById('genre');
+            const availableOnly = document.getElementById('availableOnly');
+
+            if (searchForm) {
+                searchForm.addEventListener('submit', function(e) {
+                    const searchValue = searchTerm.value.trim();
+
+                    // التحقق من طول نص البحث فقط إذا تم إدخاله
+                    // Check search term length only if entered
+                    if (searchValue && searchValue.length < 2) {
+                        e.preventDefault();
+                        alert('نص البحث يجب أن يكون حرفين على الأقل');
+                        searchTerm.focus();
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                // إضافة تلميحات تفاعلية
+                // Add interactive hints
+                searchTerm.addEventListener('input', function() {
+                    const value = this.value.trim();
+                    if (value.length === 1) {
+                        this.style.borderColor = '#ffc107';
+                        this.title = 'يرجى إدخال حرف إضافي واحد على الأقل';
+                    } else if (value.length >= 2) {
+                        this.style.borderColor = '#198754';
+                        this.title = 'جاهز للبحث!';
+                    } else {
+                        this.style.borderColor = '';
+                        this.title = '';
+                    }
+                });
+            }
+        });
         
         // استعارة كتاب
         // Borrow book

@@ -239,9 +239,20 @@
             // Add loading effects to buttons
             var submitButtons = document.querySelectorAll('button[type="submit"]');
             submitButtons.forEach(function (button) {
-                button.addEventListener('click', function () {
-                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري المعالجة...';
-                    this.disabled = true;
+                button.addEventListener('click', function (e) {
+                    var form = this.closest('form');
+                    if (form) {
+                        // التحقق من صحة النموذج قبل إظهار التحميل
+                        // Check form validity before showing loading
+                        if (form.checkValidity()) {
+                            // تأخير قصير للسماح بإرسال النموذج
+                            // Short delay to allow form submission
+                            setTimeout(() => {
+                                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري المعالجة...';
+                                this.disabled = true;
+                            }, 100);
+                        }
+                    }
                 });
             });
         });

@@ -2,6 +2,7 @@ using LibraryManagementSystem.DAL.Caching;
 using LibraryManagementSystem.DAL.Data;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.DTOs;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Text;
@@ -221,42 +222,50 @@ namespace LibraryManagementSystem.DAL.Repositories
             {
                 var cacheKey = GenerateSearchCacheKey(searchDto);
 
-                // محاولة الحصول على البيانات من التخزين المؤقت
-                // Try to get data from cache
-                var cachedResult = await _cacheService.GetAsync<PagedResult<Book>>(cacheKey);
-                if (cachedResult != null)
-                {
-                    _logger.LogDebug("تم الحصول على نتائج البحث من التخزين المؤقت - Retrieved search results from cache");
-                    return cachedResult;
-                }
+                // تعطيل التخزين المؤقت مؤقتاً للتشخيص - Disable cache temporarily for debugging
+                // var cachedResult = await _cacheService.GetAsync<PagedResult<Book>>(cacheKey);
+                // if (cachedResult != null)
+                //     return cachedResult;
+
+                _logger.LogDebug("تم تجاهل التخزين المؤقت للبحث - Cache bypassed for search debugging");
 
                 using var connection = await _connectionFactory.CreateConnectionAsync();
 
                 var (whereClause, parameters) = BuildSearchWhereClause(searchDto);
                 var orderClause = BuildOrderClause(searchDto.SortBy, searchDto.SortDescending);
 
-                // استعلام العد الإجمالي - Total count query
+                // تسجيل استعلام البحث للتشخيص
+                // Log search query for debugging
+                _logger.LogDebug("Search query: SELECT COUNT(*) FROM Books {WhereClause} with SearchTerm: {SearchTerm}",
+                    whereClause, searchDto.SearchTerm);
+
+                // عد إجمالي النتائج
                 var countSql = $"SELECT COUNT(*) FROM Books {whereClause}";
                 var totalCount = await DatabaseHelper.ExecuteScalarAsync<int>(connection, countSql, parameters);
 
-                // استعلام البيانات مع التقسيم - Data query with pagination
+                // استعلام البيانات مع الصفحات
                 var offset = (searchDto.PageNumber - 1) * searchDto.PageSize;
                 var dataSql = $@"
-                    SELECT BookId, Title, Author, ISBN, Publisher, PublicationYear,
-                           Genre, TotalCopies, AvailableCopies, Description,
-                           CreatedDate, ModifiedDate
-                    FROM Books
-                    {whereClause}
-                    {orderClause}
-                    OFFSET {offset} ROWS
-                    FETCH NEXT {searchDto.PageSize} ROWS ONLY";
+            SELECT BookId, Title, Author, ISBN, Publisher, PublicationYear,
+                   Genre, TotalCopies, AvailableCopies, Description,
+                   CreatedDate, ModifiedDate
+            FROM Books
+            {whereClause}
+            {orderClause}
+            OFFSET {offset} ROWS
+            FETCH NEXT {searchDto.PageSize} ROWS ONLY";
 
                 var books = new List<Book>();
                 using var reader = await DatabaseHelper.ExecuteReaderAsync(connection, dataSql, parameters);
-
                 while (reader.Read())
                 {
-                    books.Add(MapReaderToBook(reader));
+                    var book = MapReaderToBook(reader);
+                    books.Add(book);
+
+                    // تسجيل تفاصيل كل كتاب تم العثور عليه
+                    // Log details of each book found
+                    _logger.LogDebug("كتاب تم العثور عليه - Book found: ID={BookId}, Title='{Title}', Author='{Author}', ISBN='{ISBN}'",
+                        book.BookId, book.Title, book.Author, book.ISBN);
                 }
 
                 var result = new PagedResult<Book>
@@ -267,11 +276,14 @@ namespace LibraryManagementSystem.DAL.Repositories
                     PageSize = searchDto.PageSize
                 };
 
-                // تخزين النتائج في التخزين المؤقت
-                // Store results in cache
-                await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(15));
+                // تسجيل النتائج النهائية
+                // Log final results
+                _logger.LogInformation("نتائج البحث - Search results: العدد الإجمالي={TotalCount}, عدد العناصر في الصفحة={ItemCount}, مصطلح البحث='{SearchTerm}'",
+                    totalCount, books.Count, searchDto.SearchTerm ?? "فارغ");
 
-
+                // تعطيل التخزين المؤقت مؤقتاً
+                // Disable caching temporarily
+                // await _cacheService.SetAsync(cacheKey, result, TimeSpan.FromMinutes(15));
 
                 return result;
             }
@@ -281,6 +293,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                 throw;
             }
         }
+
 
         /// <summary>
         /// الحصول على الكتب المتاحة
@@ -431,46 +444,80 @@ namespace LibraryManagementSystem.DAL.Repositories
         private static (string whereClause, object parameters) BuildSearchWhereClause(BookSearchDto searchDto)
         {
             var conditions = new List<string>();
-            var paramDict = new Dictionary<string, object>();
 
-            if (!string.IsNullOrWhiteSpace(searchDto.Title))
+            // متغيرات للمعاملات
+            string? searchTerm = null;
+            string? title = null;
+            string? author = null;
+            string? isbn = null;
+            string? genre = null;
+
+            if (!string.IsNullOrWhiteSpace(searchDto.SearchTerm) && searchDto.SearchTerm.Trim().Length >= 2)
             {
+                var trimmed = searchDto.SearchTerm.Trim();
+                searchTerm = $"%{trimmed}%";
+
+                // البحث الدقيق - ابحث عن العبارة الكاملة كما هي
+                // Exact search - search for the complete phrase as is
+                conditions.Add("(Title LIKE @SearchTerm OR Author LIKE @SearchTerm OR ISBN LIKE @SearchTerm)");
+
+                // تسجيل معايير البحث
+                // Log search criteria
+                Console.WriteLine($"DEBUG: Search term: '{trimmed}', Pattern: '%{trimmed}%'");
+                Console.WriteLine($"DEBUG: SQL condition will be: (Title LIKE @SearchTerm OR Author LIKE @SearchTerm OR ISBN LIKE @SearchTerm)");
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchDto.Title) && searchDto.Title.Trim().Length >= 2)
+            {
+                title = $"%{searchDto.Title.Trim()}%";
                 conditions.Add("Title LIKE @Title");
-                paramDict["Title"] = $"%{searchDto.Title}%";
             }
 
-            if (!string.IsNullOrWhiteSpace(searchDto.Author))
+            if (!string.IsNullOrWhiteSpace(searchDto.Author) && searchDto.Author.Trim().Length >= 2)
             {
+                author = $"%{searchDto.Author.Trim()}%";
                 conditions.Add("Author LIKE @Author");
-                paramDict["Author"] = $"%{searchDto.Author}%";
             }
 
-            if (!string.IsNullOrWhiteSpace(searchDto.ISBN))
+            if (!string.IsNullOrWhiteSpace(searchDto.ISBN) && searchDto.ISBN.Trim().Length >= 3)
             {
+                isbn = $"%{searchDto.ISBN.Trim()}%";
                 conditions.Add("ISBN LIKE @ISBN");
-                paramDict["ISBN"] = $"%{searchDto.ISBN}%";
             }
 
             if (!string.IsNullOrWhiteSpace(searchDto.Genre))
             {
+                genre = $"%{searchDto.Genre.Trim()}%";
                 conditions.Add("Genre LIKE @Genre");
-                paramDict["Genre"] = $"%{searchDto.Genre}%";
             }
+
+            if (searchDto.AvailableOnly)
+                conditions.Add("AvailableCopies > 0");
 
             if (searchDto.IsAvailable.HasValue)
-            {
-                if (searchDto.IsAvailable.Value)
-                {
-                    conditions.Add("AvailableCopies > 0");
-                }
-                else
-                {
-                    conditions.Add("AvailableCopies = 0");
-                }
-            }
+                conditions.Add(searchDto.IsAvailable.Value ? "AvailableCopies > 0" : "AvailableCopies = 0");
 
-            var whereClause = conditions.Any() ? $"WHERE {string.Join(" AND ", conditions)}" : "";
-            return (whereClause, paramDict);
+            // إذا لم تكن هناك شروط، إرجاع جميع الكتب (السلوك الافتراضي)
+            // If no conditions, return all books (default behavior)
+            var whereClause = conditions.Count > 0 ? $"WHERE {string.Join(" AND ", conditions)}" : "";
+
+            // إنشاء كائن مجهول بالمعاملات المطلوبة فقط
+            // Create anonymous object with only required parameters
+            var parameters = new
+            {
+                SearchTerm = searchTerm,
+                Title = title,
+                Author = author,
+                ISBN = isbn,
+                Genre = genre
+            };
+
+            // تسجيل تفاصيل إضافية للتشخيص
+            // Additional logging for debugging
+            Console.WriteLine($"DEBUG: WHERE clause: '{whereClause}'");
+            Console.WriteLine($"DEBUG: Parameters - SearchTerm: {searchTerm}, Title: {title}, Author: {author}, ISBN: {isbn}, Genre: {genre}");
+
+            return (whereClause, parameters);
         }
 
         /// <summary>

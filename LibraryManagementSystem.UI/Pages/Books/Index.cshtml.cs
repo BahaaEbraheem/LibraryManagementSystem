@@ -86,8 +86,8 @@ namespace LibraryManagementSystem.UI.Pages.Books
                     "Searching books with criteria: SearchTerm={SearchTerm}, Genre={Genre}, AvailableOnly={AvailableOnly}",
                     searchTerm, genre, availableOnly, searchTerm, genre, availableOnly);
 
-                // تنفيذ البحث
-                // Execute search
+                // تنفيذ البحث (سيعرض جميع الكتب إذا لم تكن هناك معايير بحث)
+                // Execute search (will show all books if no search criteria)
                 var searchResult = await _bookService.SearchBooksAsync(SearchCriteria);
 
                 if (searchResult.IsSuccess)
@@ -96,14 +96,20 @@ namespace LibraryManagementSystem.UI.Pages.Books
 
                     // تسجيل النتائج
                     // Log results
-                    _logger.LogInformation("تم العثور على {Count} كتاب من أصل {Total} - Found books out of",
+                    _logger.LogInformation("تم العثور على {Count} كتاب من أصل - Found {Count} books out of ",
                         SearchResults!.Items.Count(), SearchResults.TotalCount);
 
-                    // إضافة رسالة معلوماتية إذا لم يتم العثور على نتائج
-                    // Add informational message if no results found
+                    // إضافة رسالة معلوماتية إذا لم يتم العثور على نتائج مع وجود معايير بحث
+                    // Add informational message if no results found with search criteria
                     if (SearchResults.TotalCount == 0 && HasSearchCriteria())
                     {
-                        TempData["InfoMessage"] = "لم يتم العثور على كتب تطابق معايير البحث المحددة. جرب تعديل معايير البحث.";
+                        TempData["InfoMessage"] = "لم يتم العثور على كتب تطابق معايير البحث المحددة. جرب تعديل معايير البحث أو استخدام كلمات مختلفة.";
+                    }
+                    else if (SearchResults.TotalCount > 0 && HasSearchCriteria())
+                    {
+                        // إضافة رسالة نجاح عند وجود معايير بحث
+                        // Add success message when search criteria exist
+                        TempData["SuccessMessage"] = $"تم العثور على {SearchResults.TotalCount} كتاب يطابق معايير البحث.";
                     }
                 }
                 else
@@ -176,21 +182,13 @@ namespace LibraryManagementSystem.UI.Pages.Books
                 // Redirect to GET with search criteria
                 var queryParams = new List<string>();
 
-                if (!string.IsNullOrWhiteSpace(SearchCriteria.Title))
-                    queryParams.Add($"title={Uri.EscapeDataString(SearchCriteria.Title)}");
-
-                if (!string.IsNullOrWhiteSpace(SearchCriteria.Author))
-                    queryParams.Add($"author={Uri.EscapeDataString(SearchCriteria.Author)}");
-
-                if (!string.IsNullOrWhiteSpace(SearchCriteria.ISBN))
-                    queryParams.Add($"isbn={Uri.EscapeDataString(SearchCriteria.ISBN)}");
+                if (!string.IsNullOrWhiteSpace(SearchCriteria.SearchTerm))
+                    queryParams.Add($"searchTerm={Uri.EscapeDataString(SearchCriteria.SearchTerm)}");
 
                 if (!string.IsNullOrWhiteSpace(SearchCriteria.Genre))
                     queryParams.Add($"genre={Uri.EscapeDataString(SearchCriteria.Genre)}");
 
-                if (SearchCriteria.IsAvailable.HasValue)
-                    queryParams.Add($"isAvailable={SearchCriteria.IsAvailable.Value}");
-
+                queryParams.Add($"availableOnly={SearchCriteria.AvailableOnly}");
                 queryParams.Add($"pageNumber={SearchCriteria.PageNumber}");
                 queryParams.Add($"pageSize={SearchCriteria.PageSize}");
                 queryParams.Add($"sortBy={SearchCriteria.SortBy}");
@@ -198,7 +196,6 @@ namespace LibraryManagementSystem.UI.Pages.Books
 
                 var queryString = string.Join("&", queryParams);
                 var redirectUrl = $"/Books?{queryString}";
-
                 return Redirect(redirectUrl);
             }
             catch (Exception ex)
@@ -256,6 +253,22 @@ namespace LibraryManagementSystem.UI.Pages.Books
             return !string.IsNullOrWhiteSpace(SearchCriteria.SearchTerm) ||
                    !string.IsNullOrWhiteSpace(SearchCriteria.Genre) ||
                    SearchCriteria.AvailableOnly;
+        }
+
+        /// <summary>
+        /// التحقق من وجود معايير بحث صالحة
+        /// Check if valid search criteria exist
+        /// </summary>
+        /// <returns>true إذا كانت هناك معايير بحث صالحة</returns>
+        private bool HasValidSearchCriteria()
+        {
+            return (!string.IsNullOrWhiteSpace(SearchCriteria.SearchTerm) && SearchCriteria.SearchTerm.Trim().Length >= 2) ||
+                   (!string.IsNullOrWhiteSpace(SearchCriteria.Title) && SearchCriteria.Title.Trim().Length >= 2) ||
+                   (!string.IsNullOrWhiteSpace(SearchCriteria.Author) && SearchCriteria.Author.Trim().Length >= 2) ||
+                   (!string.IsNullOrWhiteSpace(SearchCriteria.ISBN) && SearchCriteria.ISBN.Trim().Length >= 3) ||
+                   !string.IsNullOrWhiteSpace(SearchCriteria.Genre) ||
+                   SearchCriteria.AvailableOnly ||
+                   SearchCriteria.IsAvailable.HasValue;
         }
 
         /// <summary>
