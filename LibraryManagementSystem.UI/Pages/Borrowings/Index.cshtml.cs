@@ -94,13 +94,13 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
                 // If user is not admin, show only their borrowings
                 if (!IsAdmin)
                 {
-                    var currentUserIdString = HttpContext.Session.GetString("UserId");
-                    _logger.LogDebug("Current user ID from session: {UserId}", currentUserIdString);
+                    var currentUserId = HttpContext.Session.GetInt32("UserId");
+                    _logger.LogDebug("Current user ID from session: {UserId}", currentUserId);
 
-                    if (int.TryParse(currentUserIdString, out int currentUserId))
+                    if (currentUserId.HasValue)
                     {
-                        UserId = currentUserId;
-                        _logger.LogDebug("Setting UserId to {UserId} for non-admin user", currentUserId);
+                        UserId = currentUserId.Value;
+                        _logger.LogDebug("Setting UserId to {UserId} for non-admin user", UserId);
                     }
                     else
                     {
@@ -108,6 +108,7 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
                         return RedirectToPage("/Auth/Login");
                     }
                 }
+
 
                 // الحصول على الإحصائيات (للمدير فقط أو للمستخدم الحالي)
                 // Get statistics (for admin only or for current user)
