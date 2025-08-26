@@ -1,0 +1,246 @@
+@page "{id:int}"
+@model LibraryManagementSystem.UI.Pages.Users.DetailsModel
+@{
+    ViewData["Title"] = "تفاصيل المستخدم - User Details";
+}
+
+<div class="container-fluid" dir="rtl">
+    <div class="row">
+        <div class="col-12">
+            <!-- رسائل التنبيه - Alert Messages -->
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    @Model.ErrorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    @Model.SuccessMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (Model.User != null)
+            {
+                <!-- معلومات المستخدم الأساسية - Basic User Information -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-user me-2"></i>
+                            معلومات المستخدم - User Information
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td class="fw-bold">الاسم الكامل - Full Name:</td>
+                                        <td>@Model.User.FullName</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">البريد الإلكتروني - Email:</td>
+                                        <td>@Model.User.Email</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">رقم الهاتف - Phone:</td>
+                                        <td>@(Model.User.PhoneNumber ?? "غير محدد - Not specified")</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">العنوان - Address:</td>
+                                        <td>@(Model.User.Address ?? "غير محدد - Not specified")</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td class="fw-bold">تاريخ الانضمام - Membership Date:</td>
+                                        <td>@Model.User.MembershipDate.ToString("dd/MM/yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">الدور - Role:</td>
+                                        <td>
+                                            <span class="badge @(Model.User.Role.ToString() == "Administrator" ? "bg-danger" : "bg-info")">
+                                                @(Model.User.Role.ToString() == "Administrator" ? "مدير - Administrator" : "مستخدم - User")
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">الحالة - Status:</td>
+                                        <td>
+                                            <span class="badge @(Model.User.IsActive ? "bg-success" : "bg-secondary")">
+                                                @(Model.User.IsActive ? "نشط - Active" : "غير نشط - Inactive")
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">معرف المستخدم - User ID:</td>
+                                        <td>@Model.User.UserId</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- إحصائيات الاستعارة - Borrowing Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h4 class="card-title">@Model.TotalBorrowings</h4>
+                                <p class="card-text">إجمالي الاستعارات - Total Borrowings</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <h4 class="card-title">@(Model.ActiveBorrowings?.Count() ?? 0)</h4>
+                                <p class="card-text">استعارات نشطة - Active Borrowings</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-dark">
+                            <div class="card-body text-center">
+                                <h4 class="card-title">@Model.OverdueBooks</h4>
+                                <p class="card-text">كتب متأخرة - Overdue Books</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body text-center">
+                                <h4 class="card-title">@Model.TotalLateFees.ToString("C")</h4>
+                                <p class="card-text">رسوم التأخير - Late Fees</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الاستعارات النشطة - Active Borrowings -->
+                @if (Model.ActiveBorrowings != null && Model.ActiveBorrowings.Any())
+                {
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="card-title mb-0">
+                                <i class="fas fa-book-reader me-2"></i>
+                                الاستعارات النشطة - Active Borrowings
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>الكتاب - Book</th>
+                                            <th>تاريخ الاستعارة - Borrow Date</th>
+                                            <th>تاريخ الاستحقاق - Due Date</th>
+                                            <th>الحالة - Status</th>
+                                            <th>الرسوم - Fees</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var borrowing in Model.ActiveBorrowings)
+                                        {
+                                            <tr class="@(borrowing.IsOverdue ? "table-warning" : "")">
+                                                <td>
+                                                    <strong>@borrowing.Book?.Title</strong>
+                                                    <br><small class="text-muted">@borrowing.Book?.Author</small>
+                                                </td>
+                                                <td>@borrowing.BorrowDate.ToString("dd/MM/yyyy")</td>
+                                                <td>
+                                                    @borrowing.DueDate.ToString("dd/MM/yyyy")
+                                                    @if (borrowing.IsOverdue)
+                                                    {
+                                                        <br><small class="text-danger">متأخر @((DateTime.Now - borrowing.DueDate).Days) أيام</small>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (borrowing.IsOverdue)
+                                                    {
+                                                        <span class="badge bg-danger">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                                            متأخر - Overdue
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-primary">
+                                                            <i class="fas fa-clock me-1"></i>
+                                                            نشط - Active
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (borrowing.LateFee > 0)
+                                                    {
+                                                        <span class="text-danger fw-bold">@borrowing.LateFee.ToString("C")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">-</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- أزرار الإجراءات - Action Buttons -->
+                <div class="d-flex gap-2 mb-4">
+                    <a href="/Users" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        العودة للقائمة - Back to List
+                    </a>
+                    <a href="/Users/Edit/@Model.User.UserId" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i>
+                        تعديل - Edit
+                    </a>
+                    <a href="/Borrowings?userId=@Model.User.UserId" class="btn btn-info">
+                        <i class="fas fa-book-reader me-1"></i>
+                        عرض جميع الاستعارات - View All Borrowings
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">لم يتم العثور على المستخدم - User not found</h5>
+                    <a href="/Users" class="btn btn-primary mt-3">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        العودة للقائمة - Back to List
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.table-borderless td {
+    border: none;
+    padding: 0.5rem 0;
+}
+</style>

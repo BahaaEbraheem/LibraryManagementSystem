@@ -1,4 +1,5 @@
 using LibraryManagementSystem.BLL.Services;
+using LibraryManagementSystem.UI.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagementSystem.UI.Controllers
@@ -28,6 +29,7 @@ namespace LibraryManagementSystem.UI.Controllers
         /// Delete user
         /// </summary>
         [HttpPost("Delete/{id:int}")]
+        [JwtAdminOnly]
         public async Task<IActionResult> Delete(int id)
         {
             try

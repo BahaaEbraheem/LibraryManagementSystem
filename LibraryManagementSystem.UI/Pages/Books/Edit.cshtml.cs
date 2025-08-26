@@ -1,6 +1,7 @@
 using LibraryManagementSystem.BLL.Services;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.Enums;
+using LibraryManagementSystem.UI.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
@@ -11,6 +12,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
     /// نموذج صفحة تعديل الكتاب
     /// Edit book page model
     /// </summary>
+    [AuthorizeRole(UserRole.Administrator)]
     public class EditModel : PageModel
     {
         private readonly IBookService _bookService;

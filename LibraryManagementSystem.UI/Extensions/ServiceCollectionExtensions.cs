@@ -64,8 +64,7 @@ namespace LibraryManagementSystem.UI.Extensions
         {
             // إضافة وسطاء معالجة الأخطاء العامة
             // Add global error handling middleware
-            // Temporarily commented out to fix DI issue
-            // app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+            app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
             return app;
         }

@@ -1,5 +1,7 @@
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Repositories;
+using LibraryManagementSystem.DAL.UnitOfWork;
+using LibraryManagementSystem.DAL.QueryOptimization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -11,6 +13,7 @@ namespace LibraryManagementSystem.BLL.Services
     /// </summary>
     public class BorrowingService : IBorrowingService
     {
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IBorrowingRepository _borrowingRepository;
         private readonly IBookRepository _bookRepository;
         private readonly IUserRepository _userRepository;
@@ -18,12 +21,14 @@ namespace LibraryManagementSystem.BLL.Services
         private readonly LibrarySettings _librarySettings;
 
         public BorrowingService(
+            IUnitOfWork unitOfWork,
             IBorrowingRepository borrowingRepository,
             IBookRepository bookRepository,
             IUserRepository userRepository,
             ILogger<BorrowingService> logger,
             IOptions<LibrarySettings> librarySettings)
         {
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _borrowingRepository = borrowingRepository ?? throw new ArgumentNullException(nameof(borrowingRepository));
             _bookRepository = bookRepository ?? throw new ArgumentNullException(nameof(bookRepository));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -37,6 +42,10 @@ namespace LibraryManagementSystem.BLL.Services
         /// </summary>
         public async Task<ServiceResult<int>> BorrowBookAsync(int userId, int bookId, int borrowingDays = 14)
         {
+            // استخدام Unit of Work للمعاملة
+            // Use Unit of Work for transaction
+            using var transaction = await _unitOfWork.BeginTransactionAsync();
+
             try
             {
                 _logger.LogDebug("بدء عملية استعارة الكتاب {BookId} للمستخدم {UserId} - Starting book borrowing for user",
@@ -66,17 +75,21 @@ namespace LibraryManagementSystem.BLL.Services
                     Notes = null
                 };
 
-                var borrowingId = await _borrowingRepository.AddAsync(borrowing);
+                var borrowingId = await _unitOfWork.Borrowings.AddAsync(borrowing);
 
                 // تقليل عدد النسخ المتاحة
                 // Decrease available copies
-                var updateCopiesResult = await _bookRepository.UpdateAvailableCopiesAsync(bookId, -1);
+                var updateCopiesResult = await _unitOfWork.Books.UpdateAvailableCopiesAsync(bookId, -1);
                 if (!updateCopiesResult)
                 {
                     _logger.LogWarning("فشل في تحديث النسخ المتاحة للكتاب {BookId} - Failed to update available copies for book", bookId);
-                    // يمكن إضافة منطق للتراجع عن الاستعارة هنا إذا لزم الأمر
-                    // Could add rollback logic here if needed
+                    await _unitOfWork.RollbackAsync();
+                    return ServiceResult<int>.Failure("فشل في تحديث النسخ المتاحة - Failed to update available copies");
                 }
+
+                // تأكيد المعاملة
+                // Commit transaction
+                await _unitOfWork.CommitAsync();
 
                 _logger.LogInformation("تم إنشاء استعارة جديدة بنجاح: {BorrowingId} للمستخدم {UserId} والكتاب {BookId} - Successfully created new borrowing for user and book",
                     borrowingId, userId, bookId);
@@ -87,6 +100,18 @@ namespace LibraryManagementSystem.BLL.Services
             {
                 _logger.LogError(ex, "خطأ في استعارة الكتاب {BookId} للمستخدم {UserId} - Error borrowing book for user",
                     bookId, userId);
+
+                // إلغاء المعاملة في حالة الخطأ
+                // Rollback transaction on error
+                try
+                {
+                    await _unitOfWork.RollbackAsync();
+                }
+                catch (Exception rollbackEx)
+                {
+                    _logger.LogError(rollbackEx, "خطأ في إلغاء المعاملة - Error rolling back transaction");
+                }
+
                 return ServiceResult<int>.Failure("حدث خطأ أثناء عملية الاستعارة - An error occurred during the borrowing process");
             }
         }
@@ -265,6 +290,30 @@ namespace LibraryManagementSystem.BLL.Services
             {
                 _logger.LogError(ex, "خطأ في الحصول على الاستعارات النشطة - Error getting active borrowings");
                 return ServiceResult<IEnumerable<Borrowing>>.Failure("حدث خطأ أثناء الحصول على الاستعارات النشطة - An error occurred while retrieving active borrowings");
+            }
+        }
+
+        /// <summary>
+        /// الحصول على جميع الاستعارات (نشطة ومرجعة)
+        /// Get all borrowings (active and returned)
+        /// </summary>
+        public async Task<ServiceResult<IEnumerable<Borrowing>>> GetAllBorrowingsAsync()
+        {
+            try
+            {
+                _logger.LogDebug("الحصول على جميع الاستعارات - Getting all borrowings");
+
+                var borrowings = await _borrowingRepository.GetAllAsync();
+
+                _logger.LogDebug("تم الحصول على {Count} استعارة - Retrieved borrowings",
+                    borrowings.Count());
+
+                return ServiceResult<IEnumerable<Borrowing>>.Success(borrowings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في الحصول على جميع الاستعارات - Error getting all borrowings");
+                return ServiceResult<IEnumerable<Borrowing>>.Failure("حدث خطأ أثناء الحصول على الاستعارات - An error occurred while retrieving borrowings");
             }
         }
 
