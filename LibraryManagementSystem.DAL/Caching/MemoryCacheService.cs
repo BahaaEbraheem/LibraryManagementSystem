@@ -90,7 +90,8 @@ namespace LibraryManagementSystem.DAL.Caching
                 {
                     AbsoluteExpirationRelativeToNow = cacheExpiration,
                     SlidingExpiration = TimeSpan.FromMinutes(5), // تجديد تلقائي عند الوصول - Auto-refresh on access
-                    Priority = CacheItemPriority.Normal
+                    Priority = CacheItemPriority.Normal,
+                    Size = 1 // Set size for cache entry when SizeLimit is configured
                 };
 
                 // تسجيل المفتاح لتتبع جميع المفاتيح المخزنة - Register key for tracking all stored keys

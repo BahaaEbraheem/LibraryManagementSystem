@@ -236,8 +236,20 @@
                     {
                         <div class="text-center py-5">
                             <i class="fas fa-book-reader fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">لا توجد استعارات - No borrowings found</h5>
-                            <p class="text-muted">لا توجد استعارات تطابق المعايير المحددة - No borrowings match the specified criteria</p>
+                            @if (Model.IsAdmin)
+                            {
+                                <h5 class="text-muted">لا توجد استعارات - No borrowings found</h5>
+                                <p class="text-muted">لا توجد استعارات تطابق المعايير المحددة - No borrowings match the specified criteria</p>
+                            }
+                            else
+                            {
+                                <h5 class="text-muted">لا توجد استعارات لديك حالياً - You have no borrowings currently</h5>
+                                <p class="text-muted">يمكنك استعارة الكتب من صفحة الكتب المتاحة - You can borrow books from the available books page</p>
+                                <a href="/Books/Index" class="btn btn-primary mt-3">
+                                    <i class="fas fa-book me-1"></i>
+                                    تصفح الكتب المتاحة - Browse Available Books
+                                </a>
+                            }
                         </div>
                     }
                 </div>

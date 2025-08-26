@@ -1,5 +1,6 @@
 using LibraryManagementSystem.BLL.Services;
 using LibraryManagementSystem.DAL.Models.DTOs;
+using LibraryManagementSystem.UI.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagementSystem.UI.Controllers
@@ -26,6 +27,7 @@ namespace LibraryManagementSystem.UI.Controllers
         /// Borrow a book
         /// </summary>
         [HttpPost("borrow")]
+        [JwtAuthenticatedOnly]
         public async Task<IActionResult> BorrowBook([FromBody] BorrowBookRequest request)
         {
             try
@@ -97,6 +99,56 @@ namespace LibraryManagementSystem.UI.Controllers
         }
 
         /// <summary>
+        /// إرجاع كتاب
+        /// Return a book
+        /// </summary>
+        [HttpPost("return")]
+        [JwtAuthenticatedOnly]
+        public async Task<IActionResult> ReturnBook([FromBody] ReturnBookRequest request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return BadRequest(new { success = false, message = "طلب غير صحيح - Invalid request" });
+                }
+
+                if (request.BorrowingId <= 0)
+                {
+                    return BadRequest(new { success = false, message = "معرف الاستعارة غير صحيح - Invalid borrowing ID" });
+                }
+
+                _logger.LogInformation("محاولة إرجاع الكتاب للاستعارة {BorrowingId} - Attempting to return book for borrowing",
+                    request.BorrowingId);
+
+                var result = await _borrowingService.ReturnBookAsync(request.BorrowingId, request.Notes);
+
+                if (result.IsSuccess)
+                {
+                    _logger.LogInformation("تم إرجاع الكتاب بنجاح للاستعارة {BorrowingId} - Successfully returned book for borrowing",
+                        request.BorrowingId);
+
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "تم إرجاع الكتاب بنجاح! - Book returned successfully!"
+                    });
+                }
+                else
+                {
+                    _logger.LogWarning("فشل في إرجاع الكتاب: {Error} - Failed to return book",
+                        result.ErrorMessage);
+                    return BadRequest(new { success = false, message = result.ErrorMessage });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في إرجاع الكتاب - Error returning book");
+                return StatusCode(500, new { success = false, message = "حدث خطأ في الخادم - Server error occurred" });
+            }
+        }
+
+        /// <summary>
         /// التحقق من إمكانية استعارة كتاب
         /// Check if a book can be borrowed
         /// </summary>
@@ -151,5 +203,18 @@ namespace LibraryManagementSystem.UI.Controllers
 
         /// <summary>عدد أيام الاستعارة - Borrowing days</summary>
         public int BorrowingDays { get; set; } = 14;
+    }
+
+    /// <summary>
+    /// طلب إرجاع كتاب
+    /// Return book request
+    /// </summary>
+    public class ReturnBookRequest
+    {
+        /// <summary>معرف الاستعارة - Borrowing ID</summary>
+        public int BorrowingId { get; set; }
+
+        /// <summary>ملاحظات - Notes</summary>
+        public string? Notes { get; set; }
     }
 }

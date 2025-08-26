@@ -48,6 +48,12 @@ namespace LibraryManagementSystem.UI.Pages.Books
         public string? ErrorMessage { get; set; }
 
         /// <summary>
+        /// هل المستخدم الحالي مدير
+        /// Whether the current user is an admin
+        /// </summary>
+        public bool IsAdmin { get; set; }
+
+        /// <summary>
         /// رسالة النجاح
         /// Success message
         /// </summary>
@@ -62,12 +68,16 @@ namespace LibraryManagementSystem.UI.Pages.Books
             string? genre,
             bool availableOnly = false,
             int pageNumber = 1,
-            int pageSize = 12,
+            int pageSize = 10,
             string sortBy = "Title",
             bool sortDescending = false)
         {
             try
             {
+                // التحقق من دور المستخدم
+                // Check user role
+                IsAdmin = HttpContext.Session.GetString("UserRole") == "Administrator";
+
                 // تعيين معايير البحث
                 // Set search criteria
                 SearchCriteria = new BookSearchDto
@@ -76,7 +86,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
                     Genre = genre,
                     AvailableOnly = availableOnly,
                     PageNumber = Math.Max(1, pageNumber),
-                    PageSize = Math.Max(1, Math.Min(50, pageSize)), // الحد الأقصى 50 عنصر في الصفحة
+                    PageSize = Math.Max(1, Math.Min(50, pageSize)), // الحد الأقصى 50 عنصر في الصفحة، افتراضي 10
                     SortBy = sortBy,
                     SortDescending = sortDescending
                 };

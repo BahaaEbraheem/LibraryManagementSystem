@@ -1,0 +1,205 @@
+@page
+@model LibraryManagementSystem.UI.Pages.Books.CreateModel
+@{
+    ViewData["Title"] = "إضافة كتاب جديد - Add New Book";
+}
+
+<div class="container-fluid" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-plus me-2"></i>
+                        إضافة كتاب جديد - Add New Book
+                    </h3>
+                    <a href="/Books" class="btn btn-light btn-sm">
+                        <i class="fas fa-arrow-right me-1"></i>
+                        العودة للقائمة - Back to List
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- رسائل التنبيه - Alert Messages -->
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            يرجى تصحيح الأخطاء التالية - Please correct the following errors:
+                            <ul class="mb-0 mt-2">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <form method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <!-- معلومات أساسية - Basic Information -->
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    المعلومات الأساسية - Basic Information
+                                </h5>
+
+                                <div class="mb-3">
+                                    <label asp-for="Input.Title" class="form-label">
+                                        <i class="fas fa-book me-1"></i>
+                                        @Html.DisplayNameFor(m => m.Input.Title) <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="Input.Title" class="form-control" placeholder="أدخل عنوان الكتاب..." />
+                                    <span asp-validation-for="Input.Title" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Input.Author" class="form-label">
+                                        <i class="fas fa-user me-1"></i>
+                                        @Html.DisplayNameFor(m => m.Input.Author) <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="Input.Author" class="form-control" placeholder="أدخل اسم المؤلف..." />
+                                    <span asp-validation-for="Input.Author" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Input.ISBN" class="form-label">
+                                        <i class="fas fa-barcode me-1"></i>
+                                        @Html.DisplayNameFor(m => m.Input.ISBN) <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="Input.ISBN" class="form-control" placeholder="أدخل الرقم المعياري الدولي..." />
+                                    <span asp-validation-for="Input.ISBN" class="text-danger"></span>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        الرقم المعياري الدولي للكتاب (10 أو 13 رقم)
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Input.Publisher" class="form-label">
+                                        <i class="fas fa-building me-1"></i>
+                                        @Html.DisplayNameFor(m => m.Input.Publisher)
+                                    </label>
+                                    <input asp-for="Input.Publisher" class="form-control" placeholder="أدخل اسم الناشر..." />
+                                    <span asp-validation-for="Input.Publisher" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <!-- تفاصيل إضافية - Additional Details -->
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-cogs me-2"></i>
+                                    التفاصيل الإضافية - Additional Details
+                                </h5>
+
+                                <div class="mb-3">
+                                    <label asp-for="Input.PublicationYear" class="form-label">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        @Html.DisplayNameFor(m => m.Input.PublicationYear) <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="Input.PublicationYear" type="number" class="form-control" min="1000" max="2100" />
+                                    <span asp-validation-for="Input.PublicationYear" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Input.Genre" class="form-label">
+                                        <i class="fas fa-tags me-1"></i>
+                                        @Html.DisplayNameFor(m => m.Input.Genre)
+                                    </label>
+                                    <select asp-for="Input.Genre" class="form-select">
+                                        <option value="">اختر نوع الكتاب - Select Genre</option>
+                                        <option value="أدب">أدب - Literature</option>
+                                        <option value="رواية">رواية - Novel</option>
+                                        <option value="خيال علمي">خيال علمي - Science Fiction</option>
+                                        <option value="تاريخ">تاريخ - History</option>
+                                        <option value="فكر">فكر - Philosophy</option>
+                                        <option value="سيرة ذاتية">سيرة ذاتية - Biography</option>
+                                        <option value="قصص قصيرة">قصص قصيرة - Short Stories</option>
+                                        <option value="إثارة">إثارة - Thriller</option>
+                                        <option value="علوم">علوم - Science</option>
+                                        <option value="تكنولوجيا">تكنولوجيا - Technology</option>
+                                        <option value="دين">دين - Religion</option>
+                                        <option value="طبخ">طبخ - Cooking</option>
+                                        <option value="رياضة">رياضة - Sports</option>
+                                        <option value="فن">فن - Art</option>
+                                        <option value="موسيقى">موسيقى - Music</option>
+                                    </select>
+                                    <span asp-validation-for="Input.Genre" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Input.TotalCopies" class="form-label">
+                                        <i class="fas fa-copy me-1"></i>
+                                        @Html.DisplayNameFor(m => m.Input.TotalCopies) <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="Input.TotalCopies" type="number" class="form-control" min="1" max="1000" />
+                                    <span asp-validation-for="Input.TotalCopies" class="text-danger"></span>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        عدد النسخ المتاحة في المكتبة
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- الوصف - Description -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label asp-for="Input.Description" class="form-label">
+                                        <i class="fas fa-align-left me-1"></i>
+                                        @Html.DisplayNameFor(m => m.Input.Description)
+                                    </label>
+                                    <textarea asp-for="Input.Description" class="form-control" rows="4" 
+                                              placeholder="أدخل وصف مختصر للكتاب..."></textarea>
+                                    <span asp-validation-for="Input.Description" class="text-danger"></span>
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        وصف مختصر عن محتوى الكتاب (اختياري)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- أزرار الإجراءات - Action Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <button type="submit" class="btn btn-success btn-lg">
+                                            <i class="fas fa-save me-2"></i>
+                                            حفظ الكتاب - Save Book
+                                        </button>
+                                        <button type="reset" class="btn btn-outline-secondary btn-lg ms-2">
+                                            <i class="fas fa-undo me-2"></i>
+                                            إعادة تعيين - Reset
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <a href="/Books" class="btn btn-outline-primary btn-lg">
+                                            <i class="fas fa-times me-2"></i>
+                                            إلغاء - Cancel
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

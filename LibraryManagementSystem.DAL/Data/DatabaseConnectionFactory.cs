@@ -37,6 +37,7 @@ namespace LibraryManagementSystem.DAL.Data
     {
         private readonly string _connectionString;
         private readonly ILogger<DatabaseConnectionFactory>? _logger;
+        private readonly DatabaseConnectionManager _connectionManager;
 
         /// <summary>
         /// منشئ الفئة مع سلسلة الاتصال
@@ -46,6 +47,8 @@ namespace LibraryManagementSystem.DAL.Data
         public DatabaseConnectionFactory(string connectionString)
         {
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+            _connectionManager = new DatabaseConnectionManager(connectionString,
+                Microsoft.Extensions.Logging.Abstractions.NullLogger<DatabaseConnectionManager>.Instance);
         }
 
         /// <summary>
@@ -58,6 +61,8 @@ namespace LibraryManagementSystem.DAL.Data
         {
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
             _logger = logger;
+            _connectionManager = new DatabaseConnectionManager(connectionString,
+                new LoggerAdapter<DatabaseConnectionManager>(logger));
         }
 
         /// <summary>
@@ -77,29 +82,31 @@ namespace LibraryManagementSystem.DAL.Data
         /// </summary>
         public async Task<IDbConnection> CreateConnectionAsync()
         {
-            // دائماً تحقق من وجود قاعدة البيانات أولاً
-            Console.WriteLine("Checking database existence...");
-            await EnsureDatabaseExistsAsync();
-
-            Console.WriteLine("Connecting to database...");
-            var connection = new SqlConnection(_connectionString);
-
             try
             {
-                await connection.OpenAsync();
-                Console.WriteLine("Connected successfully!");
+                // دائماً تحقق من وجود قاعدة البيانات أولاً
+                Console.WriteLine("Checking database existence...");
+                await EnsureDatabaseExistsAsync();
+
+                Console.WriteLine("Connecting to database with retry logic...");
+                var connection = await _connectionManager.CreateConnectionWithRetryAsync();
+
+                Console.WriteLine("Ensuring tables exist...");
+                await EnsureTablesExistAsync(connection);
+
+                Console.WriteLine("Database setup complete!");
+                return connection;
+            }
+            catch (DatabaseConnectionException ex)
+            {
+                _logger?.LogCritical(ex, "فشل في إنشاء اتصال قاعدة البيانات نهائياً - Failed to create database connection permanently");
+                throw;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to connect: {ex.Message}");
+                _logger?.LogError(ex, "خطأ غير متوقع في إنشاء اتصال قاعدة البيانات - Unexpected error creating database connection");
                 throw;
             }
-
-            Console.WriteLine("Ensuring tables exist...");
-            await EnsureTablesExistAsync(connection);
-
-            Console.WriteLine("Database setup complete!");
-            return connection;
         }
 
 
@@ -227,13 +234,9 @@ namespace LibraryManagementSystem.DAL.Data
                         );
                     END");
 
-                // Create basic indexes
-                await ExecuteSqlAsync(connection, @"
-                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Books_Title')
-                        CREATE NONCLUSTERED INDEX IX_Books_Title ON Books(Title);
-
-                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Users_Email')
-                        CREATE NONCLUSTERED INDEX IX_Users_Email ON Users(Email);");
+                // Create optimized indexes for better search performance
+                // إنشاء فهارس محسنة لتحسين أداء البحث
+                await CreateOptimizedIndexesAsync(connection);
 
                 //// Insert initial data if tables are empty
                 //await InsertInitialDataIfNeededAsync(connection);
@@ -245,7 +248,130 @@ namespace LibraryManagementSystem.DAL.Data
             }
         }
 
-    
+
+
+        /// <summary>
+        /// إنشاء فهارس محسنة لتحسين أداء البحث
+        /// Create optimized indexes for better search performance
+        /// </summary>
+        private async Task CreateOptimizedIndexesAsync(IDbConnection connection)
+        {
+            try
+            {
+                Console.WriteLine("Creating optimized indexes...");
+
+                // فهرس لتحسين البحث بالعنوان
+                // Index for improving title search
+                await ExecuteSqlAsync(connection, @"
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Books_Title' AND object_id = OBJECT_ID('Books'))
+                    BEGIN
+                        CREATE NONCLUSTERED INDEX IX_Books_Title
+                        ON Books (Title)
+                        INCLUDE (Author, ISBN, AvailableCopies);
+                    END");
+
+                // فهرس لتحسين البحث بالمؤلف
+                // Index for improving author search
+                await ExecuteSqlAsync(connection, @"
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Books_Author' AND object_id = OBJECT_ID('Books'))
+                    BEGIN
+                        CREATE NONCLUSTERED INDEX IX_Books_Author
+                        ON Books (Author)
+                        INCLUDE (Title, ISBN, AvailableCopies);
+                    END");
+
+                // فهرس لتحسين البحث بالـ ISBN
+                // Index for improving ISBN search
+                await ExecuteSqlAsync(connection, @"
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Books_ISBN' AND object_id = OBJECT_ID('Books'))
+                    BEGIN
+                        CREATE NONCLUSTERED INDEX IX_Books_ISBN
+                        ON Books (ISBN)
+                        INCLUDE (Title, Author, AvailableCopies);
+                    END");
+
+                // فهرس مركب للبحث النصي
+                // Composite index for text search
+                await ExecuteSqlAsync(connection, @"
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Books_Search_Composite' AND object_id = OBJECT_ID('Books'))
+                    BEGIN
+                        CREATE NONCLUSTERED INDEX IX_Books_Search_Composite
+                        ON Books (Title, Author)
+                        INCLUDE (ISBN, Genre, AvailableCopies, TotalCopies);
+                    END");
+
+                // فهرس للكتب المتاحة
+                // Index for available books
+                await ExecuteSqlAsync(connection, @"
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Books_Available' AND object_id = OBJECT_ID('Books'))
+                    BEGIN
+                        CREATE NONCLUSTERED INDEX IX_Books_Available
+                        ON Books (AvailableCopies)
+                        WHERE AvailableCopies > 0
+                        INCLUDE (Title, Author, ISBN);
+                    END");
+
+                // فهرس للمستخدمين بالبريد الإلكتروني
+                // Index for users by email
+                await ExecuteSqlAsync(connection, @"
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Users_Email' AND object_id = OBJECT_ID('Users'))
+                    BEGIN
+                        CREATE NONCLUSTERED INDEX IX_Users_Email
+                        ON Users (Email)
+                        INCLUDE (FirstName, LastName, IsActive, Role);
+                    END");
+
+                // فهرس للمستخدمين النشطين
+                // Index for active users
+                await ExecuteSqlAsync(connection, @"
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Users_Active' AND object_id = OBJECT_ID('Users'))
+                    BEGIN
+                        CREATE NONCLUSTERED INDEX IX_Users_Active
+                        ON Users (IsActive, Role)
+                        INCLUDE (FirstName, LastName, Email);
+                    END");
+
+                // فهرس للاستعارات النشطة
+                // Index for active borrowings
+                await ExecuteSqlAsync(connection, @"
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Borrowings_Active' AND object_id = OBJECT_ID('Borrowings'))
+                    BEGIN
+                        CREATE NONCLUSTERED INDEX IX_Borrowings_Active
+                        ON Borrowings (IsReturned, DueDate)
+                        INCLUDE (UserId, BookId, BorrowDate, LateFee);
+                    END");
+
+                // فهرس للاستعارات حسب المستخدم
+                // Index for borrowings by user
+                await ExecuteSqlAsync(connection, @"
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Borrowings_User' AND object_id = OBJECT_ID('Borrowings'))
+                    BEGIN
+                        CREATE NONCLUSTERED INDEX IX_Borrowings_User
+                        ON Borrowings (UserId, IsReturned)
+                        INCLUDE (BookId, BorrowDate, DueDate, ReturnDate)
+                        WITH (FILLFACTOR = 85, PAD_INDEX = ON);
+                    END");
+
+                // فهرس للاستعارات حسب الكتاب
+                // Index for borrowings by book
+                await ExecuteSqlAsync(connection, @"
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Borrowings_Book' AND object_id = OBJECT_ID('Borrowings'))
+                    BEGIN
+                        CREATE NONCLUSTERED INDEX IX_Borrowings_Book
+                        ON Borrowings (BookId, IsReturned)
+                        INCLUDE (UserId, BorrowDate, DueDate, ReturnDate)
+                        WITH (FILLFACTOR = 85, PAD_INDEX = ON);
+                    END");
+
+                Console.WriteLine("Optimized indexes created successfully!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to create indexes: {ex.Message}");
+                // لا نرمي الاستثناء هنا لأن الفهارس ليست ضرورية لعمل التطبيق
+                // Don't throw exception here as indexes are not critical for app functionality
+            }
+        }
 
         private async Task ExecuteSqlAsync(IDbConnection connection, string sql)
         {
@@ -481,6 +607,41 @@ namespace LibraryManagementSystem.DAL.Data
 
 
         /// <summary>
+        /// تنفيذ استعلام وإرجاع مجموعة من النتائج
+        /// Execute query and return collection of results
+        /// </summary>
+        /// <typeparam name="T">نوع البيانات المطلوب إرجاعه</typeparam>
+        /// <param name="connection">اتصال قاعدة البيانات</param>
+        /// <param name="sql">استعلام SQL</param>
+        /// <param name="parameters">معاملات الاستعلام</param>
+        /// <param name="commandTimeout">مهلة الاستعلام بالثواني</param>
+        public static async Task<IEnumerable<T>> ExecuteQueryAsync<T>(IDbConnection connection, string sql, object? parameters = null, int? commandTimeout = null) where T : new()
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = sql;
+            if (commandTimeout.HasValue)
+            {
+                command.CommandTimeout = commandTimeout.Value;
+            }
+
+            if (parameters != null)
+            {
+                AddParameters(command, parameters);
+            }
+
+            var results = new List<T>();
+            using var reader = await ExecuteReaderAsync(connection, sql, parameters);
+
+            while (reader.Read())
+            {
+                var item = MapToObject<T>(reader);
+                results.Add(item);
+            }
+
+            return results;
+        }
+
+        /// <summary>
         /// تحويل قارئ البيانات إلى كائن باستخدام الانعكاس
         /// Maps a data reader to an object using reflection
         /// </summary>
@@ -512,5 +673,25 @@ namespace LibraryManagementSystem.DAL.Data
 
             return obj;
         }
+    }
+
+    /// <summary>
+    /// محول Logger لتحويل نوع Logger
+    /// Logger adapter to convert logger type
+    /// </summary>
+    /// <typeparam name="T">نوع Logger المطلوب</typeparam>
+    public class LoggerAdapter<T> : ILogger<T>
+    {
+        private readonly ILogger _logger;
+
+        public LoggerAdapter(ILogger logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => _logger.BeginScope(state);
+        public bool IsEnabled(LogLevel logLevel) => _logger.IsEnabled(logLevel);
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+            => _logger.Log(logLevel, eventId, state, exception, formatter);
     }
 }

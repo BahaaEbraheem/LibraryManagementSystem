@@ -19,8 +19,38 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    @if (Model.Users?.Any() == true)
+                    <!-- رسائل التنبيه - Alert Messages -->
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
                     {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @Model.SuccessMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (Model.Users?.Items?.Any() == true)
+                    {
+                        <!-- معلومات الصفحة - Page Information -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h5>قائمة المستخدمين - Users List</h5>
+                                <p class="text-muted">
+                                    عرض @Model.Users.Items.Count من أصل @Model.Users.TotalCount مستخدم
+                                    (الصفحة @Model.Users.PageNumber من @Model.Users.TotalPages)
+                                </p>
+                            </div>
+                        </div>
+
                         <div class="table-responsive">
                             <table class="table table-striped table-hover">
                                 <thead class="table-dark">
@@ -37,7 +67,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var user in Model.Users)
+                                    @foreach (var user in Model.Users.Items)
                                     {
                                         <tr>
                                             <td>@user.UserId</td>
@@ -69,7 +99,8 @@
                                                         <i class="fas fa-edit"></i>
                                                         تعديل - Edit
                                                     </a>
-                                                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete(@user.UserId)">
+                                                    <button type="button" class="btn btn-danger btn-sm"
+                                                        onclick="confirmDeleteUser(@user.UserId, '@user.FirstName @user.LastName')">
                                                         <i class="fas fa-trash"></i>
                                                         حذف - Delete
                                                     </button>
@@ -80,6 +111,37 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- التنقل بين الصفحات - Pagination -->
+                        @if (Model.Users.TotalPages > 1)
+                        {
+                            <nav class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    @if (Model.Users.HasPreviousPage)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@GetPageUrl(Model.Users.PageNumber - 1)">السابق</a>
+                                        </li>
+                                    }
+
+                                    @for (int i = Math.Max(1, Model.Users.PageNumber - 2);
+                                                                i <= Math.Min(Model.Users.TotalPages, Model.Users.PageNumber + 2);
+                                                                i++)
+                                    {
+                                        <li class="page-item @(i == Model.Users.PageNumber ? "active" : "")">
+                                            <a class="page-link" href="@GetPageUrl(i)">@i</a>
+                                        </li>
+                                    }
+
+                                    @if (Model.Users.HasNextPage)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@GetPageUrl(Model.Users.PageNumber + 1)">التالي</a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        }
                     }
                     else
                     {
@@ -94,27 +156,41 @@
     </div>
 </div>
 
-<script>
-function confirmDelete(userId) {
-    if (confirm('هل أنت متأكد من حذف هذا المستخدم؟ - Are you sure you want to delete this user?')) {
-        // إرسال طلب حذف
-        fetch(`/Users/Delete/${userId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                location.reload();
-            } else {
-                alert('فشل في حذف المستخدم - Failed to delete user');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('حدث خطأ أثناء الحذف - An error occurred during deletion');
-        });
+@functions {
+    private string GetPageUrl(int pageNumber)
+    {
+        return $"/Users?pageNumber={pageNumber}&pageSize={Model.PageSize}";
     }
 }
-</script>
+
+@section Scripts {
+    <script>
+        // تأكيد حذف المستخدم
+        // Confirm user deletion
+        function confirmDeleteUser(userId, userName) {
+            if (confirm(`هل أنت متأكد من حذف المستخدم: ${userName}؟\n\nهذا الإجراء لا يمكن التراجع عنه.\n\nAre you sure you want to delete the user: ${userName}?\n\nThis action cannot be undone.`)) {
+                // إرسال طلب حذف
+                fetch(`/Users/Delete/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('تم حذف المستخدم بنجاح - User deleted successfully');
+                            location.reload();
+                        } else {
+                            alert('فشل في حذف المستخدم: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('حدث خطأ أثناء حذف المستخدم - An error occurred while deleting the user');
+                    });
+            }
+        }
+    </script>
+}

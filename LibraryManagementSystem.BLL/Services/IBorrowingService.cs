@@ -46,6 +46,12 @@ namespace LibraryManagementSystem.BLL.Services
         Task<ServiceResult<IEnumerable<Borrowing>>> GetActiveBorrowingsAsync();
 
         /// <summary>
+        /// الحصول على جميع الاستعارات (نشطة ومرجعة)
+        /// Get all borrowings (active and returned)
+        /// </summary>
+        Task<ServiceResult<IEnumerable<Borrowing>>> GetAllBorrowingsAsync();
+
+        /// <summary>
         /// الحصول على استعارة بالمعرف
         /// Get borrowing by ID
         /// </summary>

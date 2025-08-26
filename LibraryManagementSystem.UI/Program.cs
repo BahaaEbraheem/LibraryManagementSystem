@@ -1,7 +1,11 @@
 ﻿using LibraryManagementSystem.BLL.Services;
+using LibraryManagementSystem.BLL.Validation;
 using LibraryManagementSystem.DAL.Caching;
 using LibraryManagementSystem.DAL.Data;
 using LibraryManagementSystem.DAL.Repositories;
+using LibraryManagementSystem.DAL.UnitOfWork;
+using LibraryManagementSystem.UI.Middleware;
+using LibraryManagementSystem.UI.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryManagementSystem.UI
@@ -61,10 +65,20 @@ namespace LibraryManagementSystem.UI
                 options.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute());
             });
 
-            // إضافة خدمات التخزين المؤقت
-            // Add caching services
-            services.AddMemoryCache();
+            // إضافة Controllers للـ API
+            // Add Controllers for API
+            services.AddControllers();
+
+            // إضافة خدمات التخزين المؤقت المتقدمة
+            // Add advanced caching services
+            services.AddMemoryCache(options =>
+            {
+                options.SizeLimit = 1000; // حد أقصى 1000 عنصر
+                options.CompactionPercentage = 0.25; // ضغط 25% عند الوصول للحد الأقصى
+            });
             services.AddScoped<ICacheService, MemoryCacheService>();
+            services.AddScoped<AdvancedCacheService>();
+            services.AddScoped<CacheInvalidationStrategies>();
 
             // إضافة خدمات قاعدة البيانات
             // Add database services
@@ -83,6 +97,10 @@ namespace LibraryManagementSystem.UI
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IBorrowingRepository, BorrowingRepository>();
 
+            // إضافة وحدة العمل
+            // Add Unit of Work
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             // إضافة خدمات منطق الأعمال
             // Add business logic services
             services.AddScoped<IBookService, BookService>();
@@ -90,6 +108,15 @@ namespace LibraryManagementSystem.UI
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
+
+            // إضافة خدمات التحقق من قواعد الأعمال
+            // Add business rule validation services
+            services.AddScoped<IBusinessRuleValidator, BusinessRuleValidator>();
+
+            // إضافة خدمات JWT
+            // Add JWT services
+            services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+            services.AddScoped<IJwtService, JwtService>();
 
             // إضافة إعدادات المكتبة
             // Add library settings
@@ -113,6 +140,14 @@ namespace LibraryManagementSystem.UI
             {
                 options.HeaderName = "X-CSRF-TOKEN";
             });
+
+            // إضافة معالجة الأخطاء العامة
+            // Add global error handling
+            services.AddGlobalErrorHandling();
+
+            // إضافة معالجة أخطاء قاعدة البيانات
+            // Add database error handling
+            services.AddDatabaseErrorHandling(connectionString);
         }
 
         /// <summary>
@@ -149,6 +184,10 @@ namespace LibraryManagementSystem.UI
         /// </summary>
         private static void ConfigurePipeline(WebApplication app)
         {
+            // تكوين معالجة الأخطاء العامة
+            // Configure global error handling
+            app.UseGlobalErrorHandling();
+
             // تكوين معالجة الأخطاء
             // Configure error handling
             if (!app.Environment.IsDevelopment())
@@ -184,6 +223,14 @@ namespace LibraryManagementSystem.UI
             // تكوين Razor Pages
             // Configure Razor Pages
             app.MapRazorPages();
+
+            // تكوين Controllers للـ API
+            // Configure Controllers for API
+            app.MapControllers();
+
+            // إضافة مراقبة الصحة
+            // Add health monitoring
+            app.UseHealthMonitoring();
 
             // الصفحة الافتراضية
             // Default page

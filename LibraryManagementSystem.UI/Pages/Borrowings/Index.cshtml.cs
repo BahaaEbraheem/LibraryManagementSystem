@@ -57,6 +57,12 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
         public int? UserId { get; set; }
 
         /// <summary>
+        /// هل المستخدم الحالي مدير
+        /// Whether the current user is an admin
+        /// </summary>
+        public bool IsAdmin { get; set; }
+
+        /// <summary>
         /// حالة الاستعارة للفلترة
         /// Borrowing status for filtering
         /// </summary>
@@ -80,8 +86,31 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
             {
                 _logger.LogDebug("تحميل صفحة إدارة الاستعارات - Loading borrowings management page");
 
-                // الحصول على الإحصائيات
-                // Get statistics
+                // التحقق من دور المستخدم
+                // Check user role
+                IsAdmin = HttpContext.Session.GetString("UserRole") == "Administrator";
+
+                // إذا لم يكن المستخدم مدير، عرض استعاراته فقط
+                // If user is not admin, show only their borrowings
+                if (!IsAdmin)
+                {
+                    var currentUserIdString = HttpContext.Session.GetString("UserId");
+                    _logger.LogDebug("Current user ID from session: {UserId}", currentUserIdString);
+
+                    if (int.TryParse(currentUserIdString, out int currentUserId))
+                    {
+                        UserId = currentUserId;
+                        _logger.LogDebug("Setting UserId to {UserId} for non-admin user", currentUserId);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("No valid user ID found in session, redirecting to login");
+                        return RedirectToPage("/Auth/Login");
+                    }
+                }
+
+                // الحصول على الإحصائيات (للمدير فقط أو للمستخدم الحالي)
+                // Get statistics (for admin only or for current user)
                 var statisticsResult = await _borrowingService.GetBorrowingStatisticsAsync();
                 if (statisticsResult.IsSuccess)
                 {
@@ -205,12 +234,16 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
                 {
                     // الحصول على استعارات مستخدم محدد
                     // Get borrowings for specific user
+                    _logger.LogDebug("Loading borrowings for user {UserId} with status {Status}", UserId.Value, Status ?? "all");
+
                     if (Status == "active")
                     {
                         result = await _borrowingService.GetUserActiveBorrowingsAsync(UserId.Value);
                     }
                     else
                     {
+                        // الحصول على جميع استعارات المستخدم (نشطة ومرجعة)
+                        // Get all user borrowings (active and returned)
                         result = await _borrowingService.GetUserBorrowingsAsync(UserId.Value);
                     }
                 }
@@ -222,13 +255,15 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
                     {
                         "active" => await _borrowingService.GetActiveBorrowingsAsync(),
                         "overdue" => await _borrowingService.GetOverdueBorrowingsAsync(),
-                        _ => await _borrowingService.GetActiveBorrowingsAsync() // افتراضي: الاستعارات النشطة
+                        "returned" => await _borrowingService.GetAllBorrowingsAsync(), // سنفلتر المرجعة لاحقاً
+                        _ => await _borrowingService.GetAllBorrowingsAsync() // افتراضي: جميع الاستعارات
                     };
                 }
 
                 if (result.IsSuccess && result.Data != null)
                 {
                     var borrowings = result.Data.ToList();
+                    _logger.LogDebug("Retrieved {Count} borrowings from service", borrowings.Count);
 
                     // فلترة الاستعارات المرجعة إذا كانت الحالة "returned"
                     // Filter returned borrowings if status is "returned"
@@ -237,6 +272,7 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
                         // هذا يتطلب إضافة دالة للحصول على الاستعارات المرجعة في الخدمة
                         // This requires adding a function to get returned borrowings in the service
                         borrowings = borrowings.Where(b => b.IsReturned).ToList();
+                        _logger.LogDebug("Filtered to {Count} returned borrowings", borrowings.Count);
                     }
 
                     // ترتيب النتائج
@@ -259,6 +295,11 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
                     if (!result.IsSuccess)
                     {
                         ErrorMessage = result.ErrorMessage ?? "حدث خطأ أثناء تحميل الاستعارات";
+                        _logger.LogWarning("Failed to load borrowings: {Error}", result.ErrorMessage);
+                    }
+                    else
+                    {
+                        _logger.LogDebug("No borrowings found for the current criteria");
                     }
                 }
             }
