@@ -7,6 +7,9 @@ using LibraryManagementSystem.DAL.UnitOfWork;
 using LibraryManagementSystem.UI.Middleware;
 using LibraryManagementSystem.UI.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace LibraryManagementSystem.UI
 {
@@ -88,6 +91,19 @@ namespace LibraryManagementSystem.UI
             services.AddScoped<IDatabaseConnectionFactory>(provider =>
                 new DatabaseConnectionFactory(connectionString));
 
+
+
+            // Read JWT section from configuration
+            var jwtSection = configuration.GetSection("JwtSettings");
+
+            // Register JwtSettings so it can be injected via IOptions<JwtSettings>
+            services.Configure<JwtSettings>(jwtSection);
+
+            // Optionally, bind to a local variable for immediate use
+            var jwtSettings = jwtSection.Get<JwtSettings>();
+
+
+
             // إضافة خدمة تهيئة قاعدة البيانات
             // Database initialization is handled by DatabaseConnectionFactory
 
@@ -123,6 +139,46 @@ namespace LibraryManagementSystem.UI
             // Add JWT services
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.AddScoped<IJwtService, JwtService>();
+
+
+
+
+            // Add Authentication
+            // Add Authentication
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             // إضافة إعدادات المكتبة
             // Add library settings
@@ -224,6 +280,7 @@ namespace LibraryManagementSystem.UI
 
             // التفويض
             // Authorization
+            app.UseAuthentication(); // ✅ Must be BEFORE UseAuthorization
             app.UseAuthorization();
 
             // تكوين Razor Pages

@@ -1,8 +1,9 @@
 using LibraryManagementSystem.DAL.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace LibraryManagementSystem.UI.Authorization
+namespace LibraryManagementSystem.BLL.Authorization
 {
 
 

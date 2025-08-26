@@ -1,3 +1,4 @@
+using LibraryManagementSystem.BLL.Authorization;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.DTOs;
 using LibraryManagementSystem.DAL.Repositories;
@@ -81,7 +82,7 @@ namespace LibraryManagementSystem.BLL.Services
                 return ServiceResult<Book>.Failure("حدث خطأ أثناء البحث عن الكتاب - An error occurred while searching for the book");
             }
         }
-
+        
         /// <summary>
         /// الحصول على كتاب بالرقم المعياري
         /// Get book by ISBN
@@ -182,7 +183,7 @@ namespace LibraryManagementSystem.BLL.Services
                 return ServiceResult<IEnumerable<Book>>.Failure("حدث خطأ أثناء الحصول على الكتب المتاحة - An error occurred while retrieving available books");
             }
         }
-
+        [JwtAdminOnly]
         /// <summary>
         /// إضافة كتاب جديد
         /// Add a new book
@@ -248,7 +249,7 @@ namespace LibraryManagementSystem.BLL.Services
         {
             return isbn.Length == 10 || isbn.Length == 13;
         }
-
+        [JwtAdminOnly]
         /// <summary>
         /// تحديث كتاب موجود
         /// Update an existing book
@@ -311,7 +312,7 @@ namespace LibraryManagementSystem.BLL.Services
                 return ServiceResult<bool>.Failure("حدث خطأ أثناء تحديث الكتاب - An error occurred while updating the book");
             }
         }
-
+        [JwtAdminOnly]
         /// <summary>
         /// حذف كتاب
         /// Delete a book
@@ -543,7 +544,7 @@ namespace LibraryManagementSystem.BLL.Services
 
             return errors.Any() ? ValidationResult.Invalid(errors) : ValidationResult.Valid();
         }
-
+        [JwtAdminOnly]
         /// <summary>
         /// إضافة كتاب جديد مع التحقق من الصلاحيات
         /// Add a new book with authorization check
@@ -579,7 +580,7 @@ namespace LibraryManagementSystem.BLL.Services
                 return ServiceResult<int>.Failure("حدث خطأ أثناء إضافة الكتاب");
             }
         }
-
+        [JwtAdminOnly]
         /// <summary>
         /// تحديث كتاب موجود مع التحقق من الصلاحيات
         /// Update an existing book with authorization check
@@ -615,7 +616,7 @@ namespace LibraryManagementSystem.BLL.Services
                 return ServiceResult<bool>.Failure("حدث خطأ أثناء تحديث الكتاب");
             }
         }
-
+        [JwtAdminOnly]
         /// <summary>
         /// حذف كتاب مع التحقق من الصلاحيات
         /// Delete a book with authorization check
