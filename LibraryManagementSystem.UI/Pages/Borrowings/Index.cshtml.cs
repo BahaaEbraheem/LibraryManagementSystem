@@ -57,6 +57,12 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
         public int? UserId { get; set; }
 
         /// <summary>
+        /// هل المستخدم الحالي مدير
+        /// Whether the current user is an admin
+        /// </summary>
+        public bool IsAdmin { get; set; }
+
+        /// <summary>
         /// حالة الاستعارة للفلترة
         /// Borrowing status for filtering
         /// </summary>
@@ -80,8 +86,27 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
             {
                 _logger.LogDebug("تحميل صفحة إدارة الاستعارات - Loading borrowings management page");
 
-                // الحصول على الإحصائيات
-                // Get statistics
+                // التحقق من دور المستخدم
+                // Check user role
+                IsAdmin = HttpContext.Session.GetString("UserRole") == "Administrator";
+
+                // إذا لم يكن المستخدم مدير، عرض استعاراته فقط
+                // If user is not admin, show only their borrowings
+                if (!IsAdmin)
+                {
+                    var currentUserIdString = HttpContext.Session.GetString("UserId");
+                    if (int.TryParse(currentUserIdString, out int currentUserId))
+                    {
+                        UserId = currentUserId;
+                    }
+                    else
+                    {
+                        return RedirectToPage("/Account/Login");
+                    }
+                }
+
+                // الحصول على الإحصائيات (للمدير فقط أو للمستخدم الحالي)
+                // Get statistics (for admin only or for current user)
                 var statisticsResult = await _borrowingService.GetBorrowingStatisticsAsync();
                 if (statisticsResult.IsSuccess)
                 {

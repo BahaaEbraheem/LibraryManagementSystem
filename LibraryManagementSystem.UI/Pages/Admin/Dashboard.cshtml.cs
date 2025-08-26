@@ -193,6 +193,7 @@ namespace LibraryManagementSystem.UI.Pages.Admin
         public int RegularUsers => TotalUsers - AdminUsers;
         public int UnavailableBooks => TotalBooks - AvailableBooks;
         public int BorrowedCopies => TotalCopies - AvailableCopies;
+        public int BorrowedCopiesFromBorrowings => ActiveBorrowings; // عدد النسخ المُعارة من إحصائيات الاستعارات
         public double BorrowingRate => TotalBooks > 0 ? (double)ActiveBorrowings / TotalBooks * 100 : 0;
         public double OverdueRate => ActiveBorrowings > 0 ? (double)OverdueBorrowings / ActiveBorrowings * 100 : 0;
     }

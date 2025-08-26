@@ -68,6 +68,16 @@ namespace LibraryManagementSystem.BLL.Services
 
                 var borrowingId = await _borrowingRepository.AddAsync(borrowing);
 
+                // تقليل عدد النسخ المتاحة
+                // Decrease available copies
+                var updateCopiesResult = await _bookRepository.UpdateAvailableCopiesAsync(bookId, -1);
+                if (!updateCopiesResult)
+                {
+                    _logger.LogWarning("فشل في تحديث النسخ المتاحة للكتاب {BookId} - Failed to update available copies for book", bookId);
+                    // يمكن إضافة منطق للتراجع عن الاستعارة هنا إذا لزم الأمر
+                    // Could add rollback logic here if needed
+                }
+
                 _logger.LogInformation("تم إنشاء استعارة جديدة بنجاح: {BorrowingId} للمستخدم {UserId} والكتاب {BookId} - Successfully created new borrowing for user and book",
                     borrowingId, userId, bookId);
 
@@ -121,6 +131,14 @@ namespace LibraryManagementSystem.BLL.Services
 
                 if (success)
                 {
+                    // زيادة عدد النسخ المتاحة
+                    // Increase available copies
+                    var updateCopiesResult = await _bookRepository.UpdateAvailableCopiesAsync(borrowing.BookId, 1);
+                    if (!updateCopiesResult)
+                    {
+                        _logger.LogWarning("فشل في تحديث النسخ المتاحة للكتاب {BookId} عند الإرجاع - Failed to update available copies for book on return", borrowing.BookId);
+                    }
+
                     _logger.LogInformation("تم إرجاع الكتاب بنجاح للاستعارة {BorrowingId} برسوم تأخير {LateFee} - Successfully returned book for borrowing with late fee",
                         borrowingId, lateFee);
                 }

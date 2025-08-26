@@ -1,7 +1,7 @@
 @page
 @model LibraryManagementSystem.UI.Pages.Borrowings.IndexModel
 @{
-    ViewData["Title"] = "إدارة الاستعارات - Manage Borrowings";
+    ViewData["Title"] = Model.IsAdmin ? "إدارة الاستعارات - Manage Borrowings" : "استعاراتي - My Borrowings";
 }
 
 @* Anti-forgery token for AJAX requests *@
@@ -14,7 +14,14 @@
                 <div class="card-header bg-success text-white">
                     <h3 class="card-title mb-0">
                         <i class="fas fa-book-reader me-2"></i>
-                        إدارة الاستعارات - Manage Borrowings
+                        @if (Model.IsAdmin)
+                        {
+                            <span>إدارة الاستعارات - Manage Borrowings</span>
+                        }
+                        else
+                        {
+                            <span>استعاراتي - My Borrowings</span>
+                        }
                     </h3>
                 </div>
                 <div class="card-body">
@@ -40,11 +47,14 @@
                     <!-- فلاتر البحث - Search Filters -->
                     <form method="get" class="mb-4">
                         <div class="row g-3">
-                            <div class="col-md-3">
-                                <label for="userId" class="form-label">معرف المستخدم - User ID</label>
-                                <input type="number" class="form-control" id="userId" name="userId" 
-                                       value="@Model.UserId" placeholder="ادخل معرف المستخدم">
-                            </div>
+                            @if (Model.IsAdmin)
+                            {
+                                <div class="col-md-3">
+                                    <label for="userId" class="form-label">معرف المستخدم - User ID</label>
+                                    <input type="number" class="form-control" id="userId" name="userId"
+                                           value="@Model.UserId" placeholder="ادخل معرف المستخدم">
+                                </div>
+                            }
                             <div class="col-md-3">
                                 <label for="status" class="form-label">حالة الاستعارة - Status</label>
                                 <select class="form-select" id="status" name="status">

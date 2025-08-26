@@ -17,7 +17,8 @@
                     </h1>
                     @if (Model.CurrentUser != null)
                     {
-                        <p class="text-muted mb-0">مرحباً، @Model.CurrentUser.FullName - Welcome, @Model.CurrentUser.FullName</p>
+                        <p class="text-muted mb-0">مرحباً، @Model.CurrentUser.FullName - Welcome,
+                            @Model.CurrentUser.FullName</p>
                     }
                 </div>
                 <div>
@@ -253,7 +254,7 @@
                                 </div>
                             </div>
                             <div class="col-6">
-                                <div class="h5 font-weight-bold text-info">@Model.Statistics.BorrowedCopies</div>
+                                <div class="h5 font-weight-bold text-info">@Model.Statistics.ActiveBorrowings</div>
                                 <div class="text-xs text-uppercase text-muted">نسخ مُعارة - Borrowed</div>
                             </div>
                         </div>
@@ -261,12 +262,14 @@
                         <div class="row text-center">
                             <div class="col-6">
                                 <div class="border-right">
-                                    <div class="h5 font-weight-bold text-primary">@Model.Statistics.BorrowingRate.ToString("F1")%</div>
+                                    <div class="h5 font-weight-bold text-primary">
+                                        @Model.Statistics.BorrowingRate.ToString("F1")%</div>
                                     <div class="text-xs text-uppercase text-muted">معدل الاستعارة - Borrowing Rate</div>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <div class="h5 font-weight-bold text-danger">@Model.Statistics.OverdueRate.ToString("F1")%</div>
+                                <div class="h5 font-weight-bold text-danger">@Model.Statistics.OverdueRate.ToString("F1")%
+                                </div>
                                 <div class="text-xs text-uppercase text-muted">معدل التأخير - Overdue Rate</div>
                             </div>
                         </div>
@@ -285,35 +288,35 @@
 </div>
 
 <style>
-.border-left-primary {
-    border-left: 0.25rem solid #4e73df !important;
-}
+    .border-left-primary {
+        border-left: 0.25rem solid #4e73df !important;
+    }
 
-.border-left-success {
-    border-left: 0.25rem solid #1cc88a !important;
-}
+    .border-left-success {
+        border-left: 0.25rem solid #1cc88a !important;
+    }
 
-.border-left-info {
-    border-left: 0.25rem solid #36b9cc !important;
-}
+    .border-left-info {
+        border-left: 0.25rem solid #36b9cc !important;
+    }
 
-.border-left-warning {
-    border-left: 0.25rem solid #f6c23e !important;
-}
+    .border-left-warning {
+        border-left: 0.25rem solid #f6c23e !important;
+    }
 
-.btn-block {
-    display: block;
-    width: 100%;
-    padding: 1rem;
-    text-align: center;
-    border-radius: 0.5rem;
-}
+    .btn-block {
+        display: block;
+        width: 100%;
+        padding: 1rem;
+        text-align: center;
+        border-radius: 0.5rem;
+    }
 
-.card {
-    transition: transform 0.2s;
-}
+    .card {
+        transition: transform 0.2s;
+    }
 
-.card:hover {
-    transform: translateY(-2px);
-}
+    .card:hover {
+        transform: translateY(-2px);
+    }
 </style>
