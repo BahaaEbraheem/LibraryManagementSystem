@@ -695,7 +695,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                     statistics.OverdueBorrowings = reader.IsDBNull(reader.GetOrdinal("OverdueBorrowings")) ? 0 : reader.GetInt32(reader.GetOrdinal("OverdueBorrowings"));
                     statistics.ReturnedBorrowings = reader.IsDBNull(reader.GetOrdinal("ReturnedBorrowings")) ? 0 : reader.GetInt32(reader.GetOrdinal("ReturnedBorrowings"));
                     statistics.TotalLateFees = reader.IsDBNull(reader.GetOrdinal("TotalLateFees")) ? 0 : reader.GetDecimal(reader.GetOrdinal("TotalLateFees"));
-                    statistics.AverageBorrowingPeriod = reader.IsDBNull(reader.GetOrdinal("AverageBorrowingPeriod")) ? 0 : reader.GetDouble(reader.GetOrdinal("AverageBorrowingPeriod"));
+                    statistics.AverageBorrowingPeriod = reader.IsDBNull(reader.GetOrdinal("AverageBorrowingPeriod"))? 0: reader.GetInt32(reader.GetOrdinal("AverageBorrowingPeriod"));
                     statistics.BorrowingsThisMonth = reader.IsDBNull(reader.GetOrdinal("BorrowingsThisMonth")) ? 0 : reader.GetInt32(reader.GetOrdinal("BorrowingsThisMonth"));
                     statistics.ReturnsThisMonth = reader.IsDBNull(reader.GetOrdinal("ReturnsThisMonth")) ? 0 : reader.GetInt32(reader.GetOrdinal("ReturnsThisMonth"));
                 }
