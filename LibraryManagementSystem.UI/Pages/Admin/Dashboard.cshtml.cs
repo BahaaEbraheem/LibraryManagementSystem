@@ -133,7 +133,7 @@ namespace LibraryManagementSystem.UI.Pages.Admin
 
                 // إحصائيات الكتب
                 // Book statistics
-                var booksResult = await _bookService.SearchBooksAsync(new DAL.Models.DTOs.BookSearchDto { PageSize = int.MaxValue });
+                var booksResult = await _bookService.SearchBooksAsync(new DAL.Models.DTOs.BookSearchDto { PageSize = 100 });
                 if (booksResult.IsSuccess && booksResult.Data != null)
                 {
                     var books = booksResult.Data.Items.ToList();
@@ -141,6 +141,7 @@ namespace LibraryManagementSystem.UI.Pages.Admin
                     Statistics.AvailableBooks = books.Count(b => b.IsAvailable);
                     Statistics.TotalCopies = books.Sum(b => b.TotalCopies);
                     Statistics.AvailableCopies = books.Sum(b => b.AvailableCopies);
+
                 }
 
                 // إحصائيات الاستعارات

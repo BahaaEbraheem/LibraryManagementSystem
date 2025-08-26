@@ -58,6 +58,7 @@
                                         <th>الرقم - ID</th>
                                         <th>الاسم الكامل - Full Name</th>
                                         <th>البريد الإلكتروني - Email</th>
+                                        <th>هل هو مدير</th>
                                         <th>رقم الهاتف - Phone</th>
                                         <th>العنوان - Address</th>
                                         <th>تاريخ العضوية - Membership Date</th>
@@ -72,6 +73,9 @@
                                             <td>@user.UserId</td>
                                             <td>@user.FirstName @user.LastName</td>
                                             <td>@user.Email</td>
+                                            <td>
+                                                @(user.Role == DAL.Models.Enums.UserRole.Administrator ? "مدير" : "عضو عادي")
+                                            </td>
                                             <td>@user.PhoneNumber</td>
                                             <td>@user.Address</td>
                                             <td>@user.MembershipDate.ToString("yyyy-MM-dd")</td>
