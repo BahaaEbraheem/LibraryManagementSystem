@@ -53,7 +53,7 @@ namespace LibraryManagementSystem.BLL.Services
         {
             try
             {
-                _logger.LogDebug("إنشاء رمز JWT للمستخدم {UserId} - Generating JWT token for user {UserId}", user.UserId);
+                _logger.LogDebug("إنشاء رمز JWT للمستخدم {UserId} - Generating JWT token for user", user.UserId);
 
                 var claims = new List<Claim>
                 {
@@ -81,12 +81,12 @@ namespace LibraryManagementSystem.BLL.Services
                 var token = _tokenHandler.CreateToken(tokenDescriptor);
                 var tokenString = _tokenHandler.WriteToken(token);
 
-                _logger.LogDebug("تم إنشاء رمز JWT بنجاح للمستخدم {UserId} - JWT token generated successfully for user {UserId}", user.UserId);
+                _logger.LogDebug("تم إنشاء رمز JWT بنجاح للمستخدم {UserId} - JWT token generated successfully for user", user.UserId);
                 return tokenString;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في إنشاء رمز JWT للمستخدم {UserId} - Error generating JWT token for user {UserId}", user.UserId);
+                _logger.LogError(ex, "خطأ في إنشاء رمز JWT للمستخدم {UserId} - Error generating JWT token for user", user.UserId);
                 throw;
             }
         }
@@ -99,7 +99,7 @@ namespace LibraryManagementSystem.BLL.Services
         {
             try
             {
-                _logger.LogDebug("إنشاء رمز JWT للمستخدم {UserId} - Generating JWT token for user {UserId}", loggedInUser.UserId);
+                _logger.LogDebug("إنشاء رمز JWT للمستخدم {UserId} - Generating JWT token for user", loggedInUser.UserId);
 
                 var claims = new List<Claim>
                 {
@@ -127,12 +127,12 @@ namespace LibraryManagementSystem.BLL.Services
                 var token = _tokenHandler.CreateToken(tokenDescriptor);
                 var tokenString = _tokenHandler.WriteToken(token);
 
-                _logger.LogDebug("تم إنشاء رمز JWT بنجاح للمستخدم {UserId} - JWT token generated successfully for user {UserId}", loggedInUser.UserId);
+                _logger.LogDebug("تم إنشاء رمز JWT بنجاح للمستخدم {UserId} - JWT token generated successfully for user", loggedInUser.UserId);
                 return tokenString;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في إنشاء رمز JWT للمستخدم {UserId} - Error generating JWT token for user {UserId}", loggedInUser.UserId);
+                _logger.LogError(ex, "خطأ في إنشاء رمز JWT للمستخدم {UserId} - Error generating JWT token for user", loggedInUser.UserId);
                 throw;
             }
         }
@@ -316,7 +316,7 @@ namespace LibraryManagementSystem.BLL.Services
                 };
 
                 var newToken = GenerateToken(user);
-                _logger.LogDebug("تم تحديث رمز JWT بنجاح للمستخدم {UserId} - JWT token refreshed successfully for user {UserId}", userId);
+                _logger.LogDebug("تم تحديث رمز JWT بنجاح للمستخدم {UserId} - JWT token refreshed successfully for user", userId);
                 return newToken;
             }
             catch (Exception ex)

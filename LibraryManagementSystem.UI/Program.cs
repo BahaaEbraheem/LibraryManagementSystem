@@ -69,16 +69,16 @@ namespace LibraryManagementSystem.UI
             // Add Controllers for API
             services.AddControllers();
 
-            // إضافة خدمات التخزين المؤقت المتقدمة
-            // Add advanced caching services
+            // إضافة خدمات التخزين المؤقت
+            // Add caching services
             services.AddMemoryCache(options =>
             {
                 options.SizeLimit = 1000; // حد أقصى 1000 عنصر
                 options.CompactionPercentage = 0.25; // ضغط 25% عند الوصول للحد الأقصى
             });
+            services.AddMemoryCache(); // enables IMemoryCache
+
             services.AddScoped<ICacheService, MemoryCacheService>();
-            services.AddScoped<AdvancedCacheService>();
-            services.AddScoped<CacheInvalidationStrategies>();
 
             // إضافة خدمات قاعدة البيانات
             // Add database services
@@ -99,7 +99,13 @@ namespace LibraryManagementSystem.UI
 
             // إضافة وحدة العمل
             // Add Unit of Work
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUnitOfWork>(provider =>
+            {
+                var connectionFactory = provider.GetRequiredService<IDatabaseConnectionFactory>();
+                var logger = provider.GetRequiredService<ILogger<UnitOfWork>>();
+                var cacheService = provider.GetRequiredService<ICacheService>();
+                return new UnitOfWork(connectionFactory, logger, cacheService, provider);
+            });
 
             // إضافة خدمات منطق الأعمال
             // Add business logic services

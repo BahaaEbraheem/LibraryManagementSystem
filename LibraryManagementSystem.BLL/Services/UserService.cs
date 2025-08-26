@@ -13,11 +13,13 @@ namespace LibraryManagementSystem.BLL.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<UserService> _logger;
 
-        public UserService(IUserRepository userRepository, ILogger<UserService> logger)
+        public UserService(IUserRepository userRepository, IAuthorizationService authorizationService, ILogger<UserService> logger)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _authorizationService = authorizationService ?? throw new ArgumentNullException(nameof(authorizationService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -31,7 +33,7 @@ namespace LibraryManagementSystem.BLL.Services
             {
                 _logger.LogDebug("الحصول على جميع المستخدمين - Getting all users");
                 var users = await _userRepository.GetAllAsync();
-                _logger.LogDebug("تم الحصول على {Count} مستخدم - Retrieved  users", users.Count());
+                _logger.LogDebug("تم الحصول على {Count} مستخدم - Retrieved users", users.Count());
                 return users;
             }
             catch (Exception ex)
@@ -143,7 +145,7 @@ namespace LibraryManagementSystem.BLL.Services
 
                 _logger.LogDebug("البحث عن المستخدمين بالمصطلح: {SearchTerm} - Searching users with term", searchTerm);
                 var users = await _userRepository.SearchUsersAsync(searchTerm);
-                _logger.LogDebug("تم العثور على {Count} مستخدم - Found  users", users.Count());
+                _logger.LogDebug("تم العثور على {Count} مستخدم - Found users", users.Count());
                 return users;
             }
             catch (Exception ex)
@@ -445,6 +447,43 @@ namespace LibraryManagementSystem.BLL.Services
             catch
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// حذف مستخدم مع التحقق من الصلاحيات
+        /// Delete a user with authorization check
+        /// </summary>
+        public async Task<ServiceResult<bool>> DeleteUserAsync(int id, int currentUserId)
+        {
+            try
+            {
+                _logger.LogDebug("التحقق من صلاحية حذف مستخدم للمستخدم {UserId} - Checking user deletion permission for user", currentUserId);
+
+                // التحقق من الصلاحيات
+                // Check permissions
+                var permissionResult = await _authorizationService.CanManageUsersAsync(currentUserId);
+                if (!permissionResult.IsSuccess || !permissionResult.Data)
+                {
+                    _logger.LogWarning("المستخدم {UserId} ليس لديه صلاحية حذف المستخدمين - User does not have permission to delete users", currentUserId);
+                    return ServiceResult<bool>.Failure("ليس لديك صلاحية لحذف المستخدمين - You don't have permission to delete users");
+                }
+
+                // التحقق من عدم حذف المستخدم لنفسه
+                // Check not deleting self
+                if (id == currentUserId)
+                {
+                    return ServiceResult<bool>.Failure("لا يمكنك حذف حسابك الخاص - You cannot delete your own account");
+                }
+
+                // حذف المستخدم
+                // Delete the user
+                return await DeleteUserAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في حذف مستخدم مع التحقق من الصلاحيات للمستخدم {UserId} - Error deleting user with authorization check", currentUserId);
+                return ServiceResult<bool>.Failure("حدث خطأ أثناء حذف المستخدم - An error occurred while deleting the user");
             }
         }
     }

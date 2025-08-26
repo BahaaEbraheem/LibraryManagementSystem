@@ -98,11 +98,5 @@ namespace LibraryManagementSystem.DAL.Models
         /// Computed property for full name display
         /// </summary>
         public string FullName => $"{FirstName} {LastName}";
-
-        /// <summary>
-        /// خاصية محسوبة لوصف الدور
-        /// Computed property for role description
-        /// </summary>
-        public string RoleDescription => Role.GetDescription();
     }
 }

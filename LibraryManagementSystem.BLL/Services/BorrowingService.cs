@@ -1,7 +1,6 @@
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Repositories;
 using LibraryManagementSystem.DAL.UnitOfWork;
-using LibraryManagementSystem.DAL.QueryOptimization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

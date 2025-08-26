@@ -12,11 +12,13 @@ namespace LibraryManagementSystem.UI.Pages.Auth
     public class LoginModel : PageModel
     {
         private readonly IAuthenticationService _authenticationService;
+        private readonly IJwtService _jwtService;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(IAuthenticationService authenticationService, ILogger<LoginModel> logger)
+        public LoginModel(IAuthenticationService authenticationService, IJwtService jwtService, ILogger<LoginModel> logger)
         {
             _authenticationService = authenticationService ?? throw new ArgumentNullException(nameof(authenticationService));
+            _jwtService = jwtService ?? throw new ArgumentNullException(nameof(jwtService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -93,12 +95,33 @@ namespace LibraryManagementSystem.UI.Pages.Auth
 
                 if (result.IsSuccess && result.Data != null)
                 {
+                    var user = result.Data;
+
+                    // إنشاء رمز JWT
+                    // Generate JWT token
+                    var jwtToken = _jwtService.GenerateToken(user);
+
                     // حفظ بيانات المستخدم في الجلسة
                     // Save user data in session
-                    HttpContext.Session.SetInt32("UserId", result.Data.UserId);
-                    HttpContext.Session.SetString("UserName", result.Data.FullName);
-                    HttpContext.Session.SetString("UserEmail", result.Data.Email);
-                    HttpContext.Session.SetString("UserRole", result.Data.Role.ToString());
+                    HttpContext.Session.SetInt32("UserId", user.UserId);
+                    HttpContext.Session.SetString("UserName", user.FullName);
+                    HttpContext.Session.SetString("UserEmail", user.Email);
+                    HttpContext.Session.SetString("UserRole", user.Role.ToString());
+
+                    // حفظ JWT في الجلسة والكوكيز
+                    // Save JWT in session and cookies
+                    HttpContext.Session.SetString("jwt", jwtToken);
+
+                    // إضافة JWT كـ cookie (اختياري - للأمان أكثر)
+                    // Add JWT as cookie (optional - for better security)
+                    var cookieOptions = new CookieOptions
+                    {
+                        HttpOnly = true, // منع الوصول من JavaScript
+                        Secure = true,   // HTTPS فقط
+                        SameSite = SameSiteMode.Strict,
+                        Expires = DateTime.UtcNow.AddHours(1) // نفس مدة انتهاء JWT
+                    };
+                    Response.Cookies.Append("jwt", jwtToken, cookieOptions);
 
                     _logger.LogInformation("تم تسجيل الدخول بنجاح للمستخدم: {Email} - Successful login for user: {Email}",
                         LoginData.Email, LoginData.Email);

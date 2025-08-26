@@ -11,7 +11,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
     /// نموذج صفحة البحث عن الكتب
     /// Books search page model
     /// </summary>
-    public class IndexModel : PageModel
+    public class IndexModel : BasePageModel
     {
         private readonly IBookService _bookService;
         private readonly IBorrowingService _borrowingService;
@@ -21,7 +21,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
         /// منشئ نموذج الصفحة
         /// Page model constructor
         /// </summary>
-        public IndexModel(IBookService bookService, IBorrowingService borrowingService, ILogger<IndexModel> logger)
+        public IndexModel(IBookService bookService, IBorrowingService borrowingService, IJwtService jwtService, ILogger<IndexModel> logger) : base(jwtService)
         {
             _bookService = bookService ?? throw new ArgumentNullException(nameof(bookService));
             _borrowingService = borrowingService ?? throw new ArgumentNullException(nameof(borrowingService));
@@ -76,7 +76,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
             {
                 // التحقق من دور المستخدم
                 // Check user role
-                IsAdmin = HttpContext.Session.GetString("UserRole") == "Administrator";
+                IsAdmin = IsAdmin();
 
                 // تعيين معايير البحث
                 // Set search criteria
@@ -296,9 +296,9 @@ namespace LibraryManagementSystem.UI.Pages.Books
                     return RedirectToPage();
                 }
 
-                // الحصول على معرف المستخدم الحالي (مؤقتاً نستخدم معرف ثابت)
-                // Get current user ID (temporarily using fixed ID)
-                int userId = GetCurrentUserId();
+                // الحصول على معرف المستخدم الحالي من JWT
+                // Get current user ID from JWT
+                int userId = GetCurrentUserIdForBorrowing();
 
                 if (userId <= 0)
                 {
@@ -369,18 +369,73 @@ namespace LibraryManagementSystem.UI.Pages.Books
                 return RedirectToPage();
             }
         }
+        public async Task<IActionResult> OnPostDeleteBookAsync(int bookId)
+        {
+            try
+            {
+                if (bookId <= 0)
+                {
+                    TempData["ErrorMessage"] = "معرف الكتاب غير صحيح - Invalid book ID";
+                    return RedirectToPage();
+                }
+
+                int userId = GetCurrentUserIdForBorrowing();
+                if (userId <= 0)
+                {
+                    TempData["ErrorMessage"] = "يرجى تسجيل الدخول أولاً - Please login first";
+                    return RedirectToPage();
+                }
+
+                _logger.LogInformation("محاولة حذف الكتاب {BookId} من قبل المستخدم {UserId} - Attempting to delete book",
+                    bookId, userId);
+
+                // تنفيذ الحذف
+                var deleteResult = await _bookService.DeleteBookAsync(bookId, userId);
+
+                if (deleteResult.IsSuccess)
+                {
+                    _logger.LogInformation("تم حذف الكتاب بنجاح - Book deleted successfully. BookId: {BookId}", bookId);
+
+                    TempData["SuccessMessage"] = $"تم حذف الكتاب بنجاح! - Book deleted successfully!";
+
+                    // إعادة التوجيه مع الحفاظ على معايير البحث
+                    return RedirectToPage(new
+                    {
+                        searchTerm = SearchCriteria.SearchTerm,
+                        genre = SearchCriteria.Genre,
+                        availableOnly = SearchCriteria.AvailableOnly,
+                        pageNumber = SearchCriteria.PageNumber,
+                        pageSize = SearchCriteria.PageSize,
+                        sortBy = SearchCriteria.SortBy,
+                        sortDescending = SearchCriteria.SortDescending
+                    });
+                }
+                else
+                {
+                    _logger.LogWarning("فشل في حذف الكتاب: {Error} - Failed to delete book", deleteResult.ErrorMessage);
+                    TempData["ErrorMessage"] = deleteResult.ErrorMessage;
+                }
+
+                return RedirectToPage();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في حذف الكتاب {BookId} - Error deleting book", bookId);
+                TempData["ErrorMessage"] = "حدث خطأ في الخادم أثناء حذف الكتاب - Server error occurred while deleting book";
+                return RedirectToPage();
+            }
+        }
+
 
         /// <summary>
         /// الحصول على معرف المستخدم الحالي
         /// Get current user ID
         /// </summary>
         /// <returns>معرف المستخدم</returns>
-        private int GetCurrentUserId()
+        private int GetCurrentUserIdForBorrowing()
         {
-            // مؤقتاً نستخدم معرف ثابت، يجب تطوير نظام المصادقة
-            // Temporarily use fixed ID, authentication system needs to be developed
-            // TODO: Implement proper user authentication
-            return 1;
+            var userId = GetCurrentUserId();
+            return userId ?? 0;
         }
 
 

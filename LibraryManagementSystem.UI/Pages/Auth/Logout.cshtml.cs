@@ -67,6 +67,13 @@ namespace LibraryManagementSystem.UI.Pages.Auth
                 // Clear all session data
                 HttpContext.Session.Clear();
 
+                // مسح JWT cookie
+                // Clear JWT cookie
+                if (Request.Cookies.ContainsKey("jwt"))
+                {
+                    Response.Cookies.Delete("jwt");
+                }
+
                 _logger.LogInformation("تم تسجيل الخروج بنجاح للمستخدم: {Email} - Successful logout for user: {Email}",
                     userEmail ?? "Unknown", userEmail ?? "Unknown");
 

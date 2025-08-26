@@ -58,6 +58,12 @@ namespace LibraryManagementSystem.BLL.Services
         Task<ServiceResult<bool>> DeleteUserAsync(int id);
 
         /// <summary>
+        /// حذف مستخدم مع التحقق من الصلاحيات
+        /// Delete a user with authorization check
+        /// </summary>
+        Task<ServiceResult<bool>> DeleteUserAsync(int id, int currentUserId);
+
+        /// <summary>
         /// تفعيل أو إلغاء تفعيل مستخدم
         /// Activate or deactivate a user
         /// </summary>

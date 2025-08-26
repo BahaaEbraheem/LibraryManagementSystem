@@ -1,5 +1,7 @@
+using LibraryManagementSystem.DAL.Caching;
 using LibraryManagementSystem.DAL.Data;
 using LibraryManagementSystem.DAL.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Data;
 
@@ -13,6 +15,8 @@ namespace LibraryManagementSystem.DAL.UnitOfWork
     {
         private readonly IDatabaseConnectionFactory _connectionFactory;
         private readonly ILogger<UnitOfWork> _logger;
+        private readonly ICacheService _cacheService;
+        private readonly IServiceProvider _serviceProvider;
         private IDbConnection? _connection;
         private IDbTransaction? _transaction;
         private bool _disposed = false;
@@ -26,10 +30,16 @@ namespace LibraryManagementSystem.DAL.UnitOfWork
         /// منشئ وحدة العمل
         /// Unit of Work constructor
         /// </summary>
-        public UnitOfWork(IDatabaseConnectionFactory connectionFactory, ILogger<UnitOfWork> logger)
+        public UnitOfWork(
+            IDatabaseConnectionFactory connectionFactory,
+            ILogger<UnitOfWork> logger,
+            ICacheService cacheService,
+            IServiceProvider serviceProvider)
         {
             _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         /// <summary>
@@ -67,7 +77,8 @@ namespace LibraryManagementSystem.DAL.UnitOfWork
                 {
                     // إنشاء مستودع الكتب مع الاتصال المشترك
                     // Create books repository with shared connection
-                    _books = new BookRepository(_connectionFactory, null!, null!);
+                    var bookLogger = _serviceProvider.GetRequiredService<ILogger<BookRepository>>();
+                    _books = new BookRepository(_connectionFactory, _cacheService, bookLogger);
                     _logger.LogDebug("تم إنشاء مستودع الكتب - Created books repository");
                 }
                 return _books;
@@ -86,7 +97,8 @@ namespace LibraryManagementSystem.DAL.UnitOfWork
                 {
                     // إنشاء مستودع المستخدمين مع الاتصال المشترك
                     // Create users repository with shared connection
-                    _users = new UserRepository(_connectionFactory, null!, null!);
+                    var userLogger = _serviceProvider.GetRequiredService<ILogger<UserRepository>>();
+                    _users = new UserRepository(_connectionFactory, _cacheService, userLogger);
                     _logger.LogDebug("تم إنشاء مستودع المستخدمين - Created users repository");
                 }
                 return _users;
@@ -105,7 +117,8 @@ namespace LibraryManagementSystem.DAL.UnitOfWork
                 {
                     // إنشاء مستودع الاستعارات مع الاتصال المشترك
                     // Create borrowings repository with shared connection
-                    _borrowings = new BorrowingRepository(_connectionFactory, null!, null!);
+                    var borrowingLogger = _serviceProvider.GetRequiredService<ILogger<BorrowingRepository>>();
+                    _borrowings = new BorrowingRepository(_connectionFactory, _cacheService, borrowingLogger);
                     _logger.LogDebug("تم إنشاء مستودع الاستعارات - Created borrowings repository");
                 }
                 return _borrowings;
@@ -124,7 +137,7 @@ namespace LibraryManagementSystem.DAL.UnitOfWork
             }
 
             _transaction = Connection.BeginTransaction(isolationLevel);
-            _logger.LogDebug("تم بدء معاملة جديدة بمستوى العزل {IsolationLevel} - Started new transaction with isolation level", 
+            _logger.LogDebug("تم بدء معاملة جديدة بمستوى العزل {IsolationLevel} - Started new transaction with isolation level",
                 isolationLevel);
 
             return _transaction;
@@ -152,7 +165,7 @@ namespace LibraryManagementSystem.DAL.UnitOfWork
                 _transaction = Connection.BeginTransaction(isolationLevel);
             }
 
-            _logger.LogDebug("تم بدء معاملة جديدة بشكل غير متزامن بمستوى العزل {IsolationLevel} - Started new async transaction with isolation level", 
+            _logger.LogDebug("تم بدء معاملة جديدة بشكل غير متزامن بمستوى العزل {IsolationLevel} - Started new async transaction with isolation level",
                 isolationLevel);
 
             return _transaction;
@@ -302,7 +315,7 @@ namespace LibraryManagementSystem.DAL.UnitOfWork
             // In Dapper, changes are saved immediately
             // هذه الطريقة موجودة للتوافق مع نمط Unit of Work
             // This method exists for Unit of Work pattern compatibility
-            
+
             if (_transaction != null)
             {
                 await CommitAsync();
@@ -316,7 +329,7 @@ namespace LibraryManagementSystem.DAL.UnitOfWork
         /// تنفيذ عملية داخل معاملة
         /// Execute operation within a transaction
         /// </summary>
-        public async Task<T> ExecuteInTransactionAsync<T>(Func<IUnitOfWork, Task<T>> operation, 
+        public async Task<T> ExecuteInTransactionAsync<T>(Func<IUnitOfWork, Task<T>> operation,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             if (operation == null)
@@ -354,7 +367,7 @@ namespace LibraryManagementSystem.DAL.UnitOfWork
         /// تنفيذ عملية داخل معاملة بدون إرجاع قيمة
         /// Execute operation within a transaction without return value
         /// </summary>
-        public async Task ExecuteInTransactionAsync(Func<IUnitOfWork, Task> operation, 
+        public async Task ExecuteInTransactionAsync(Func<IUnitOfWork, Task> operation,
             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
             await ExecuteInTransactionAsync(async uow =>

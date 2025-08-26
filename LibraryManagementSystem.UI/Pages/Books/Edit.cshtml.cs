@@ -1,7 +1,6 @@
 using LibraryManagementSystem.BLL.Services;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.Enums;
-using LibraryManagementSystem.UI.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
@@ -12,8 +11,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
     /// نموذج صفحة تعديل الكتاب
     /// Edit book page model
     /// </summary>
-    [AuthorizeRole(UserRole.Administrator)]
-    public class EditModel : PageModel
+    public class EditModel : BasePageModel
     {
         private readonly IBookService _bookService;
         private readonly ILogger<EditModel> _logger;
@@ -22,7 +20,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
         /// منشئ نموذج الصفحة
         /// Page model constructor
         /// </summary>
-        public EditModel(IBookService bookService, ILogger<EditModel> logger)
+        public EditModel(IBookService bookService, IJwtService jwtService, ILogger<EditModel> logger) : base(jwtService)
         {
             _bookService = bookService ?? throw new ArgumentNullException(nameof(bookService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -141,7 +139,16 @@ namespace LibraryManagementSystem.UI.Pages.Books
                     ModifiedDate = DateTime.Now
                 };
 
-                var result = await _bookService.UpdateBookAsync(book);
+                // الحصول على معرف المستخدم الحالي من JWT
+                // Get current user ID from JWT
+                var currentUserId = GetCurrentUserId();
+                if (currentUserId == null)
+                {
+                    ErrorMessage = "يجب تسجيل الدخول أولاً - Please login first";
+                    return Page();
+                }
+
+                var result = await _bookService.UpdateBookAsync(book, currentUserId.Value);
 
                 if (result.IsSuccess)
                 {

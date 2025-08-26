@@ -10,7 +10,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
     /// نموذج صفحة تفاصيل الكتاب
     /// Book details page model
     /// </summary>
-    public class DetailsModel : PageModel
+    public class DetailsModel : BasePageModel
     {
         private readonly IBookService _bookService;
         private readonly IBorrowingService _borrowingService;
@@ -20,7 +20,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
         /// منشئ نموذج الصفحة
         /// Page model constructor
         /// </summary>
-        public DetailsModel(IBookService bookService, IBorrowingService borrowingService, ILogger<DetailsModel> logger)
+        public DetailsModel(IBookService bookService, IBorrowingService borrowingService, IJwtService jwtService, ILogger<DetailsModel> logger) : base(jwtService)
         {
             _bookService = bookService ?? throw new ArgumentNullException(nameof(bookService));
             _borrowingService = borrowingService ?? throw new ArgumentNullException(nameof(borrowingService));
@@ -81,7 +81,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
                 else
                 {
                     ErrorMessage = result.ErrorMessage ?? "لم يتم العثور على الكتاب - Book not found";
-                    _logger.LogWarning("فشل في تحميل تفاصيل الكتاب {BookId}: {Error} - Failed to load book details", 
+                    _logger.LogWarning("فشل في تحميل تفاصيل الكتاب {BookId}: {Error} - Failed to load book details",
                         id, ErrorMessage);
                 }
 
@@ -147,13 +147,59 @@ namespace LibraryManagementSystem.UI.Pages.Books
         }
 
         /// <summary>
-        /// الحصول على معرف المستخدم الحالي
-        /// Get current user ID
+        /// معالج طلب POST - حذف الكتاب
+        /// POST request handler - delete book
         /// </summary>
-        private int GetCurrentUserId()
+        public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
-            var userIdString = HttpContext.Session.GetString("UserId");
-            return int.TryParse(userIdString, out int userId) ? userId : 0;
+            try
+            {
+                if (id <= 0)
+                {
+                    TempData["ErrorMessage"] = "معرف الكتاب غير صحيح - Invalid book ID";
+                    return Page();
+                }
+
+                // التحقق من تسجيل الدخول والصلاحيات
+                // Check login and permissions
+                var currentUserId = GetCurrentUserId();
+                if (currentUserId == null)
+                {
+                    TempData["ErrorMessage"] = "يجب تسجيل الدخول أولاً - Please login first";
+                    return RedirectToPage("/Auth/Login");
+                }
+
+                // التحقق من صلاحيات المدير
+                // Check admin permissions
+                if (!IsAdmin())
+                {
+                    TempData["ErrorMessage"] = "ليس لديك صلاحية لحذف الكتب - You don't have permission to delete books";
+                    return Page();
+                }
+
+                _logger.LogDebug("محاولة حذف الكتاب {BookId} بواسطة المستخدم {UserId} - Attempting to delete book by user", id, currentUserId.Value);
+
+                var result = await _bookService.DeleteBookAsync(id, currentUserId.Value);
+
+                if (result.IsSuccess)
+                {
+                    _logger.LogInformation("تم حذف الكتاب {BookId} بنجاح - Successfully deleted book", id);
+                    TempData["SuccessMessage"] = "تم حذف الكتاب بنجاح! - Book deleted successfully!";
+                    return RedirectToPage("/Books/Index");
+                }
+                else
+                {
+                    _logger.LogWarning("فشل في حذف الكتاب {BookId}: {Error} - Failed to delete book", id, result.ErrorMessage);
+                    TempData["ErrorMessage"] = result.ErrorMessage ?? "فشل في حذف الكتاب - Failed to delete book";
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في حذف الكتاب {BookId} - Error deleting book", id);
+                TempData["ErrorMessage"] = "حدث خطأ أثناء حذف الكتاب - An error occurred while deleting the book";
+                return Page();
+            }
         }
     }
 }
