@@ -40,34 +40,16 @@ namespace LibraryManagementSystem.BLL.Services
         Task<ServiceResult<IEnumerable<Book>>> GetAvailableBooksAsync();
 
         /// <summary>
-        /// إضافة كتاب جديد
-        /// Add a new book
-        /// </summary>
-        Task<ServiceResult<int>> AddBookAsync(Book book);
-
-        /// <summary>
         /// إضافة كتاب جديد مع التحقق من الصلاحيات
         /// Add a new book with authorization check
         /// </summary>
         Task<ServiceResult<int>> AddBookAsync(Book book, int userId);
 
         /// <summary>
-        /// تحديث كتاب موجود
-        /// Update an existing book
-        /// </summary>
-        Task<ServiceResult<bool>> UpdateBookAsync(Book book);
-
-        /// <summary>
         /// تحديث كتاب موجود مع التحقق من الصلاحيات
         /// Update an existing book with authorization check
         /// </summary>
         Task<ServiceResult<bool>> UpdateBookAsync(Book book, int userId);
-
-        /// <summary>
-        /// حذف كتاب
-        /// Delete a book
-        /// </summary>
-        Task<ServiceResult<bool>> DeleteBookAsync(int id);
 
         /// <summary>
         /// حذف كتاب مع التحقق من الصلاحيات

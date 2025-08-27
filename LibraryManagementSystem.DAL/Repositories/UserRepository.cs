@@ -334,7 +334,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                     user.MembershipDate,
                     user.IsActive,
                     user.PasswordHash,
-                    Role = user.Role.ToString(),
+                    Role = (int)user.Role, // ✅ تم تعديل هذا السطر
                     user.CreatedDate,
                     user.ModifiedDate
                 });
