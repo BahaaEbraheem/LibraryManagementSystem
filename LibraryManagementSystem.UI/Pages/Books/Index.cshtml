@@ -24,23 +24,23 @@
                 </div>
                 <div class="card-body">
                     <!-- رسائل التنبيه - Alert Messages -->
-@if (!string.IsNullOrEmpty(Model.ErrorMessage))
-{
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             @Model.ErrorMessage
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-}
+                    }
 
-@if (!string.IsNullOrEmpty(Model.SuccessMessage))
-{
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2"></i>
                             @Model.SuccessMessage
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-}
+                    }
 
                     <!-- نموذج البحث - Search Form -->
                     <form method="get" class="mb-4" id="searchForm">
@@ -115,191 +115,198 @@
                         </div>
                     </form>
 
-                    <!-- نتائج البحث - Search results -->
+
+
+
+<!-- نتائج البحث - Search results -->
 @if (Model.SearchResults != null && Model.SearchResults.Items.Any())
 {
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <h4>نتائج البحث</h4>
-                                <p class="text-muted">
-                                    عرض @Model.SearchResults.Items.Count من أصل @Model.SearchResults.TotalCount كتاب
-                                    (الصفحة @Model.SearchResults.PageNumber من @Model.SearchResults.TotalPages)
-                                </p>
-                            </div>
-                            <div class="col-md-6 text-end">
-                                <div class="btn-group" role="group">
-                                    <input type="radio" class="btn-check" name="sortBy" id="sortTitle" value="Title"
-                                           checked="@(Model.SearchCriteria.SortBy == "Title")" onchange="updateSort(this)">
-                                    <label class="btn btn-outline-primary" for="sortTitle">ترتيب بالعنوان</label>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h4>نتائج البحث</h4>
+            <p class="text-muted">
+                عرض @Model.SearchResults.Items.Count من أصل @Model.SearchResults.TotalCount كتاب
+                (الصفحة @Model.SearchResults.PageNumber من @Model.SearchResults.TotalPages)
+            </p>
+        </div>
+        <div class="col-md-6 text-end">
+            <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="sortBy" id="sortTitle" value="Title"
+                       checked="@(Model.SearchCriteria.SortBy == "Title")" onchange="updateSort(this)">
+                <label class="btn btn-outline-primary" for="sortTitle">ترتيب بالعنوان</label>
 
-                                    <input type="radio" class="btn-check" name="sortBy" id="sortAuthor" value="Author"
-                                           checked="@(Model.SearchCriteria.SortBy == "Author")" onchange="updateSort(this)">
-                                    <label class="btn btn-outline-primary" for="sortAuthor">ترتيب بالمؤلف</label>
+                <input type="radio" class="btn-check" name="sortBy" id="sortAuthor" value="Author"
+                       checked="@(Model.SearchCriteria.SortBy == "Author")" onchange="updateSort(this)">
+                <label class="btn btn-outline-primary" for="sortAuthor">ترتيب بالمؤلف</label>
 
-                                    <input type="radio" class="btn-check" name="sortBy" id="sortYear" value="PublicationYear"
-                                           checked="@(Model.SearchCriteria.SortBy == "PublicationYear")" onchange="updateSort(this)">
-                                    <label class="btn btn-outline-primary" for="sortYear">ترتيب بالسنة</label>
-                                </div>
-                            </div>
-                        </div>
+                <input type="radio" class="btn-check" name="sortBy" id="sortYear" value="PublicationYear"
+                       checked="@(Model.SearchCriteria.SortBy == "PublicationYear")" onchange="updateSort(this)">
+                <label class="btn btn-outline-primary" for="sortYear">ترتيب بالسنة</label>
+            </div>
+        </div>
+    </div>
 
-                        <!-- جدول النتائج - Results table -->
-                        <div class="card">
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>العنوان</th>
-                                                <th>الرقم المعياري الدولي</th>
-                                                <th>المؤلف</th>
-                                                <th>النوع</th>
-                                                <th>سنة النشر</th>
-                                                <th>التوفر</th>
-                                                <th>الإجراءات</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var book in Model.SearchResults.Items)
-                                            {
-                                                <tr>
-                                                    <td>
-                                                        <strong>@book.Title</strong>
-                                                        @if (!string.IsNullOrEmpty(book.Description))
-                                                        {
-                                                            <br>
-                                                
-                                                            <small class="text-muted">@book.Description.Substring(0, Math.Min(100, book.Description.Length))...</small>
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        <strong>@book.ISBN</strong>
-                                                       @*  @if (!string.IsNullOrEmpty(book.ISBN))
+    <!-- جدول النتائج - Results table -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>العنوان</th>
+                            <th>الرقم المعياري الدولي</th>
+                            <th>المؤلف</th>
+                            <th>النوع</th>
+                            <th>سنة النشر</th>
+                            <th>التوفر</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var book in Model.SearchResults.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@book.Title</strong>
+                                    @if (!string.IsNullOrEmpty(book.Description))
+                                    {
+                                        <br>
+
+                                        <small class="text-muted">@book.Description.Substring(0, Math.Min(100, book.Description.Length))...</small>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@book.ISBN</strong>
+                                    @*  @if (!string.IsNullOrEmpty(book.ISBN))
                                                         {
                                                             <br>
                                                             <small class="text-muted">
                                                                 @book.ISBN.Substring(0, Math.Min(100, book.ISBN.Length))...
                                                             </small>
                                                         } *@
-                                                    </td>
-                                                    <td>@book.Author</td>
-                                                    <td>
-                                                        @if (!string.IsNullOrEmpty(book.Genre))
-                                                        {
-                                                            <span class="badge bg-secondary">@book.Genre</span>
-                                                        }
-                                                    </td>
-                                                    <td>@book.PublicationYear</td>
-                                                    <td>
-                                                        <div class="d-flex flex-column">
-                                                            <span class="@book.AvailabilityStatus.GetCssClass() mb-1">
-                                                                <i class="@book.AvailabilityStatus.GetIcon() me-1"></i>
-                                                                @book.AvailabilityStatusText
-                                                            </span>
-                                                            <small class="text-muted">
-                                                                <i class="fas fa-info-circle me-1"></i>
-                                                                @book.AvailableCopies من @book.TotalCopies متوفرة
-                                                            </small>
-                                                            @if (book.BorrowedCopies > 0)
-                                                            {
-                                                                <small class="text-warning">
-                                                                    <i class="fas fa-user-clock me-1"></i>
-                                                                    @book.BorrowedCopies نسخة مُعارة
-                                                                </small>
-                                                            }
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="btn-group btn-group-sm">
-                                                            <a href="/Books/Details/@book.BookId" class="btn btn-outline-info" title="عرض التفاصيل - View Details">
-                                                                <i class="fas fa-eye me-1"></i>
-                                                                تفاصيل
-                                                            </a>
-                                                            @if (book.IsAvailable)
-                                                            {
-                                                                <form method="post" asp-page-handler="BorrowBook" class="d-inline">
-                                                                    <input type="hidden" name="bookId" value="@book.BookId" />
-                                                                    <button type="submit" class="btn btn-primary"
-                                                                            title="استعارة الكتاب - Borrow Book"
-                                                                            onclick="return confirm('هل تريد استعارة الكتاب: @book.Title؟\n\nفترة الاستعارة: 14 يوم\n\nDo you want to borrow: @book.Title?\nBorrowing period: 14 days')">
-                                                                        <i class="fas fa-book-reader me-1"></i>
-                                                                        استعارة
-                                                                    </button>
-                                                                </form>
-                                                            }
-                                                            @if (Model.IsAdmin)
-                                                            {
-                                                                <a href="/Books/Edit/@book.BookId" class="btn btn-outline-warning" title="تعديل الكتاب - Edit Book">
-                                                                    <i class="fas fa-edit me-1"></i>
-                                                                    تعديل
-                                                                </a>
-                                                                <form method="post" asp-page-handler="DeleteBook" asp-route-bookId="@book.BookId"
-                                                                      onsubmit="return confirm('هل أنت متأكد من حذف الكتاب: @book.Title ؟\n\nهذا الإجراء لا يمكن التراجع عنه.\n\nAre you sure you want to delete the book: @book.Title ?\n\nThis action cannot be undone.')">
-                                                                    <button type="submit" class="btn btn-outline-danger" title="حذف الكتاب - Delete Book">
-                                                                        <i class="fas fa-trash me-1"></i> حذف
-                                                                    </button>
-                                                                </form>
+                                </td>
+                                <td>@book.Author</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(book.Genre))
+                                    {
+                                        <span class="badge bg-secondary">@book.Genre</span>
+                                    }
+                                </td>
+                                <td>@book.PublicationYear</td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="@book.AvailabilityStatus.GetCssClass() mb-1">
+                                            <i class="@book.AvailabilityStatus.GetIcon() me-1"></i>
+                                            @book.AvailabilityStatusText
+                                        </span>
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            @book.AvailableCopies من @book.TotalCopies متوفرة
+                                        </small>
+                                        @if (book.BorrowedCopies > 0)
+                                        {
+                                            <small class="text-warning">
+                                                <i class="fas fa-user-clock me-1"></i>
+                                                @book.BorrowedCopies نسخة مُعارة
+                                            </small>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/Books/Details/@book.BookId" class="btn btn-outline-info" title="عرض التفاصيل - View Details">
+                                            <i class="fas fa-eye me-1"></i>
+                                            تفاصيل
+                                        </a>
+                                        @if (book.IsAvailable)
+                                        {
+                                            <form method="post" asp-page-handler="BorrowBook" class="d-inline">
+                                                <input type="hidden" name="bookId" value="@book.BookId" />
+                                                <button type="submit" class="btn btn-primary"
+                                                        title="استعارة الكتاب - Borrow Book"
+                                                        onclick="return confirm('هل تريد استعارة الكتاب: @book.Title؟\n\nفترة الاستعارة: 14 يوم\n\nDo you want to borrow: @book.Title?\nBorrowing period: 14 days')">
+                                                    <i class="fas fa-book-reader me-1"></i>
+                                                    استعارة
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (Model.IsAdmin)
+                                        {
+                                            <a href="/Books/Edit/@book.BookId" class="btn btn-outline-warning" title="تعديل الكتاب - Edit Book">
+                                                <i class="fas fa-edit me-1"></i>
+                                                تعديل
+                                            </a>
+                                            <form method="post" asp-page-handler="DeleteBook" asp-route-bookId="@book.BookId"
+                                                  onsubmit="return confirm('هل أنت متأكد من حذف الكتاب: @book.Title ؟\n\nهذا الإجراء لا يمكن التراجع عنه.\n\nAre you sure you want to delete the book: @book.Title ?\n\nThis action cannot be undone.')">
+                                                <button type="submit" class="btn btn-outline-danger" title="حذف الكتاب - Delete Book">
+                                                    <i class="fas fa-trash me-1"></i> حذف
+                                                </button>
+                                            </form>
 
-                                                            }
-                                                            else
-                                                            {
-                                                                <button type="button" class="btn btn-secondary" disabled
-                                                                        title="الكتاب غير متوفر للاستعارة - Book not available for borrowing">
-                                                                    <i class="fas fa-ban me-1"></i>
-                                                                    غير متوفر
-                                                                </button>
-                                                            }
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-secondary" disabled
+                                                    title="الكتاب غير متوفر للاستعارة - Book not available for borrowing">
+                                                <i class="fas fa-ban me-1"></i>
+                                                غير متوفر
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-                        <!-- التنقل بين الصفحات - Pagination -->
+    <!-- التنقل بين الصفحات - Pagination -->
     @if (Model.SearchResults.TotalPages > 1)
     {
-                            <nav class="mt-4">
-                                <ul class="pagination justify-content-center">
-                                    @if (Model.SearchResults.HasPreviousPage)
-                                    {
-                                        <li class="page-item">
-                                            <a class="page-link" href="@GetPageUrl(Model.SearchResults.PageNumber - 1)">السابق</a>
-                                        </li>
-                                    }
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @if (Model.SearchResults.HasPreviousPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@GetPageUrl(Model.SearchResults.PageNumber - 1)">السابق</a>
+                    </li>
+                }
 
-                                    @for (int i = Math.Max(1, Model.SearchResults.PageNumber - 2);
-                                                                i <= Math.Min(Model.SearchResults.TotalPages, Model.SearchResults.PageNumber + 2);
-                                                                i++)
-                                    {
-                                        <li class="page-item @(i == Model.SearchResults.PageNumber ? "active" : "")">
-                                            <a class="page-link" href="@GetPageUrl(i)">@i</a>
-                                        </li>
-                                    }
+                @for (int i = Math.Max(1, Model.SearchResults.PageNumber - 2);
+                        i <= Math.Min(Model.SearchResults.TotalPages, Model.SearchResults.PageNumber + 2);
+                        i++)
+                {
+                    <li class="page-item @(i == Model.SearchResults.PageNumber ? "active" : "")">
+                        <a class="page-link" href="@GetPageUrl(i)">@i</a>
+                    </li>
+                }
 
-                                    @if (Model.SearchResults.HasNextPage)
-                                    {
-                                        <li class="page-item">
-                                            <a class="page-link" href="@GetPageUrl(Model.SearchResults.PageNumber + 1)">التالي</a>
-                                        </li>
-                                    }
-                                </ul>
-                            </nav>
+                @if (Model.SearchResults.HasNextPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@GetPageUrl(Model.SearchResults.PageNumber + 1)">التالي</a>
+                    </li>
+                }
+            </ul>
+        </nav>
     }
 }
 else if (Model.SearchResults != null)
 {
-                        <div class="alert alert-info text-center">
-                            <i class="fas fa-info-circle me-2"></i>
-                            لم يتم العثور على كتب تطابق معايير البحث المحددة.
-                        </div>
+    <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle me-2"></i>
+        لم يتم العثور على كتب تطابق معايير البحث المحددة.
+    </div>
 }
 
 
-
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @functions {
     private string GetPageUrl(int pageNumber)
     {
@@ -317,48 +324,48 @@ else if (Model.SearchResults != null)
 }
 
 @section Scripts {
-                        <script>
-                            // تحديث الترتيب
-                            // Update sorting
-                            function updateSort(element) {
-                                const form = document.querySelector('form');
-                                const sortInput = document.createElement('input');
-                                sortInput.type = 'hidden';
-                                sortInput.name = 'sortBy';
-                                sortInput.value = element.value;
-                                form.appendChild(sortInput);
-                                form.submit();
-                            }
+    <script>
+        // تحديث الترتيب
+        // Update sorting
+        function updateSort(element) {
+            const form = document.querySelector('form');
+            const sortInput = document.createElement('input');
+            sortInput.type = 'hidden';
+            sortInput.name = 'sortBy';
+            sortInput.value = element.value;
+            form.appendChild(sortInput);
+            form.submit();
+        }
 
-                            // تأكيد حذف الكتاب
-                            // Confirm book deletion
-                            function confirmDeleteBook(bookId, bookTitle) {
-                                if (confirm(`هل أنت متأكد من حذف الكتاب: ${bookTitle}؟\n\nهذا الإجراء لا يمكن التراجع عنه.\n\nAre you sure you want to delete the book: ${bookTitle}?\n\nThis action cannot be undone.`)) {
-                                    // إرسال طلب حذف
-                                                             fetch(`?handler=DeleteBook&bookId=${bookId}`, {
-                                method: 'POST',
-                                headers: {
-                                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                                }
-                            });
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            alert('تم حذف الكتاب بنجاح - Book deleted successfully');
-                                            location.reload();
-                                        } else {
-                                            alert('فشل في حذف الكتاب: ' + data.message);
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error:', error);
-                                        alert('حدث خطأ أثناء حذف الكتاب - An error occurred while deleting the book');
-                                    });
-                                }
-                            }
-
-
+        // تأكيد حذف الكتاب
+        // Confirm book deletion
+        function confirmDeleteBook(bookId, bookTitle) {
+            if (confirm(`هل أنت متأكد من حذف الكتاب: ${bookTitle}؟\n\nهذا الإجراء لا يمكن التراجع عنه.\n\nAre you sure you want to delete the book: ${bookTitle}?\n\nThis action cannot be undone.`)) {
+                // إرسال طلب حذف
+                                         fetch(`?handler=DeleteBook&bookId=${bookId}`, {
+            method: 'POST',
+            headers: {
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            }
+        });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('تم حذف الكتاب بنجاح - Book deleted successfully');
+                        location.reload();
+                    } else {
+                        alert('فشل في حذف الكتاب: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء حذف الكتاب - An error occurred while deleting the book');
+                });
+            }
+        }
 
 
-                        </script>
+
+
+    </script>
 }

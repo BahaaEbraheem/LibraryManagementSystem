@@ -4,12 +4,13 @@ using LibraryManagementSystem.DAL.Caching;
 using LibraryManagementSystem.DAL.Data;
 using LibraryManagementSystem.DAL.Repositories;
 using LibraryManagementSystem.DAL.UnitOfWork;
-using LibraryManagementSystem.UI.Middleware;
 using LibraryManagementSystem.UI.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using LibraryManagementSystem.BLL.Middleware;
+using LibraryManagementSystem.UI.HealthChecks;
 
 namespace LibraryManagementSystem.UI
 {
@@ -51,7 +52,6 @@ namespace LibraryManagementSystem.UI
         private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             // إضافة خدمات Session
-            // Add Session services
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {
@@ -62,59 +62,41 @@ namespace LibraryManagementSystem.UI
             });
 
             // إضافة Razor Pages
-            // Add Razor Pages
             services.AddRazorPages(options =>
             {
                 options.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute());
             });
 
             // إضافة Controllers للـ API
-            // Add Controllers for API
             services.AddControllers();
 
             // إضافة خدمات التخزين المؤقت
-            // Add caching services
             services.AddMemoryCache(options =>
             {
                 options.SizeLimit = 1000; // حد أقصى 1000 عنصر
                 options.CompactionPercentage = 0.25; // ضغط 25% عند الوصول للحد الأقصى
             });
-            services.AddMemoryCache(); // enables IMemoryCache
-
+            services.AddMemoryCache(); // تمكين IMemoryCache
             services.AddScoped<ICacheService, MemoryCacheService>();
 
             // إضافة خدمات قاعدة البيانات
-            // Add database services
             var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? "Server=(localdb)\\mssqllocaldb;Database=LibraryManagementSystem;Trusted_Connection=true;MultipleActiveResultSets=true";
 
             services.AddScoped<IDatabaseConnectionFactory>(provider =>
                 new DatabaseConnectionFactory(connectionString));
 
-
-
-            // Read JWT section from configuration
+            // إعدادات JWT
             var jwtSection = configuration.GetSection("JwtSettings");
-
-            // Register JwtSettings so it can be injected via IOptions<JwtSettings>
             services.Configure<JwtSettings>(jwtSection);
-
-            // Optionally, bind to a local variable for immediate use
             var jwtSettings = jwtSection.Get<JwtSettings>();
 
-
-
-            // إضافة خدمة تهيئة قاعدة البيانات
-            // Database initialization is handled by DatabaseConnectionFactory
-
             // إضافة المستودعات
-            // Add repositories
             services.AddScoped<IBookRepository, BookRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IBorrowingRepository, BorrowingRepository>();
 
             // إضافة وحدة العمل
-            // Add Unit of Work
             services.AddScoped<IUnitOfWork>(provider =>
             {
                 var connectionFactory = provider.GetRequiredService<IDatabaseConnectionFactory>();
@@ -124,7 +106,6 @@ namespace LibraryManagementSystem.UI
             });
 
             // إضافة خدمات منطق الأعمال
-            // Add business logic services
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<IBorrowingService, BorrowingService>();
             services.AddScoped<IUserService, UserService>();
@@ -132,19 +113,12 @@ namespace LibraryManagementSystem.UI
             services.AddScoped<IAuthorizationService, AuthorizationService>();
 
             // إضافة خدمات التحقق من قواعد الأعمال
-            // Add business rule validation services
             services.AddScoped<IBusinessRuleValidator, BusinessRuleValidator>();
 
             // إضافة خدمات JWT
-            // Add JWT services
-            services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.AddScoped<IJwtService, JwtService>();
 
-
-
-
-            // Add Authentication
-            // Add Authentication
+            // إضافة Authentication
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -165,27 +139,10 @@ namespace LibraryManagementSystem.UI
                 };
             });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             // إضافة إعدادات المكتبة
-            // Add library settings
             services.Configure<LibrarySettings>(configuration.GetSection("LibrarySettings"));
 
             // إضافة خدمات التسجيل
-            // Add logging services
             services.AddLogging(builder =>
             {
                 builder.AddConsole();
@@ -193,22 +150,18 @@ namespace LibraryManagementSystem.UI
             });
 
             // إضافة خدمات HTTP Context
-            // Add HTTP Context services
             services.AddHttpContextAccessor();
 
             // إضافة خدمات التحقق من صحة النموذج
-            // Add model validation services
             services.AddAntiforgery(options =>
             {
                 options.HeaderName = "X-CSRF-TOKEN";
             });
 
             // إضافة معالجة الأخطاء العامة
-            // Add global error handling
             services.AddGlobalErrorHandling();
 
             // إضافة معالجة أخطاء قاعدة البيانات
-            // Add database error handling
             services.AddDatabaseErrorHandling(connectionString);
         }
 
@@ -226,8 +179,7 @@ namespace LibraryManagementSystem.UI
 
                 logger.LogInformation("بدء تهيئة قاعدة البيانات - Starting database initialization");
 
-                // تشغيل تهيئة قاعدة البيانات بشكل متزامن عند بدء التطبيق
-                // Run database initialization synchronously at application startup
+                // تشغيل التهيئة بشكل متزامن عند بدء التطبيق
                 connectionFactory.InitializeDatabaseAsync().GetAwaiter().GetResult();
 
                 logger.LogInformation("تم إكمال تهيئة قاعدة البيانات بنجاح - Database initialization completed successfully");
@@ -247,11 +199,9 @@ namespace LibraryManagementSystem.UI
         private static void ConfigurePipeline(WebApplication app)
         {
             // تكوين معالجة الأخطاء العامة
-            // Configure global error handling
-            app.UseGlobalErrorHandling();
+            app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
-            // تكوين معالجة الأخطاء
-            // Configure error handling
+            // تكوين معالجة الأخطاء حسب البيئة
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
@@ -263,40 +213,31 @@ namespace LibraryManagementSystem.UI
             }
 
             // إعادة توجيه HTTPS
-            // HTTPS redirection
             app.UseHttpsRedirection();
 
             // الملفات الثابتة
-            // Static files
             app.UseStaticFiles();
 
             // التوجيه
-            // Routing
             app.UseRouting();
 
             // الجلسة
-            // Session
             app.UseSession();
 
             // التفويض
-            // Authorization
-            app.UseAuthentication(); // ✅ Must be BEFORE UseAuthorization
+            app.UseAuthentication(); // يجب أن يكون قبل UseAuthorization
             app.UseAuthorization();
 
             // تكوين Razor Pages
-            // Configure Razor Pages
             app.MapRazorPages();
 
             // تكوين Controllers للـ API
-            // Configure Controllers for API
             app.MapControllers();
 
             // إضافة مراقبة الصحة
-            // Add health monitoring
             app.UseHealthMonitoring();
 
             // الصفحة الافتراضية
-            // Default page
             app.MapGet("/", () => Results.Redirect("/Auth/Login"));
         }
     }

@@ -162,17 +162,18 @@ namespace LibraryManagementSystem.DAL.Data
 
                 var books = new[]
                 {
-                    new { Title = "Clean Code", Author = "Robert C. Martin", ISBN = "978-0-13-235088-4", Publisher = "Prentice Hall", Year = 2008, Genre = "Programming", Copies = 3, Description = "A Handbook of Agile Software Craftsmanship" },
-                    new { Title = "The Pragmatic Programmer", Author = "David Thomas", ISBN = "978-0-20-161622-4", Publisher = "Addison-Wesley", Year = 1999, Genre = "Programming", Copies = 2, Description = "From Journeyman to Master" },
-                    new { Title = "Design Patterns", Author = "Gang of Four", ISBN = "978-0-20-163361-0", Publisher = "Addison-Wesley", Year = 1994, Genre = "Programming", Copies = 2, Description = "Elements of Reusable Object-Oriented Software" },
-                    new { Title = "The Great Gatsby", Author = "F. Scott Fitzgerald", ISBN = "978-0-74-327356-5", Publisher = "Scribner", Year = 1925, Genre = "Fiction", Copies = 3, Description = "A classic American novel set in the Jazz Age" },
-                    new { Title = "To Kill a Mockingbird", Author = "Harper Lee", ISBN = "978-0-06-112008-4", Publisher = "J.B. Lippincott & Co.", Year = 1960, Genre = "Fiction", Copies = 2, Description = "A gripping tale of racial injustice and childhood innocence" },
-                    new { Title = "1984", Author = "George Orwell", ISBN = "978-0-45-228423-4", Publisher = "Secker & Warburg", Year = 1949, Genre = "Dystopian Fiction", Copies = 4, Description = "A dystopian social science fiction novel" },
-                    new { Title = "Pride and Prejudice", Author = "Jane Austen", ISBN = "978-0-14-143951-8", Publisher = "T. Egerton", Year = 1813, Genre = "Romance", Copies = 2, Description = "A romantic novel of manners" },
-                    new { Title = "The Hobbit", Author = "J.R.R. Tolkien", ISBN = "978-0-54-792822-7", Publisher = "George Allen & Unwin", Year = 1937, Genre = "Fantasy", Copies = 3, Description = "A fantasy novel about the adventures of Bilbo Baggins" },
-                    new { Title = "Harry Potter and the Philosopher's Stone", Author = "J.K. Rowling", ISBN = "978-0-74-753269-9", Publisher = "Bloomsbury", Year = 1997, Genre = "Fantasy", Copies = 5, Description = "The first book in the Harry Potter series" },
-                    new { Title = "The Alchemist", Author = "Paulo Coelho", ISBN = "978-0-06-231500-7", Publisher = "HarperOne", Year = 1988, Genre = "Fiction", Copies = 3, Description = "A philosophical novel about following your dreams" }
+                    new { Title = "الحرب والسلم", Author = "ليو تولستوي", ISBN = "978-0-14-044793-4", Publisher = "دار النشر", Year = 1869, Genre = "رواية", Copies = 3, Description = "رواية كلاسيكية روسية" },
+                    new { Title = "الأمير", Author = "نيكولو مكيافيلي", ISBN = "978-0-19-953569-9", Publisher = "دار النشر", Year = 1532, Genre = "فكر", Copies = 2, Description = "كتاب سياسي وفلسفي" },
+                    new { Title = "مئة عام من العزلة", Author = "غابرييل غارثيا ماركيث", ISBN = "978-0-06-088328-7", Publisher = "دار النشر", Year = 1967, Genre = "رواية", Copies = 4, Description = "رواية خيالية لاتينية" },
+                    new { Title = "رحلة ابن بطوطة", Author = "ابن بطوطة", ISBN = "978-977-09-0467-6", Publisher = "دار النشر", Year = 1355, Genre = "تاريخ", Copies = 2, Description = "سيرة ذاتية ورحلات تاريخية" },
+                    new { Title = "قواعد التفكير", Author = "أحمد أمين", ISBN = "978-977-09-0123-2", Publisher = "دار النشر", Year = 1950, Genre = "فكر", Copies = 3, Description = "كتاب في الفلسفة والمنطق" },
+                    new { Title = "قصص للأطفال", Author = "جبران خليل جبران", ISBN = "978-977-09-0543-1", Publisher = "دار النشر", Year = 1920, Genre = "قصص قصيرة", Copies = 5, Description = "مجموعة قصص قصيرة للأطفال" },
+                    new { Title = "إثارة الغموض", Author = "أجاثا كريستي", ISBN = "978-0-06-207348-8", Publisher = "دار النشر", Year = 1934, Genre = "إثارة", Copies = 2, Description = "رواية إثارة وغموض" },
+                    new { Title = "خيال علمي المستقبل", Author = "إسحاق أسيموف", ISBN = "978-0-553-80370-9", Publisher = "دار النشر", Year = 1951, Genre = "خيال علمي", Copies = 3, Description = "رواية خيال علمي" },
+                    new { Title = "قصص رومانسية", Author = "جين أوستن", ISBN = "978-0-14-143951-8", Publisher = "دار النشر", Year = 1813, Genre = "أدب", Copies = 2, Description = "رواية رومانسية" },
+                    new { Title = "سيرة حياة شخصية مشهورة", Author = "جون سميث", ISBN = "978-0-06-231500-7", Publisher = "دار النشر", Year = 1988, Genre = "سيرة ذاتية", Copies = 3, Description = "سيرة شخصية" }
                 };
+
 
                 var insertBookQuery = @"
                     INSERT INTO Books (Title, Author, ISBN, Publisher, PublicationYear, Genre, TotalCopies, AvailableCopies, Description, CreatedDate, ModifiedDate)

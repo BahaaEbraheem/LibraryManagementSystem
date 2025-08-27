@@ -48,7 +48,7 @@ namespace LibraryManagementSystem.UI.HealthChecks
                         ["checkTime"] = healthInfo.CheckTime.ToString("yyyy-MM-dd HH:mm:ss UTC")
                     };
 
-                    _logger.LogInformation("فحص صحة قاعدة البيانات نجح: زمن الاستجابة={ResponseTime}ms - Database health check succeeded: ResponseTime={ResponseTime}ms",
+                    _logger.LogInformation("فحص صحة قاعدة البيانات نجح: زمن الاستجابة={ResponseTime}ms - Database health check succeeded: ResponseTime",
                         healthInfo.ResponseTimeMs);
 
                     // تحديد حالة الصحة بناءً على زمن الاستجابة
@@ -78,7 +78,7 @@ namespace LibraryManagementSystem.UI.HealthChecks
                         ["checkTime"] = healthInfo.CheckTime.ToString("yyyy-MM-dd HH:mm:ss UTC")
                     };
 
-                    _logger.LogError("فحص صحة قاعدة البيانات فشل: {Error} - Database health check failed: {Error}",
+                    _logger.LogError("فحص صحة قاعدة البيانات فشل: Database health check failed: {Error}",
                         healthInfo.ErrorMessage);
 
                     return HealthCheckResult.Unhealthy("قاعدة البيانات غير متاحة - Database is unavailable", data: data);

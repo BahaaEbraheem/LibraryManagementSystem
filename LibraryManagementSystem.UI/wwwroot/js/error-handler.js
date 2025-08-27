@@ -165,37 +165,37 @@
 
     // دالة فحص حالة الاتصال
     // Network connectivity check function
-    function checkConnectivity() {
-        if (!navigator.onLine) {
-            showErrorAlert('لا يوجد اتصال بالإنترنت - No internet connection');
-        }
-    }
+    //function checkConnectivity() {
+    //    if (!navigator.onLine) {
+    //        showErrorAlert('لا يوجد اتصال بالإنترنت - No internet connection');
+    //    }
+    //}
 
     // مراقبة حالة الاتصال
     // Monitor connectivity status
-    window.addEventListener('online', function() {
-        $('.alert-ajax-error').remove();
-        const alertHtml = `
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-wifi me-2"></i>
-                تم استعادة الاتصال بالإنترنت - Internet connection restored
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-        $('main.container').prepend(alertHtml);
-        setTimeout(function() {
-            $('.alert-success').fadeOut();
-        }, 5000);
-    });
+    //window.addEventListener('online', function() {
+    //    $('.alert-ajax-error').remove();
+    //    const alertHtml = `
+    //        <div class="alert alert-success alert-dismissible fade show" role="alert">
+    //            <i class="fas fa-wifi me-2"></i>
+    //            تم استعادة الاتصال بالإنترنت - Internet connection restored
+    //            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    //        </div>
+    //    `;
+    //    $('main.container').prepend(alertHtml);
+    //    setTimeout(function() {
+    //        $('.alert-success').fadeOut();
+    //    }, 5000);
+    //});
 
-    window.addEventListener('offline', function() {
-        showErrorAlert('انقطع الاتصال بالإنترنت - Internet connection lost');
-    });
+    //window.addEventListener('offline', function() {
+    //    showErrorAlert('انقطع الاتصال بالإنترنت - Internet connection lost');
+    //});
 
-    // فحص الاتصال عند تحميل الصفحة
-    // Check connectivity on page load
-    $(document).ready(function() {
-        checkConnectivity();
-    });
+    //// فحص الاتصال عند تحميل الصفحة
+    //// Check connectivity on page load
+    //$(document).ready(function() {
+    //    checkConnectivity();
+    //});
 
 })();

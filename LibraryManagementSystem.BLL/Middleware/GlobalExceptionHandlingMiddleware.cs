@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.Json;
 
-namespace LibraryManagementSystem.UI.Middleware
+namespace LibraryManagementSystem.BLL.Middleware
 {
     /// <summary>
     /// وسطاء معالجة الأخطاء العامة
@@ -12,7 +14,6 @@ namespace LibraryManagementSystem.UI.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<GlobalExceptionHandlingMiddleware> _logger;
-        private readonly IWebHostEnvironment _environment;
 
         /// <summary>
         /// منشئ الوسطاء
@@ -20,12 +21,10 @@ namespace LibraryManagementSystem.UI.Middleware
         /// </summary>
         public GlobalExceptionHandlingMiddleware(
             RequestDelegate next,
-            ILogger<GlobalExceptionHandlingMiddleware> logger,
-            IWebHostEnvironment environment)
+            ILogger<GlobalExceptionHandlingMiddleware> logger)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }
 
         /// <summary>
@@ -74,7 +73,6 @@ namespace LibraryManagementSystem.UI.Middleware
                     {
                         Title = "انتهت المهلة الزمنية - Request Timeout",
                         Message = "انتهت المهلة الزمنية للطلب. يرجى المحاولة مرة أخرى - Request timeout. Please try again",
-                        Details = _environment.IsDevelopment() ? timeoutEx.Message : null
                     };
                     response.StatusCode = (int)HttpStatusCode.RequestTimeout;
                     break;
@@ -86,7 +84,6 @@ namespace LibraryManagementSystem.UI.Middleware
                     {
                         Title = "غير مصرح - Unauthorized",
                         Message = "ليس لديك صلاحية للوصول لهذا المورد - You don't have permission to access this resource",
-                        Details = _environment.IsDevelopment() ? unauthorizedEx.Message : null
                     };
                     response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     break;
@@ -98,7 +95,6 @@ namespace LibraryManagementSystem.UI.Middleware
                     {
                         Title = "معامل غير صحيح - Invalid Argument",
                         Message = "تم تمرير معامل غير صحيح - Invalid argument provided",
-                        Details = _environment.IsDevelopment() ? argEx.Message : null
                     };
                     response.StatusCode = (int)HttpStatusCode.BadRequest;
                     break;
@@ -110,7 +106,6 @@ namespace LibraryManagementSystem.UI.Middleware
                     {
                         Title = "عملية غير صحيحة - Invalid Operation",
                         Message = "لا يمكن تنفيذ هذه العملية في الوقت الحالي - Cannot perform this operation at this time",
-                        Details = _environment.IsDevelopment() ? invalidOpEx.Message : null
                     };
                     response.StatusCode = (int)HttpStatusCode.BadRequest;
                     break;
@@ -122,7 +117,6 @@ namespace LibraryManagementSystem.UI.Middleware
                     {
                         Title = "ملف غير موجود - File Not Found",
                         Message = "الملف المطلوب غير موجود - The requested file was not found",
-                        Details = _environment.IsDevelopment() ? fileNotFoundEx.Message : null
                     };
                     response.StatusCode = (int)HttpStatusCode.NotFound;
                     break;
@@ -134,7 +128,6 @@ namespace LibraryManagementSystem.UI.Middleware
                     {
                         Title = "خطأ في الخادم - Server Error",
                         Message = "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى أو الاتصال بالدعم الفني - An unexpected error occurred. Please try again or contact support",
-                        Details = _environment.IsDevelopment() ? exception.ToString() : null
                     };
                     response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     break;
@@ -145,7 +138,7 @@ namespace LibraryManagementSystem.UI.Middleware
             errorResponse.ErrorId = Guid.NewGuid().ToString();
             errorResponse.Timestamp = DateTime.UtcNow;
 
-            _logger.LogError("معرف الخطأ: {ErrorId} - نوع الاستثناء: {ExceptionType} - الرسالة: {Message} - Error ID: {ErrorId} - Exception Type: {ExceptionType} - Message: {Message}",
+            _logger.LogError("معرف الخطأ: {ErrorId} - نوع الاستثناء- الرسالة: - Error ID: - Exception Type: {ExceptionType} - Message: {Message}",
                 errorResponse.ErrorId, exception.GetType().Name, exception.Message);
 
             // التحقق من نوع الطلب
@@ -205,10 +198,6 @@ namespace LibraryManagementSystem.UI.Middleware
                     break;
             }
 
-            if (_environment.IsDevelopment())
-            {
-                errorResponse.Details = $"SQL Error {sqlException.Number}: {sqlException.Message}";
-            }
 
             return errorResponse;
         }
@@ -233,40 +222,5 @@ namespace LibraryManagementSystem.UI.Middleware
         }
     }
 
-    /// <summary>
-    /// نموذج استجابة الخطأ
-    /// Error response model
-    /// </summary>
-    public class ErrorResponse
-    {
-        /// <summary>
-        /// معرف الخطأ الفريد
-        /// Unique error identifier
-        /// </summary>
-        public string ErrorId { get; set; } = string.Empty;
 
-        /// <summary>
-        /// عنوان الخطأ
-        /// Error title
-        /// </summary>
-        public string Title { get; set; } = string.Empty;
-
-        /// <summary>
-        /// رسالة الخطأ
-        /// Error message
-        /// </summary>
-        public string Message { get; set; } = string.Empty;
-
-        /// <summary>
-        /// تفاصيل الخطأ (للتطوير فقط)
-        /// Error details (development only)
-        /// </summary>
-        public string? Details { get; set; }
-
-        /// <summary>
-        /// وقت حدوث الخطأ
-        /// Error timestamp
-        /// </summary>
-        public DateTime Timestamp { get; set; }
-    }
 }

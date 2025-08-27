@@ -46,7 +46,7 @@ namespace LibraryManagementSystem.BLL.Validation
         {
             try
             {
-                _logger.LogDebug("التحقق من صحة استعارة الكتاب {BookId} للمستخدم {UserId} - Validating borrowing of book {BookId} for user {UserId}",
+                _logger.LogDebug("التحقق من صحة استعارة الكتاب {BookId} للمستخدم {UserId} - Validating borrowing",
                     bookId, userId);
 
                 var result = new ValidationResult { IsValid = true };
@@ -131,7 +131,7 @@ namespace LibraryManagementSystem.BLL.Validation
         {
             try
             {
-                _logger.LogDebug("التحقق من صحة إرجاع الاستعارة {BorrowingId} للمستخدم {UserId} - Validating return of borrowing {BorrowingId} for user {UserId}",
+                _logger.LogDebug("التحقق من صحة إرجاع الاستعارة {BorrowingId} للمستخدم {UserId} - Validating return of borrowing",
                     borrowingId, userId);
 
                 // التحقق من وجود الاستعارة
@@ -191,7 +191,7 @@ namespace LibraryManagementSystem.BLL.Validation
         {
             try
             {
-                _logger.LogDebug("التحقق من صحة تجديد الاستعارة {BorrowingId} للمستخدم {UserId} - Validating renewal of borrowing {BorrowingId} for user {UserId}",
+                _logger.LogDebug("التحقق من صحة تجديد الاستعارة {BorrowingId} للمستخدم {UserId} - Validating renewal of borrowing",
                     borrowingId, userId);
 
                 // التحقق من وجود الاستعارة
@@ -258,7 +258,7 @@ namespace LibraryManagementSystem.BLL.Validation
         {
             try
             {
-                _logger.LogDebug("التحقق من صحة إضافة الكتاب {Title} - Validating addition of book {Title}", book.Title);
+                _logger.LogDebug("التحقق من صحة إضافة الكتاب {Title}", book.Title);
 
                 var result = new ValidationResult { IsValid = true };
 
@@ -315,7 +315,7 @@ namespace LibraryManagementSystem.BLL.Validation
                     result.AddError("سنة النشر غير صحيحة - Invalid publication year");
                 }
 
-                _logger.LogDebug("تم التحقق من صحة إضافة الكتاب: {IsValid} - Book addition validation completed: {IsValid}", result.IsValid);
+                _logger.LogDebug("تم التحقق من صحة إضافة الكتاب: {IsValid}", result.IsValid);
                 return result;
             }
             catch (Exception ex)
@@ -351,7 +351,7 @@ namespace LibraryManagementSystem.BLL.Validation
         {
             try
             {
-                _logger.LogDebug("التحقق من صحة تحديث الكتاب {BookId} - Validating update of book {BookId}", book.BookId);
+                _logger.LogDebug("التحقق من صحة تحديث الكتاب {BookId}", book.BookId);
 
                 // نفس التحقق من الإضافة مع التحقق من وجود الكتاب
                 // Same validation as addition plus checking book existence
@@ -393,7 +393,7 @@ namespace LibraryManagementSystem.BLL.Validation
         {
             try
             {
-                _logger.LogDebug("التحقق من صحة حذف الكتاب {BookId} - Validating deletion of book {BookId}", bookId);
+                _logger.LogDebug("التحقق من صحة حذف الكتاب {BookId}", bookId);
 
                 // التحقق من وجود الكتاب
                 // Check book existence
@@ -432,7 +432,7 @@ namespace LibraryManagementSystem.BLL.Validation
         {
             try
             {
-                _logger.LogDebug("التحقق من صحة إضافة المستخدم {Email} - Validating addition of user {Email}", user.Email);
+                _logger.LogDebug("التحقق من صحة إضافة المستخدم {Email}", user.Email);
 
                 var result = new ValidationResult { IsValid = true };
 
@@ -495,7 +495,7 @@ namespace LibraryManagementSystem.BLL.Validation
         {
             try
             {
-                _logger.LogDebug("التحقق من صحة تحديث المستخدم {UserId} - Validating update of user {UserId}", user.UserId);
+                _logger.LogDebug("التحقق من صحة تحديث المستخدم {UserId}", user.UserId);
 
                 // نفس التحقق من الإضافة مع التحقق من وجود المستخدم
                 // Same validation as addition plus checking user existence
@@ -537,7 +537,7 @@ namespace LibraryManagementSystem.BLL.Validation
         {
             try
             {
-                _logger.LogDebug("التحقق من صحة حذف المستخدم {UserId} - Validating deletion of user {UserId}", userId);
+                _logger.LogDebug("التحقق من صحة حذف المستخدم {UserId}", userId);
 
                 // التحقق من وجود المستخدم
                 // Check user existence

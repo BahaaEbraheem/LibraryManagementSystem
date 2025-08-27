@@ -45,7 +45,7 @@ namespace LibraryManagementSystem.DAL.Data
             {
                 try
                 {
-                    _logger.LogDebug("محاولة الاتصال بقاعدة البيانات - المحاولة {Attempt}/{MaxAttempts} - Database connection attempt {Attempt}/{MaxAttempts}",
+                    _logger.LogDebug("محاولة الاتصال بقاعدة البيانات - المحاولة {Attempt}/{MaxAttempts} - Database connection attempt ",
                         attempt, _maxRetryAttempts);
 
                     var connection = new SqlConnection(_connectionString);
@@ -57,7 +57,7 @@ namespace LibraryManagementSystem.DAL.Data
                     await connection.OpenAsync();
 
                     stopwatch.Stop();
-                    _logger.LogInformation("تم الاتصال بقاعدة البيانات بنجاح في المحاولة {Attempt} خلال {ElapsedMs}ms - Database connected successfully on attempt {Attempt} in {ElapsedMs}ms",
+                    _logger.LogInformation("تم الاتصال بقاعدة البيانات بنجاح في المحاولة {Attempt} خلال {ElapsedMs}ms - Database connected successfully on attempt",
                         attempt, stopwatch.ElapsedMilliseconds);
 
                     // تسجيل إحصائيات الاتصال
@@ -83,7 +83,7 @@ namespace LibraryManagementSystem.DAL.Data
                 catch (Exception ex)
                 {
                     lastException = ex;
-                    _logger.LogError(ex, "خطأ غير متوقع في الاتصال بقاعدة البيانات - المحاولة {Attempt} - Unexpected database connection error - Attempt {Attempt}",
+                    _logger.LogError(ex, "خطأ غير متوقع في الاتصال بقاعدة البيانات - المحاولة {Attempt} - Unexpected database connection error - Attempt",
                         attempt);
 
                     if (attempt == _maxRetryAttempts)
@@ -96,7 +96,7 @@ namespace LibraryManagementSystem.DAL.Data
             }
 
             stopwatch.Stop();
-            _logger.LogCritical(lastException, "فشل في الاتصال بقاعدة البيانات بعد {MaxAttempts} محاولات خلال {ElapsedMs}ms - Failed to connect to database after {MaxAttempts} attempts in {ElapsedMs}ms",
+            _logger.LogCritical(lastException, "فشل في الاتصال بقاعدة البيانات بعد {MaxAttempts} محاولات خلال {ElapsedMs}ms - Failed to connect to database after",
                 _maxRetryAttempts, stopwatch.ElapsedMilliseconds);
 
             throw new DatabaseConnectionException(
@@ -114,7 +114,7 @@ namespace LibraryManagementSystem.DAL.Data
             {
                 var builder = new SqlConnectionStringBuilder(connection.ConnectionString);
 
-                _logger.LogDebug("معلومات الاتصال - المحاولة {Attempt}: الخادم={Server}, قاعدة البيانات={Database}, مهلة الاتصال={Timeout}s - Connection info - Attempt {Attempt}: Server={Server}, Database={Database}, Timeout={Timeout}s",
+                _logger.LogDebug("معلومات الاتصال - المحاولة {Attempt}: الخادم={Server}, قاعدة البيانات={Database}, مهلة الاتصال={Timeout}s - Connection info ",
                     attempt, builder.DataSource, builder.InitialCatalog, builder.ConnectTimeout);
             }
             catch (Exception ex)
@@ -131,7 +131,7 @@ namespace LibraryManagementSystem.DAL.Data
         {
             try
             {
-                _logger.LogDebug("إحصائيات الاتصال: الحالة={State}, إصدار الخادم={ServerVersion}, قاعدة البيانات={Database} - Connection statistics: State={State}, ServerVersion={ServerVersion}, Database={Database}",
+                _logger.LogDebug("إحصائيات الاتصال: الحالة={State}, إصدار الخادم={ServerVersion}, قاعدة البيانات={Database}",
                     connection.State, connection.ServerVersion, connection.Database);
             }
             catch (Exception ex)
@@ -167,29 +167,29 @@ namespace LibraryManagementSystem.DAL.Data
                     break;
 
                 case 18456: // Login failed
-                    _logger.LogError("فشل في تسجيل الدخول لقاعدة البيانات - المحاولة {Attempt}: {ErrorDetails} - Database login failed - Attempt {Attempt}: {ErrorDetails}",
+                    _logger.LogError("فشل في تسجيل الدخول لقاعدة البيانات - المحاولة {Attempt}: {ErrorDetails} - Database login failed",
                         attempt, errorDetails);
                     break;
 
                 case 53: // Network path not found
                 case 233: // Connection forcibly closed
                 case 10054: // Connection reset by peer
-                    _logger.LogWarning("خطأ في الشبكة أثناء الاتصال بقاعدة البيانات - المحاولة {Attempt}: {ErrorDetails} - Network error during database connection - Attempt {Attempt}: {ErrorDetails}",
+                    _logger.LogWarning("خطأ في الشبكة أثناء الاتصال بقاعدة البيانات - المحاولة {Attempt}: {ErrorDetails} - Network error during database connection - Attempt",
                         attempt, errorDetails);
                     break;
 
                 case 4060: // Invalid database name
-                    _logger.LogError("اسم قاعدة البيانات غير صحيح - المحاولة {Attempt}: {ErrorDetails} - Invalid database name - Attempt {Attempt}: {ErrorDetails}",
+                    _logger.LogError("اسم قاعدة البيانات غير صحيح - المحاولة {Attempt}: {ErrorDetails} - Invalid database name - Attempt",
                         attempt, errorDetails);
                     break;
 
                 case 18452: // Login timeout
-                    _logger.LogWarning("انتهت مهلة تسجيل الدخول - المحاولة {Attempt}: {ErrorDetails} - Login timeout - Attempt {Attempt}: {ErrorDetails}",
+                    _logger.LogWarning("انتهت مهلة تسجيل الدخول - المحاولة {Attempt}: {ErrorDetails} - Login timeout - Attempt",
                         attempt, errorDetails);
                     break;
 
                 default:
-                    _logger.LogError(sqlEx, "خطأ SQL غير متوقع - المحاولة {Attempt}: رقم الخطأ={ErrorNumber}, الشدة={Severity}, الحالة={State} - Unexpected SQL error - Attempt {Attempt}: ErrorNumber={ErrorNumber}, Severity={Severity}, State={State}",
+                    _logger.LogError(sqlEx, "خطأ SQL غير متوقع - المحاولة {Attempt}: رقم الخطأ={ErrorNumber}, الشدة={Severity}, الحالة={State} - Unexpected SQL error",
                         attempt, sqlEx.Number, sqlEx.Class, sqlEx.State);
                     break;
             }
@@ -221,35 +221,10 @@ namespace LibraryManagementSystem.DAL.Data
 
             bool shouldRetry = retryableErrors.Contains(sqlEx.Number);
 
-            _logger.LogDebug("تحديد إعادة المحاولة لخطأ SQL {ErrorNumber}: {ShouldRetry} - Determining retry for SQL error {ErrorNumber}: {ShouldRetry}",
+            _logger.LogDebug("تحديد إعادة المحاولة لخطأ SQL {ErrorNumber}: {ShouldRetry} ",
                 sqlEx.Number, shouldRetry);
 
             return shouldRetry;
-        }
-
-        /// <summary>
-        /// اختبار الاتصال بقاعدة البيانات
-        /// Test database connection
-        /// </summary>
-        public async Task<bool> TestConnectionAsync()
-        {
-            try
-            {
-                using var connection = await CreateConnectionWithRetryAsync();
-
-                // تنفيذ استعلام بسيط للتأكد من عمل الاتصال
-                // Execute simple query to verify connection works
-                using var command = new SqlCommand("SELECT 1", (SqlConnection)connection);
-                var result = await command.ExecuteScalarAsync();
-
-                _logger.LogInformation("اختبار الاتصال بقاعدة البيانات نجح - Database connection test succeeded");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "فشل اختبار الاتصال بقاعدة البيانات - Database connection test failed");
-                return false;
-            }
         }
 
         /// <summary>
@@ -278,7 +253,7 @@ namespace LibraryManagementSystem.DAL.Data
                 healthInfo.Database = connection.Database;
                 healthInfo.CheckTime = DateTime.UtcNow;
 
-                _logger.LogInformation("فحص صحة قاعدة البيانات نجح: زمن الاستجابة={ResponseTime}ms - Database health check succeeded: ResponseTime={ResponseTime}ms",
+                _logger.LogInformation("فحص صحة قاعدة البيانات نجح: زمن الاستجابة={ResponseTime}ms - Database health check succeeded",
                     healthInfo.ResponseTimeMs);
             }
             catch (Exception ex)
@@ -295,27 +270,7 @@ namespace LibraryManagementSystem.DAL.Data
         }
     }
 
-    /// <summary>
-    /// معلومات صحة قاعدة البيانات
-    /// Database health information
-    /// </summary>
-    public class DatabaseHealthInfo
-    {
-        public bool IsHealthy { get; set; }
-        public long ResponseTimeMs { get; set; }
-        public string? ServerVersion { get; set; }
-        public string? Database { get; set; }
-        public string? ErrorMessage { get; set; }
-        public DateTime CheckTime { get; set; }
-    }
 
-    /// <summary>
-    /// استثناء اتصال قاعدة البيانات
-    /// Database connection exception
-    /// </summary>
-    public class DatabaseConnectionException : Exception
-    {
-        public DatabaseConnectionException(string message) : base(message) { }
-        public DatabaseConnectionException(string message, Exception? innerException) : base(message, innerException) { }
-    }
+
+ 
 }

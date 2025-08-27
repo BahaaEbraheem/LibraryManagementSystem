@@ -1,0 +1,113 @@
+﻿@page "{id:int}"
+@model LibraryManagementSystem.UI.Pages.Borrowings.DetailsModel
+@{
+    ViewData["Title"] = "تفاصيل الاستعارة - Borrowing Details";
+}
+
+<div class="container-fluid" dir="rtl">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-book-reader me-2"></i>
+                        تفاصيل الاستعارة - Borrowing Details
+                    </h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.Borrowing == null)
+                    {
+                        <div class="alert alert-warning">
+                            لم يتم العثور على الاستعارة المطلوبة - Borrowing not found.
+                        </div>
+                    }
+                    else
+                    {
+                        <dl class="row">
+                            <dt class="col-sm-3">معرف الاستعارة - ID</dt>
+                            <dd class="col-sm-9">@Model.Borrowing.BorrowingId</dd>
+
+                            <dt class="col-sm-3">المستخدم - User</dt>
+                            <dd class="col-sm-9">
+                                @Model.Borrowing.User?.FirstName @Model.Borrowing.User?.LastName
+                                <br /><small class="text-muted">@Model.Borrowing.User?.Email</small>
+                            </dd>
+
+                            <dt class="col-sm-3">الكتاب - Book</dt>
+                            <dd class="col-sm-9">
+                                @Model.Borrowing.Book?.Title
+                                <br /><small class="text-muted">@Model.Borrowing.Book?.Author</small>
+                            </dd>
+
+                            <dt class="col-sm-3">تاريخ الاستعارة - Borrow Date</dt>
+                            <dd class="col-sm-9">@Model.Borrowing.BorrowDate.ToString("dd/MM/yyyy")</dd>
+
+                            <dt class="col-sm-3">تاريخ الاستحقاق - Due Date</dt>
+                            <dd class="col-sm-9">@Model.Borrowing.DueDate.ToString("dd/MM/yyyy")</dd>
+
+                            <dt class="col-sm-3">تاريخ الإرجاع - Return Date</dt>
+                            <dd class="col-sm-9">
+                                @(Model.Borrowing.ReturnDate?.ToString("dd/MM/yyyy") ?? "-")
+                            </dd>
+
+                            <dt class="col-sm-3">الحالة - Status</dt>
+                            <dd class="col-sm-9">
+                                @if (Model.Borrowing.IsReturned)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i> مرجع - Returned
+                                    </span>
+                                }
+                                else if (Model.Borrowing.IsOverdue)
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-exclamation-triangle me-1"></i> متأخر - Overdue
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-clock me-1"></i> نشط - Active
+                                    </span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-3">رسوم التأخير - Late Fees</dt>
+                            <dd class="col-sm-9">
+                                @if (Model.Borrowing.LateFee > 0)
+                                {
+                                    <span class="text-danger fw-bold">@Model.Borrowing.LateFee.ToString("C")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </dd>
+
+                            @if (!string.IsNullOrEmpty(Model.Borrowing.Notes))
+                            {
+                                <dt class="col-sm-3">ملاحظات - Notes</dt>
+                                <dd class="col-sm-9">@Model.Borrowing.Notes</dd>
+                            }
+                        </dl>
+
+                        <a href="/Borrowings/Index" class="btn btn-secondary mt-3">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            العودة للقائمة - Back to List
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    dl.row dt {
+        font-weight: 600;
+    }
+
+    dl.row dd {
+        margin-bottom: 1rem;
+    }
+</style>
