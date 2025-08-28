@@ -129,21 +129,7 @@
                 (الصفحة @Model.SearchResults.PageNumber من @Model.SearchResults.TotalPages)
             </p>
         </div>
-        <div class="col-md-6 text-end">
-            <div class="btn-group" role="group">
-                <input type="radio" class="btn-check" name="sortBy" id="sortTitle" value="Title"
-                       checked="@(Model.SearchCriteria.SortBy == "Title")" onchange="updateSort(this)">
-                <label class="btn btn-outline-primary" for="sortTitle">ترتيب بالعنوان</label>
-
-                <input type="radio" class="btn-check" name="sortBy" id="sortAuthor" value="Author"
-                       checked="@(Model.SearchCriteria.SortBy == "Author")" onchange="updateSort(this)">
-                <label class="btn btn-outline-primary" for="sortAuthor">ترتيب بالمؤلف</label>
-
-                <input type="radio" class="btn-check" name="sortBy" id="sortYear" value="PublicationYear"
-                       checked="@(Model.SearchCriteria.SortBy == "PublicationYear")" onchange="updateSort(this)">
-                <label class="btn btn-outline-primary" for="sortYear">ترتيب بالسنة</label>
-            </div>
-        </div>
+      
     </div>
 
     <!-- جدول النتائج - Results table -->
@@ -177,13 +163,7 @@
                                 </td>
                                 <td>
                                     <strong>@book.ISBN</strong>
-                                    @*  @if (!string.IsNullOrEmpty(book.ISBN))
-                                                        {
-                                                            <br>
-                                                            <small class="text-muted">
-                                                                @book.ISBN.Substring(0, Math.Min(100, book.ISBN.Length))...
-                                                            </small>
-                                                        } *@
+                             
                                 </td>
                                 <td>@book.Author</td>
                                 <td>
@@ -325,17 +305,6 @@ else if (Model.SearchResults != null)
 
 @section Scripts {
     <script>
-        // تحديث الترتيب
-        // Update sorting
-        function updateSort(element) {
-            const form = document.querySelector('form');
-            const sortInput = document.createElement('input');
-            sortInput.type = 'hidden';
-            sortInput.name = 'sortBy';
-            sortInput.value = element.value;
-            form.appendChild(sortInput);
-            form.submit();
-        }
 
         // تأكيد حذف الكتاب
         // Confirm book deletion

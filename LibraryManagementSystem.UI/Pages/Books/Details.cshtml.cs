@@ -99,7 +99,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
         /// معالج طلب POST لاستعارة كتاب
         /// POST request handler for borrowing a book
         /// </summary>
-        public async Task<IActionResult> OnPostBorrowAsync(int bookId)
+        public async Task<IActionResult> OnPostBorrowBookAsync(int bookId)
         {
             try
             {

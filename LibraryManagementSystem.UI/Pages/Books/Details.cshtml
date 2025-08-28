@@ -172,13 +172,14 @@
                                         
                                         @if (Model.Book.IsAvailable)
                                         {
-                                            <form method="post" asp-page-handler="Borrow">
+                                            <form method="post" asp-page-handler="BorrowBook" class="d-inline">
                                                 <input type="hidden" name="bookId" value="@Model.Book.BookId" />
-                                                <button type="submit" class="btn btn-primary btn-lg w-100"
+                                               @*  <button type="submit" class="btn btn-primary"
+                                                        title="استعارة الكتاب - Borrow Book"
                                                         onclick="return confirm('هل تريد استعارة الكتاب: @Model.Book.Title؟\n\nفترة الاستعارة: 14 يوم\n\nDo you want to borrow: @Model.Book.Title?\nBorrowing period: 14 days')">
-                                                    <i class="fas fa-book-reader me-2"></i>
-                                                    استعارة الكتاب - Borrow Book
-                                                </button>
+                                                    <i class="fas fa-book-reader me-1"></i>
+                                                    استعارة
+                                                </button> *@
                                             </form>
                                         }
                                         else
