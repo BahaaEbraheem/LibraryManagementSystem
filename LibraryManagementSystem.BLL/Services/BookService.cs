@@ -180,7 +180,7 @@ namespace LibraryManagementSystem.BLL.Services
                 return ServiceResult<int>.ValidationFailure(validation.ErrorMessages);
 
             // التحقق من قواعد الأعمال المخصصة
-            validation = await _validator.ValidateBookAdditionAsync(book);
+            validation = await _validator.ValidateBookAdditionAsync(book,false);
             if (!validation.IsValid)
                 return ServiceResult<int>.ValidationFailure(validation.ErrorMessages);
 
@@ -230,9 +230,13 @@ namespace LibraryManagementSystem.BLL.Services
             if (existing == null)
                 return ServiceResult<bool>.Failure("لم يتم العثور على الكتاب");
 
-            var bookWithSameIsbn = await _bookRepository.GetByIsbnAsync(book.ISBN);
-            if (bookWithSameIsbn != null && bookWithSameIsbn.BookId != book.BookId)
-                return ServiceResult<bool>.Failure("يوجد كتاب آخر بنفس الرقم المعياري");
+            // تحقق من ISBN فقط إذا تغير عن النسخة الحالية
+            if (!string.Equals(existing.ISBN, book.ISBN, StringComparison.OrdinalIgnoreCase))
+            {
+                var bookWithSameIsbn = await _bookRepository.GetByIsbnAsync(book.ISBN);
+                if (bookWithSameIsbn != null && bookWithSameIsbn.BookId != book.BookId)
+                    return ServiceResult<bool>.Failure("يوجد كتاب آخر بنفس الرقم المعياري");
+            }
 
             try
             {

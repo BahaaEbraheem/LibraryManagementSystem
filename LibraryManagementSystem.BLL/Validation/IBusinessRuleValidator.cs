@@ -41,7 +41,7 @@ namespace LibraryManagementSystem.BLL.Validation
         /// </summary>
         /// <param name="book">بيانات الكتاب</param>
         /// <returns>نتيجة التحقق</returns>
-        Task<ValidationResult> ValidateBookAdditionAsync(Book book);
+        Task<ValidationResult> ValidateBookAdditionAsync(Book book,bool isUpdate);
 
         /// <summary>
         /// التحقق من صحة تحديث كتاب

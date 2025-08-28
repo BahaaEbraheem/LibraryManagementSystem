@@ -398,19 +398,22 @@ namespace LibraryManagementSystem.DAL.Repositories
         {
             try
             {
-                // إزالة جميع مفاتيح الكتب
-                // Remove all book keys
+                // إزالة جميع مفاتيح الكتب العامة
                 await _cacheService.RemoveByPatternAsync(CacheKeys.Patterns.AllBooks);
-
-                // إزالة مفاتيح البحث والإحصائيات المتعلقة
-                // Remove related search and statistics keys
                 await _cacheService.RemoveByPatternAsync(CacheKeys.Patterns.AllSearch);
                 await _cacheService.RemoveByPatternAsync(CacheKeys.Patterns.AllStatistics);
 
                 if (bookId.HasValue)
                 {
+                    // إزالة كاش الكتاب نفسه
+                    await _cacheService.RemoveAsync(CacheKeys.Books.ById(bookId.Value));
+
+                    // إزالة كاش الكتاب حسب ISBN
+                    var book = await GetByIdAsync(bookId.Value);
+                    if (book != null)
+                        await _cacheService.RemoveAsync(CacheKeys.Books.ByIsbn(book.ISBN));
+
                     // إزالة مفاتيح الاستعارات المتعلقة بهذا الكتاب
-                    // Remove borrowing keys related to this book
                     await _cacheService.RemoveAsync(CacheKeys.Borrowings.ByBook(bookId.Value));
                 }
 
@@ -421,6 +424,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                 _logger.LogError(ex, "خطأ في إلغاء صحة التخزين المؤقت للكتب - Error invalidating book cache");
             }
         }
+
 
         /// <summary>
         /// إنشاء مفتاح التخزين المؤقت للبحث

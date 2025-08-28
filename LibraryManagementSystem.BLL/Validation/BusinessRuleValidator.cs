@@ -254,25 +254,20 @@ namespace LibraryManagementSystem.BLL.Validation
         /// التحقق من صحة إضافة كتاب
         /// Validate book addition
         /// </summary>
-        public async Task<ValidationResult> ValidateBookAdditionAsync(Book book)
+        public async Task<ValidationResult> ValidateBookAdditionAsync(Book book, bool isUpdate)
         {
             try
             {
-                _logger.LogDebug("التحقق من صحة إضافة الكتاب {Title}", book.Title);
+                _logger.LogDebug("التحقق من صحة إضافة/تحديث الكتاب {Title}", book.Title);
 
                 var result = new ValidationResult { IsValid = true };
 
                 // التحقق من البيانات الأساسية
-                // Check basic data
                 if (string.IsNullOrWhiteSpace(book.Title))
-                {
                     result.AddError("عنوان الكتاب مطلوب - Book title is required");
-                }
 
                 if (string.IsNullOrWhiteSpace(book.Author))
-                {
                     result.AddError("مؤلف الكتاب مطلوب - Book author is required");
-                }
 
                 if (string.IsNullOrWhiteSpace(book.ISBN))
                 {
@@ -281,7 +276,6 @@ namespace LibraryManagementSystem.BLL.Validation
                 else
                 {
                     // التحقق من صحة تنسيق ISBN
-                    // Validate ISBN format
                     if (!IsValidIsbn(book.ISBN))
                     {
                         result.AddError("تنسيق الرقم المعياري غير صحيح - Invalid ISBN format");
@@ -289,9 +283,8 @@ namespace LibraryManagementSystem.BLL.Validation
                     else
                     {
                         // التحقق من عدم وجود ISBN مكرر
-                        // Check for duplicate ISBN
                         var existingBook = await _bookRepository.GetByIsbnAsync(book.ISBN);
-                        if (existingBook != null)
+                        if (existingBook != null && (!isUpdate || existingBook.BookId != book.BookId))
                         {
                             result.AddError("الرقم المعياري موجود مسبقاً - ISBN already exists")
                                   .AddData("existingBookId", existingBook.BookId)
@@ -301,27 +294,21 @@ namespace LibraryManagementSystem.BLL.Validation
                 }
 
                 if (book.TotalCopies <= 0)
-                {
                     result.AddError("عدد النسخ يجب أن يكون أكبر من صفر - Total copies must be greater than zero");
-                }
 
                 if (book.AvailableCopies < 0 || book.AvailableCopies > book.TotalCopies)
-                {
                     result.AddError("عدد النسخ المتاحة غير صحيح - Invalid available copies count");
-                }
 
                 if (book.PublicationYear.HasValue && (book.PublicationYear < 1000 || book.PublicationYear > DateTime.Now.Year))
-                {
                     result.AddError("سنة النشر غير صحيحة - Invalid publication year");
-                }
 
-                _logger.LogDebug("تم التحقق من صحة إضافة الكتاب: {IsValid}", result.IsValid);
+                _logger.LogDebug("تم التحقق من صحة إضافة/تحديث الكتاب: {IsValid}", result.IsValid);
                 return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في التحقق من صحة إضافة الكتاب - Error validating book addition");
-                return ValidationResult.Failure("حدث خطأ أثناء التحقق من صحة إضافة الكتاب - Error occurred while validating book addition");
+                _logger.LogError(ex, "خطأ في التحقق من صحة إضافة/تحديث الكتاب - Error validating book addition/update");
+                return ValidationResult.Failure("حدث خطأ أثناء التحقق من صحة إضافة/تحديث الكتاب - Error occurred while validating book addition/update");
             }
         }
 
@@ -355,7 +342,7 @@ namespace LibraryManagementSystem.BLL.Validation
 
                 // نفس التحقق من الإضافة مع التحقق من وجود الكتاب
                 // Same validation as addition plus checking book existence
-                var result = await ValidateBookAdditionAsync(book);
+                var result = await ValidateBookAdditionAsync(book,true);
 
                 // التحقق من وجود الكتاب
                 // Check book existence
@@ -366,8 +353,8 @@ namespace LibraryManagementSystem.BLL.Validation
                 }
 
                 // التحقق من ISBN إذا تم تغييره
-                // Check ISBN if changed
-                if (existingBook.ISBN != book.ISBN)
+                // التحقق من ISBN فقط إذا تم تغييره عن السجل الحالي
+                if (!string.Equals(existingBook.ISBN, book.ISBN, StringComparison.OrdinalIgnoreCase))
                 {
                     var bookWithSameIsbn = await _bookRepository.GetByIsbnAsync(book.ISBN);
                     if (bookWithSameIsbn != null && bookWithSameIsbn.BookId != book.BookId)
