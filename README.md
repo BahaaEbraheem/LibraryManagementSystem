@@ -560,7 +560,7 @@ public async Task<IEnumerable<Book>> SearchBooksAsync(BookSearchDto searchDto)
 
 ```
 
-### 5. **واجهة خدمة التخزين المؤقت ICacheService ** (افتراضي بناءً على README)
+### 5. **واجهة خدمة التخزين المؤقت ICacheService** (افتراضي بناءً على README)
 ```
     public interface ICacheService
     {
@@ -780,7 +780,6 @@ LibraryManagementSystem/
 - **Data Access**: ADO.NET, SQL Server/LocalDB.
 - **Caching**: IMemoryCache.
 - **Patterns**: Repository Pattern, Dependency Injection.
-- **License**: MIT.
 
 ## كيفية التشغيل
 1. استنساخ المستودع:
