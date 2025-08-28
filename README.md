@@ -1,4 +1,4 @@
-# تقرير نظام إدارة المكتبة
+<img width="1024" height="1536" alt="ChatGPT Image Aug 28, 2025, 03_06_02 PM" src="https://github.com/user-attachments/assets/5be68d15-3a77-4c42-93de-cb950da272be" /># تقرير نظام إدارة المكتبة
 
 ## صفحة العنوان
 **نظام إدارة المكتبة**  
@@ -162,6 +162,12 @@
 | Notes           | NVARCHAR(200)    | اختياري                       |
 | CreatedDate     | DATETIME2        | افتراضي GETDATE()             |
 | ModifiedDate    | DATETIME2        | افتراضي GETDATE()             |
+
+
+
+
+
+
 
 ### العلاقات
 - **Users ↔ Borrowings**: علاقة واحد إلى متعدد (1:N) عبر `UserId`.
