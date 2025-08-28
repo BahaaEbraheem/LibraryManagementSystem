@@ -1,4 +1,5 @@
 using LibraryManagementSystem.BLL.Services;
+using LibraryManagementSystem.BLL.Validation;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.DTOs;
 using LibraryManagementSystem.DAL.Repositories;
@@ -18,13 +19,14 @@ namespace LibraryManagementSystem.Tests.UnitTests
         private readonly Mock<IAuthorizationService> _mockAuthorizationService;
         private readonly Mock<ILogger<BookService>> _mockLogger;
         private readonly BookService _bookService;
-
+        private readonly Mock<IBusinessRuleValidator> _validator;
         public BookServiceTests()
         {
             _mockBookRepository = new Mock<IBookRepository>();
             _mockAuthorizationService = new Mock<IAuthorizationService>();
             _mockLogger = new Mock<ILogger<BookService>>();
-            _bookService = new BookService(_mockBookRepository.Object, _mockAuthorizationService.Object, _mockLogger.Object);
+            _validator = new Mock<IBusinessRuleValidator>();
+            _bookService = new BookService(_mockBookRepository.Object, _mockAuthorizationService.Object,_validator.Object, _mockLogger.Object);
         }
 
         [Fact]
@@ -108,28 +110,28 @@ namespace LibraryManagementSystem.Tests.UnitTests
             Assert.Equal(2, result.Data.Items.Count());
         }
 
-        //[Fact]
-        //public async Task GetAvailableBooksAsync_ReturnsOnlyAvailableBooks()
-        //{
-        //    // Arrange
-        //    var availableBooks = new List<Book>
-        //    {
-        //        new Book { BookId = 1, Title = "كتاب متاح", AvailableCopies = 3 },
-        //        new Book { BookId = 2, Title = "كتاب متاح آخر", AvailableCopies = 1 }
-        //    };
+        [Fact]
+        public async Task GetAvailableBooksAsync_ReturnsOnlyAvailableBooks()
+        {
+            // Arrange
+            var availableBooks = new List<Book>
+            {
+                new Book { BookId = 1, Title = "كتاب متاح", AvailableCopies = 3 },
+                new Book { BookId = 2, Title = "كتاب متاح آخر", AvailableCopies = 1 }
+            };
 
-        //    _mockBookRepository.Setup(repo => repo.GetAvailableBooksAsync())
-        //        .ReturnsAsync(availableBooks);
+            _mockBookRepository.Setup(repo => repo.GetAvailableAsync())
+                .ReturnsAsync(availableBooks);
 
-        //    // Act
-        //    var result = await _bookService.GetAvailableBooksAsync();
+            // Act
+            var result = await _bookService.GetAvailableBooksAsync();
 
-        //    // Assert
-        //    Assert.True(result.IsSuccess);
-        //    Assert.NotNull(result.Data);
-        //    Assert.Equal(2, result.Data.Count());
-        //    Assert.All(result.Data, book => Assert.True(book.AvailableCopies > 0));
-        //}
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Data);
+            Assert.Equal(2, result.Data.Count());
+            Assert.All(result.Data, book => Assert.True(book.AvailableCopies > 0));
+        }
 
         [Fact]
         public async Task IsBookAvailableAsync_AvailableBook_ReturnsTrue()
@@ -177,66 +179,30 @@ namespace LibraryManagementSystem.Tests.UnitTests
             Assert.Contains("معرف الكتاب غير صحيح", result.ErrorMessage);
         }
 
-        //[Fact]
-        //public async Task GetBooksByAuthorAsync_ValidAuthor_ReturnsBooks()
-        //{
-        //    // Arrange
-        //    var author = "نجيب محفوظ";
-        //    var expectedBooks = new List<Book>
-        //    {
-        //        new Book { BookId = 1, Title = "أولاد حارتنا", Author = author },
-        //        new Book { BookId = 2, Title = "الثلاثية", Author = author }
-        //    };
+        [Fact]
+        public async Task GetBooksByAuthorAsync_ValidAuthor_ReturnsBooks()
+        {
+            // Arrange
+            var author = "نجيب محفوظ";
+            var expectedBooks = new List<Book>
+            {
+                new Book { BookId = 1, Title = "أولاد حارتنا", Author = author },
+                new Book { BookId = 2, Title = "الثلاثية", Author = author }
+            };
 
-        //    _mockBookRepository.Setup(repo => repo.GetByAuthorAsync(author))
-        //        .ReturnsAsync(expectedBooks);
+            _mockBookRepository.Setup(repo => repo.GetByAuthorAsync(author))
+                .ReturnsAsync(expectedBooks);
 
-        //    // Act
-        //    var result = await _bookService.GetBooksByAuthorAsync(author);
+            // Act
+            var result = await _bookService.GetAvailableBooksAsync();
 
-        //    // Assert
-        //    Assert.True(result.IsSuccess);
-        //    Assert.NotNull(result.Data);
-        //    Assert.Equal(2, result.Data.Count());
-        //    Assert.All(result.Data, book => Assert.Equal(author, book.Author));
-        //}
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.NotNull(result.Data);
+            Assert.Equal(2, result.Data.Count());
+            Assert.All(result.Data, book => Assert.Equal(author, book.Author));
+        }
 
-        //[Theory]
-        //[InlineData("")]
-        //[InlineData("   ")]
-        //[InlineData(null)]
-        //public async Task GetBooksByAuthorAsync_InvalidAuthor_ReturnsFailure(string invalidAuthor)
-        //{
-        //    // Act
-        //    var result = await _bookService.GetBooksByAuthorAsync(invalidAuthor);
 
-        //    // Assert
-        //    Assert.False(result.IsSuccess);
-        //    Assert.Contains("اسم المؤلف مطلوب", result.ErrorMessage);
-        //}
-
-        //[Fact]
-        //public async Task GetBooksByGenreAsync_ValidGenre_ReturnsBooks()
-        //{
-        //    // Arrange
-        //    var genre = "أدب";
-        //    var expectedBooks = new List<Book>
-        //    {
-        //        new Book { BookId = 1, Title = "رواية أدبية", Genre = genre },
-        //        new Book { BookId = 2, Title = "مجموعة قصصية", Genre = genre }
-        //    };
-
-        //    _mockBookRepository.Setup(repo => repo.GetByGenreAsync(genre))
-        //        .ReturnsAsync(expectedBooks);
-
-        //    // Act
-        //    var result = await _bookService.GetBooksByGenreAsync(genre);
-
-        //    // Assert
-        //    Assert.True(result.IsSuccess);
-        //    Assert.NotNull(result.Data);
-        //    Assert.Equal(2, result.Data.Count());
-        //    Assert.All(result.Data, book => Assert.Equal(genre, book.Genre));
-        //}
     }
 }

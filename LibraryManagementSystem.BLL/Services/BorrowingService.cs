@@ -1,8 +1,10 @@
+using LibraryManagementSystem.BLL.Validation;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Repositories;
 using LibraryManagementSystem.DAL.UnitOfWork;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using static LibraryManagementSystem.DAL.Caching.CacheKeys;
 
 namespace LibraryManagementSystem.BLL.Services
 {
@@ -18,8 +20,10 @@ namespace LibraryManagementSystem.BLL.Services
         private readonly IUserRepository _userRepository;
         private readonly ILogger<BorrowingService> _logger;
         private readonly LibrarySettings _librarySettings;
+        private readonly IBusinessRuleValidator _validator;
 
         public BorrowingService(
+            IBusinessRuleValidator validator,
             IUnitOfWork unitOfWork,
             IBorrowingRepository borrowingRepository,
             IBookRepository bookRepository,
@@ -33,6 +37,7 @@ namespace LibraryManagementSystem.BLL.Services
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _librarySettings = librarySettings?.Value ?? throw new ArgumentNullException(nameof(librarySettings));
+            _validator= validator ?? throw new ArgumentNullException(nameof(validator));
         }
 
         /// <summary>
@@ -60,6 +65,11 @@ namespace LibraryManagementSystem.BLL.Services
                         userId, bookId, reason);
                     return ServiceResult<int>.Failure(reason);
                 }
+                // التحقق من قواعد الأعمال المخصصة
+                var validation = await _validator.ValidateBorrowingAsync(userId,bookId);
+                if (!validation.IsValid)
+                    return ServiceResult<int>.ValidationFailure(validation.ErrorMessages);
+
 
                 // إنشاء سجل الاستعارة
                 // Create borrowing record
@@ -119,12 +129,17 @@ namespace LibraryManagementSystem.BLL.Services
         /// إرجاع كتاب
         /// Return a book
         /// </summary>
-        public async Task<ServiceResult<bool>> ReturnBookAsync(int borrowingId, string? notes = null)
+        public async Task<ServiceResult<bool>> ReturnBookAsync(int borrowingId, int userId, string? notes = null)
         {
             try
             {
                 _logger.LogDebug("بدء عملية إرجاع الكتاب للاستعارة {BorrowingId} - Starting book return for borrowing",
                     borrowingId);
+
+                // التحقق من قواعد الأعمال المخصصة
+                var validation = await _validator.ValidateReturnAsync(borrowingId, userId);
+                if (!validation.IsValid)
+                    return ServiceResult<bool>.ValidationFailure(validation.ErrorMessages);
 
                 // الحصول على سجل الاستعارة
                 // Get borrowing record
@@ -142,6 +157,8 @@ namespace LibraryManagementSystem.BLL.Services
                         borrowingId);
                     return ServiceResult<bool>.Failure("الكتاب تم إرجاعه مسبقاً - Book has already been returned");
                 }
+
+
 
                 // حساب الرسوم المتأخرة
                 // Calculate late fees

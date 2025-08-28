@@ -1,3 +1,4 @@
+using LibraryManagementSystem.BLL.Validation;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Repositories;
 
@@ -19,7 +20,7 @@ namespace LibraryManagementSystem.BLL.Services
         /// إرجاع كتاب
         /// Return a book
         /// </summary>
-        Task<ServiceResult<bool>> ReturnBookAsync(int borrowingId, string? notes = null);
+        Task<ServiceResult<bool>> ReturnBookAsync(int borrowingId, int userId, string? notes = null);
 
         /// <summary>
         /// الحصول على استعارات المستخدم النشطة

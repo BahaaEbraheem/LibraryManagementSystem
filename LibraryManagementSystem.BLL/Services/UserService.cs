@@ -1,8 +1,10 @@
+using LibraryManagementSystem.BLL.Validation;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Repositories;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
+using static LibraryManagementSystem.DAL.Caching.CacheKeys;
 
 namespace LibraryManagementSystem.BLL.Services
 {
@@ -15,12 +17,13 @@ namespace LibraryManagementSystem.BLL.Services
         private readonly IUserRepository _userRepository;
         private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<UserService> _logger;
-
-        public UserService(IUserRepository userRepository, IAuthorizationService authorizationService, ILogger<UserService> logger)
+        private readonly IBusinessRuleValidator _validator;
+        public UserService(IBusinessRuleValidator validator,IUserRepository userRepository, IAuthorizationService authorizationService, ILogger<UserService> logger)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _authorizationService = authorizationService ?? throw new ArgumentNullException(nameof(authorizationService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _validator= validator ?? throw new ArgumentNullException(nameof(validator));
         }
 
         /// <summary>
@@ -176,6 +179,12 @@ namespace LibraryManagementSystem.BLL.Services
                     return ServiceResult<int>.Failure(validationResult.ErrorMessage!);
                 }
 
+                // التحقق من قواعد الأعمال المخصصة
+               var validation = await _validator.ValidateUserAdditionAsync(user);
+                if (!validation.IsValid)
+                    return ServiceResult<int>.ValidationFailure(validation.ErrorMessages);
+
+
                 // التحقق من عدم وجود مستخدم بنفس البريد الإلكتروني
                 if (await _userRepository.ExistsByEmailAsync(user.Email))
                 {
@@ -230,6 +239,7 @@ namespace LibraryManagementSystem.BLL.Services
                     _logger.LogWarning("محاولة تحديث مستخدم غير موجود: {UserId} - Attempt to update non-existing user", user.UserId);
                     return ServiceResult<bool>.Failure("المستخدم غير موجود - User not found");
                 }
+                //// التحقق من قواعد الأعمال المخصصة
 
                 // التحقق من صحة البيانات
                 var validationResult = ValidateUser(user);
@@ -237,6 +247,12 @@ namespace LibraryManagementSystem.BLL.Services
                 {
                     return ServiceResult<bool>.Failure(validationResult.ErrorMessage!);
                 }
+
+                user.PasswordHash = string.IsNullOrEmpty(user.PasswordHash)
+                    ? existingUser.PasswordHash
+                    : user.PasswordHash;
+
+
 
                 // التحقق من عدم وجود مستخدم آخر بنفس البريد الإلكتروني
                 var userWithSameEmail = await _userRepository.GetByEmailAsync(user.Email);
@@ -290,6 +306,10 @@ namespace LibraryManagementSystem.BLL.Services
                     _logger.LogWarning("محاولة حذف مستخدم غير موجود: {UserId} - Attempt to delete non-existing user", id);
                     return ServiceResult<bool>.Failure("المستخدم غير موجود - User not found");
                 }
+                // التحقق من قواعد الأعمال المخصصة
+                var validation = await _validator.ValidateUserDeletionAsync(id);
+                if (!validation.IsValid)
+                    return ServiceResult<bool>.ValidationFailure(validation.ErrorMessages);
 
                 _logger.LogDebug("حذف المستخدم {UserId} - Deleting user", id);
                 var success = await _userRepository.DeleteAsync(id);

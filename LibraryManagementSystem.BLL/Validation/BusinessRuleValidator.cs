@@ -497,24 +497,21 @@ namespace LibraryManagementSystem.BLL.Validation
             {
                 _logger.LogDebug("التحقق من صحة تحديث المستخدم {UserId}", user.UserId);
 
-                // نفس التحقق من الإضافة مع التحقق من وجود المستخدم
-                // Same validation as addition plus checking user existence
+                // 1. Validate same rules as Add
                 var result = await ValidateUserAdditionAsync(user);
 
-                // التحقق من وجود المستخدم
-                // Check user existence
+                // 2. Check existence
                 var existingUser = await _userRepository.GetByIdAsync(user.UserId);
                 if (existingUser == null)
                 {
                     return ValidationResult.Failure("المستخدم غير موجود - User not found");
                 }
 
-                // التحقق من البريد الإلكتروني إذا تم تغييره
-                // Check email if changed
-                if (existingUser.Email != user.Email)
+                // 3. If email changed, check duplication
+                if (!string.Equals(existingUser.Email, user.Email, StringComparison.OrdinalIgnoreCase))
                 {
-                    var userWithSameEmail = await _userRepository.GetByEmailAsync(user.Email);
-                    if (userWithSameEmail != null && userWithSameEmail.UserId != user.UserId)
+                    var userWithSameEmail = await _userRepository.GetByEmailAsync(user.Email, user.UserId);
+                    if (userWithSameEmail != null)
                     {
                         result.AddError("البريد الإلكتروني موجود مسبقاً - Email already exists");
                     }
@@ -528,6 +525,7 @@ namespace LibraryManagementSystem.BLL.Validation
                 return ValidationResult.Failure("حدث خطأ أثناء التحقق من صحة تحديث المستخدم - Error occurred while validating user update");
             }
         }
+
 
         /// <summary>
         /// التحقق من صحة حذف مستخدم

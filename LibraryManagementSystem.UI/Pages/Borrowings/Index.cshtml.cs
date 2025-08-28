@@ -1,4 +1,5 @@
 using LibraryManagementSystem.BLL.Services;
+using LibraryManagementSystem.BLL.Validation;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +11,7 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
     /// نموذج صفحة إدارة الاستعارات
     /// Borrowings management page model
     /// </summary>
-    public class IndexModel : PageModel
+    public class IndexModel : BasePageModel
     {
         private readonly IBorrowingService _borrowingService;
         private readonly ILogger<IndexModel> _logger;
@@ -19,7 +20,7 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
         /// منشئ نموذج الصفحة
         /// Page model constructor
         /// </summary>
-        public IndexModel(IBorrowingService borrowingService, ILogger<IndexModel> logger)
+        public IndexModel(IBorrowingService borrowingService, IJwtService jwtService, ILogger<IndexModel> logger) : base(jwtService)
         {
             _borrowingService = borrowingService ?? throw new ArgumentNullException(nameof(borrowingService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -158,7 +159,16 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
 
                 _logger.LogDebug("محاولة إرجاع الكتاب للاستعارة {BorrowingId} - Attempting to return book for borrowing {BorrowingId}", borrowingId, borrowingId);
 
-                var result = await _borrowingService.ReturnBookAsync(borrowingId, notes);
+                // الحصول على معرف المستخدم الحالي من JWT
+                // Get current user ID from JWT
+                var currentUserId = GetCurrentUserId();
+                if (currentUserId == null)
+                {
+                    ErrorMessage = "يجب تسجيل الدخول أولاً - Please login first";
+                    return Page();
+                }
+
+                var result = await _borrowingService.ReturnBookAsync(borrowingId, currentUserId.Value , notes);
 
                 if (result.IsSuccess)
                 {

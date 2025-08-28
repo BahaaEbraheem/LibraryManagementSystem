@@ -127,5 +127,33 @@ namespace LibraryManagementSystem.UI.Pages.Users
                 return Page();
             }
         }
+
+        // داخل IndexModel
+        public async Task<IActionResult> OnPostDeleteAsync(int userId)
+        {
+            try
+            {
+                var result = await _userService.DeleteUserAsync(userId);
+
+                if (result.IsSuccess)
+                {
+                    TempData["SuccessMessage"] = "تم حذف المستخدم بنجاح!";
+                    return RedirectToPage(); // إعادة تحميل الصفحة
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = result.ErrorMessage;
+                    return RedirectToPage();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "خطأ في حذف المستخدم {UserId}", userId);
+                TempData["ErrorMessage"] = "حدث خطأ أثناء حذف المستخدم";
+                return RedirectToPage();
+            }
+        }
+
+
     }
 }

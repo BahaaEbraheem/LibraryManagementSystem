@@ -347,7 +347,7 @@ else if (Model.SearchResults != null)
             headers: {
                 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
             }
-        });
+        })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

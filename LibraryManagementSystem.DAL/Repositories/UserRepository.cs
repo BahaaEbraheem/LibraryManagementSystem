@@ -127,42 +127,45 @@ namespace LibraryManagementSystem.DAL.Repositories
             }
         }
 
-        /// <summary>
-        /// الحصول على مستخدم بالبريد الإلكتروني
-        /// Get user by email
-        /// </summary>
-        public async Task<User?> GetByEmailAsync(string email)
+
+        public async Task<User?> GetByEmailAsync(string email, int? excludeUserId = null)
         {
             try
             {
                 var cacheKey = CacheKeys.Users.ByEmail(email);
 
                 // محاولة الحصول على البيانات من التخزين المؤقت
-                // Try to get data from cache
-                var cachedUser = await _cacheService.GetAsync<User>(cacheKey);
-                if (cachedUser != null)
+                if (excludeUserId == null)
                 {
-                    _logger.LogDebug("تم الحصول على المستخدم بالبريد الإلكتروني من التخزين المؤقت - Retrieved user by email from cache");
-                    return cachedUser;
+                    var cachedUser = await _cacheService.GetAsync<User>(cacheKey);
+                    if (cachedUser != null)
+                    {
+                        _logger.LogDebug("تم الحصول على المستخدم بالبريد الإلكتروني من التخزين المؤقت - Retrieved user by email from cache");
+                        return cachedUser;
+                    }
                 }
 
                 using var connection = await _connectionFactory.CreateConnectionAsync();
 
-                const string sql = @"
-                    SELECT UserId, FirstName, LastName, Email, PhoneNumber, Address,
-                           MembershipDate, IsActive, CreatedDate, ModifiedDate, PasswordHash, Role
-                    FROM Users
-                    WHERE Email = @Email";
+                var sql = @"
+            SELECT UserId, FirstName, LastName, Email, PhoneNumber, Address,
+                   MembershipDate, IsActive, CreatedDate, ModifiedDate, PasswordHash, Role
+            FROM Users
+            WHERE Email = @Email";
 
-                using var reader = await DatabaseHelper.ExecuteReaderAsync(connection, sql, new { Email = email });
+                // لو فيه UserId مستثنى (يعني المستخدم نفسه اللي بيعمل تحديث)
+                if (excludeUserId.HasValue)
+                    sql += " AND UserId != @ExcludeUserId";
+
+                using var reader = await DatabaseHelper.ExecuteReaderAsync(connection, sql, new { Email = email, ExcludeUserId = excludeUserId });
 
                 if (reader.Read())
                 {
                     var user = MapReaderToUser(reader);
 
-                    // تخزين النتيجة في التخزين المؤقت
-                    // Store result in cache
-                    await _cacheService.SetAsync(cacheKey, user, _cacheExpiration);
+                    // تخزين النتيجة في الكاش فقط لو مش مستثنى
+                    if (excludeUserId == null)
+                        await _cacheService.SetAsync(cacheKey, user, _cacheExpiration);
 
                     _logger.LogDebug("تم الحصول على المستخدم بالبريد الإلكتروني من قاعدة البيانات - Retrieved user by email from database");
                     return user;
@@ -176,6 +179,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                 throw;
             }
         }
+
 
         /// <summary>
         /// الحصول على المستخدمين النشطين
@@ -383,7 +387,7 @@ namespace LibraryManagementSystem.DAL.Repositories
                     user.Address,
                     user.IsActive,
                     user.PasswordHash,
-                    Role = user.Role.ToString(),
+                    Role = (int)user.Role, // هنا بدلاً من ToString()
                     user.ModifiedDate,
                     user.UserId
                 });
@@ -642,6 +646,9 @@ namespace LibraryManagementSystem.DAL.Repositories
             await _cacheService.RemoveAsync(CacheKeys.Users.All);
             await _cacheService.RemoveAsync(CacheKeys.Users.Active);
             await _cacheService.RemoveAsync(CacheKeys.Users.ById(userId));
+            if (!string.IsNullOrEmpty(email))
+                await _cacheService.RemoveAsync(CacheKeys.Users.ByEmail(email));
+
 
             if (!string.IsNullOrEmpty(email))
             {

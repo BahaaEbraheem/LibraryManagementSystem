@@ -24,7 +24,7 @@ namespace LibraryManagementSystem.DAL.Repositories
         /// الحصول على مستخدم بالبريد الإلكتروني
         /// Get user by email
         /// </summary>
-        Task<User?> GetByEmailAsync(string email);
+        Task<User?> GetByEmailAsync(string email, int? excludeUserId = null);
 
         /// <summary>
         /// الحصول على المستخدمين النشطين
