@@ -389,7 +389,12 @@ namespace LibraryManagementSystem.BLL.Validation
                 {
                     return ValidationResult.Failure("الكتاب غير موجود - Book not found");
                 }
-
+                // تحقق من وجود استعارات مرتبطة بالكتاب
+                var hasBorrowings = await _borrowingRepository.HasBorrowingsAsync(bookId);
+                if (hasBorrowings)
+                {
+                    return ValidationResult.Failure("لا يمكن حذف الكتاب لأن هناك استعارات مرتبطة به.");
+                }
                 // التحقق من عدم وجود استعارات نشطة
                 // Check for active borrowings
                 var activeBorrowings = await _borrowingRepository.GetBookBorrowingsAsync(bookId);

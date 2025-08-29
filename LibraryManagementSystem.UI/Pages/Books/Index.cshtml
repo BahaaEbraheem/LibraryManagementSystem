@@ -200,15 +200,12 @@
                                         </a>
                                         @if (book.IsAvailable)
                                         {
-                                            <form method="post" asp-page-handler="BorrowBook" class="d-inline">
-                                                <input type="hidden" name="bookId" value="@book.BookId" />
-                                                <button type="submit" class="btn btn-primary"
-                                                        title="استعارة الكتاب - Borrow Book"
-                                                        onclick="return confirm('هل تريد استعارة الكتاب: @book.Title؟\n\nفترة الاستعارة: 14 يوم\n\nDo you want to borrow: @book.Title?\nBorrowing period: 14 days')">
-                                                    <i class="fas fa-book-reader me-1"></i>
-                                                    استعارة
-                                                </button>
-                                            </form>
+                                                                <button type="button" class="btn btn-primary"
+                                                                        onclick="confirmBorrowBook(@book.BookId, '@book.Title')"
+                                                                        title="استعارة الكتاب - Borrow Book">
+                                                                    <i class="fas fa-book-reader me-1"></i>
+                                                                    استعارة
+                                                                </button>
                                         }
                                         @if (Model.IsAdmin)
                                         {
@@ -216,22 +213,13 @@
                                                 <i class="fas fa-edit me-1"></i>
                                                 تعديل
                                             </a>
-                                            <form method="post" asp-page-handler="DeleteBook" asp-route-bookId="@book.BookId"
-                                                  onsubmit="return confirm('هل أنت متأكد من حذف الكتاب: @book.Title ؟\n\nهذا الإجراء لا يمكن التراجع عنه.\n\nAre you sure you want to delete the book: @book.Title ?\n\nThis action cannot be undone.')">
-                                                <button type="submit" class="btn btn-outline-danger" title="حذف الكتاب - Delete Book">
-                                                    <i class="fas fa-trash me-1"></i> حذف
-                                                </button>
-                                            </form>
+                                                                <button type="button" class="btn btn-outline-danger"
+                                                                        onclick="confirmDeleteBook(@book.BookId, '@book.Title')">
+                                                                    <i class="fas fa-trash me-1"></i> حذف
+                                                                </button>
 
                                         }
-                                        else
-                                        {
-                                            <button type="button" class="btn btn-secondary" disabled
-                                                    title="الكتاب غير متوفر للاستعارة - Book not available for borrowing">
-                                                <i class="fas fa-ban me-1"></i>
-                                                غير متوفر
-                                            </button>
-                                        }
+                                       
                                     </div>
                                 </td>
                             </tr>
@@ -241,6 +229,40 @@
             </div>
         </div>
     </div>
+                        <!-- Confirm Action Modal -->
+                        <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">تأكيد العملية</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body" id="confirmActionText"></div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                                        <button type="button" id="confirmActionBtn" class="btn btn-danger">تأكيد</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Message Modal -->
+                        <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">رسالة</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body" id="messageContent"></div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">حسناً</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
 
     <!-- التنقل بين الصفحات - Pagination -->
     @if (Model.SearchResults.TotalPages > 1)
@@ -302,39 +324,73 @@ else if (Model.SearchResults != null)
         return Request.Path + queryString;
     }
 }
-
 @section Scripts {
     <script>
+        let actionType = null;
+        let currentBookId = null;
+        let currentBookTitle = '';
 
-        // تأكيد حذف الكتاب
-        // Confirm book deletion
         function confirmDeleteBook(bookId, bookTitle) {
-            if (confirm(`هل أنت متأكد من حذف الكتاب: ${bookTitle}؟\n\nهذا الإجراء لا يمكن التراجع عنه.\n\nAre you sure you want to delete the book: ${bookTitle}?\n\nThis action cannot be undone.`)) {
-                // إرسال طلب حذف
-                                         fetch(`?handler=DeleteBook&bookId=${bookId}`, {
-            method: 'POST',
-            headers: {
-                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-            }
-        })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('تم حذف الكتاب بنجاح - Book deleted successfully');
-                        location.reload();
-                    } else {
-                        alert('فشل في حذف الكتاب: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('حدث خطأ أثناء حذف الكتاب - An error occurred while deleting the book');
-                });
-            }
+            actionType = 'delete';
+            currentBookId = bookId;
+            currentBookTitle = bookTitle;
+
+            document.getElementById('confirmActionText').innerText =
+                `هل أنت متأكد من حذف الكتاب: ${bookTitle}؟ هذا الإجراء لا يمكن التراجع عنه.`;
+
+            new bootstrap.Modal(document.getElementById('confirmActionModal')).show();
         }
 
+        function confirmBorrowBook(bookId, bookTitle) {
+            actionType = 'borrow';
+            currentBookId = bookId;
+            currentBookTitle = bookTitle;
 
+            document.getElementById('confirmActionText').innerText =
+                `هل تريد استعارة الكتاب: ${bookTitle}؟\n\nفترة الاستعارة: 14 يوم`;
 
+            new bootstrap.Modal(document.getElementById('confirmActionModal')).show();
+        }
 
+        document.getElementById('confirmActionBtn').addEventListener('click', function () {
+            if (!currentBookId) return;
+
+            let url = '';
+            if (actionType === 'delete') {
+                url = `?handler=DeleteBook&bookId=${currentBookId}`;
+            } else if (actionType === 'borrow') {
+                url = `?handler=BorrowBook&bookId=${currentBookId}`;
+            }
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
+                document.getElementById('messageContent').innerText = data.success
+                    ? (actionType === 'delete'
+                        ? 'تم حذف الكتاب بنجاح!'
+                        : 'تم استعارة الكتاب بنجاح!')
+                    : 'فشل في العملية: ' + data.message;
+
+                messageModal.show();
+                if (data.success) {
+                    messageModal._element.addEventListener('hidden.bs.modal', () => location.reload());
+                }
+            })
+            .catch(() => {
+                const messageModal = new bootstrap.Modal(document.getElementById('messageModal'));
+                document.getElementById('messageContent').innerText = 'حدث خطأ أثناء تنفيذ العملية';
+                messageModal.show();
+            });
+
+            bootstrap.Modal.getInstance(document.getElementById('confirmActionModal')).hide();
+        });
     </script>
+}
+
 }

@@ -103,6 +103,7 @@ namespace LibraryManagementSystem.DAL.Repositories
         /// Get most active borrowing users
         /// </summary>
         Task<IEnumerable<MostActiveUser>> GetMostActiveUsersAsync(int topCount = 10);
+        Task<bool> HasBorrowingsAsync(int bookId);
     }
 
     /// <summary>

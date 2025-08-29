@@ -281,148 +281,81 @@ namespace LibraryManagementSystem.UI.Pages.Books
                    SearchCriteria.AvailableOnly ||
                    SearchCriteria.IsAvailable.HasValue;
         }
-
         /// <summary>
         /// استعارة كتاب
         /// Borrow a book
         /// </summary>
-        public async Task<IActionResult> OnPostBorrowBookAsync(int bookId)
+        public async Task<JsonResult> OnPostBorrowBookAsync(int bookId)
         {
             try
             {
                 if (bookId <= 0)
                 {
-                    TempData["ErrorMessage"] = "معرف الكتاب غير صحيح - Invalid book ID";
-                    return RedirectToPage();
+                    return new JsonResult(new { success = false, message = "معرف الكتاب غير صحيح - Invalid book ID" });
                 }
 
-                // الحصول على معرف المستخدم الحالي من JWT
-                // Get current user ID from JWT
                 int userId = GetCurrentUserIdForBorrowing();
-
                 if (userId <= 0)
                 {
-                    TempData["ErrorMessage"] = "يرجى تسجيل الدخول أولاً - Please login first";
-                    return RedirectToPage();
+                    return new JsonResult(new { success = false, message = "يرجى تسجيل الدخول أولاً - Please login first" });
                 }
 
-                _logger.LogInformation("محاولة استعارة الكتاب {BookId} للمستخدم {UserId} - Attempting to borrow book for user",
-                    bookId, userId);
-
-                // التحقق من أهلية الاستعارة أولاً
-                // Check borrowing eligibility first
                 var eligibilityResult = await _borrowingService.CheckBorrowingEligibilityAsync(userId, bookId);
-
-                if (!eligibilityResult.IsSuccess)
+                if (!eligibilityResult.IsSuccess || !eligibilityResult.Data!.CanBorrow)
                 {
-                    _logger.LogWarning("فشل في التحقق من أهلية الاستعارة: {Error} - Failed to check borrowing eligibility",
-                        eligibilityResult.ErrorMessage);
-                    TempData["ErrorMessage"] = eligibilityResult.ErrorMessage;
-                    return RedirectToPage();
+                    return new JsonResult(new { success = false, message = eligibilityResult.ErrorMessage ?? eligibilityResult.Data?.Reason });
                 }
 
-                if (!eligibilityResult.Data!.CanBorrow)
-                {
-                    _logger.LogWarning("المستخدم غير مؤهل للاستعارة: {Reason} - User not eligible for borrowing",
-                        eligibilityResult.Data.Reason);
-                    TempData["ErrorMessage"] = eligibilityResult.Data.Reason;
-                    return RedirectToPage();
-                }
-
-                // تنفيذ الاستعارة
-                // Execute borrowing
                 var borrowResult = await _borrowingService.BorrowBookAsync(userId, bookId, 14);
-
                 if (borrowResult.IsSuccess)
                 {
-                    _logger.LogInformation("تم استعارة الكتاب بنجاح - Book borrowed successfully. BorrowingId: {BorrowingId}",
-                        borrowResult.Data);
-
-                    TempData["SuccessMessage"] = $"تم استعارة الكتاب بنجاح! رقم الاستعارة: {borrowResult.Data} - Book borrowed successfully! Borrowing ID: {borrowResult.Data}";
-
-                    // إعادة توجيه مع الحفاظ على معايير البحث الحالية
-                    // Redirect while preserving current search criteria
-                    return RedirectToPage(new
-                    {
-                        searchTerm = SearchCriteria.SearchTerm,
-                        genre = SearchCriteria.Genre,
-                        availableOnly = SearchCriteria.AvailableOnly,
-                        pageNumber = SearchCriteria.PageNumber,
-                        pageSize = SearchCriteria.PageSize,
-                        sortBy = SearchCriteria.SortBy,
-                        sortDescending = SearchCriteria.SortDescending
-                    });
+                    return new JsonResult(new { success = true, message = $"تم استعارة الكتاب بنجاح! رقم الاستعارة: {borrowResult.Data}" });
                 }
                 else
                 {
-                    _logger.LogWarning("فشل في استعارة الكتاب: {Error} - Failed to borrow book",
-                        borrowResult.ErrorMessage);
-                    TempData["ErrorMessage"] = borrowResult.ErrorMessage;
+                    return new JsonResult(new { success = false, message = borrowResult.ErrorMessage });
                 }
-
-                return RedirectToPage();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "خطأ في استعارة الكتاب {BookId} - Error borrowing book", bookId);
-                TempData["ErrorMessage"] = "حدث خطأ في الخادم أثناء استعارة الكتاب - Server error occurred while borrowing book";
-                return RedirectToPage();
+                _logger.LogError(ex, "خطأ في استعارة الكتاب {BookId}", bookId);
+                return new JsonResult(new { success = false, message = "حدث خطأ في الخادم أثناء استعارة الكتاب" });
             }
         }
+   
+
         public async Task<IActionResult> OnPostDeleteBookAsync(int bookId)
         {
             try
             {
                 if (bookId <= 0)
                 {
-                    TempData["ErrorMessage"] = "معرف الكتاب غير صحيح - Invalid book ID";
-                    return RedirectToPage();
+                    return new JsonResult(new { success = false, message = "معرف الكتاب غير صحيح - Invalid book ID" });
                 }
 
                 int userId = GetCurrentUserIdForBorrowing();
                 if (userId <= 0)
                 {
-                    TempData["ErrorMessage"] = "يرجى تسجيل الدخول أولاً - Please login first";
-                    return RedirectToPage();
+                    return new JsonResult(new { success = false, message = "يرجى تسجيل الدخول أولاً - Please login first" });
                 }
 
-                _logger.LogInformation("محاولة حذف الكتاب {BookId} من قبل المستخدم {UserId} - Attempting to delete book",
-                    bookId, userId);
-
-                // تنفيذ الحذف
                 var deleteResult = await _bookService.DeleteBookAsync(bookId, userId);
 
                 if (deleteResult.IsSuccess)
                 {
                     _logger.LogInformation("تم حذف الكتاب بنجاح - Book deleted successfully. BookId: {BookId}", bookId);
-
-                    TempData["SuccessMessage"] = $"تم حذف الكتاب بنجاح! - Book deleted successfully!";
-
-                    // إعادة التوجيه مع الحفاظ على معايير البحث
-                    return RedirectToPage(new
-                    {
-                        searchTerm = SearchCriteria.SearchTerm,
-                        genre = SearchCriteria.Genre,
-                        availableOnly = SearchCriteria.AvailableOnly,
-                        pageNumber = SearchCriteria.PageNumber,
-                        pageSize = SearchCriteria.PageSize,
-                        sortBy = SearchCriteria.SortBy,
-                        sortDescending = SearchCriteria.SortDescending
-                    });
+                    return new JsonResult(new { success = true, message = "تم حذف الكتاب بنجاح - Book deleted successfully" });
                 }
                 else
                 {
-                    _logger.LogWarning("فشل في حذف الكتاب: {Error} - Failed to delete book", deleteResult.ErrorMessage);
-                    TempData["ErrorMessage"] = deleteResult.ErrorMessage;
+                    _logger.LogWarning("فشل في حذف الكتاب: {Error} - Failed to delete book", deleteResult.ValidationErrors);
+                    return new JsonResult(new { success = false, message = deleteResult.ValidationErrors });
                 }
-
-                return RedirectToPage();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "خطأ في حذف الكتاب {BookId} - Error deleting book", bookId);
-                TempData["ErrorMessage"] = "حدث خطأ في الخادم أثناء حذف الكتاب - Server error occurred while deleting book";
-                return RedirectToPage();
+                return new JsonResult(new { success = false, message = "حدث خطأ في الخادم أثناء حذف الكتاب - Server error occurred while deleting book" });
             }
         }
 

@@ -3,6 +3,7 @@ using LibraryManagementSystem.DAL.Data;
 using LibraryManagementSystem.DAL.Models;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using static LibraryManagementSystem.DAL.Caching.CacheKeys;
 
 namespace LibraryManagementSystem.DAL.Repositories
 {
@@ -825,6 +826,25 @@ namespace LibraryManagementSystem.DAL.Repositories
             await _cacheService.RemoveAsync(CacheKeys.Borrowings.ByBook(bookId));
             await _cacheService.RemoveAsync(CacheKeys.Borrowings.ActiveByUser(userId));
             await _cacheService.RemoveAsync(CacheKeys.Borrowings.Statistics);
+        }
+
+        public async Task<bool> HasBorrowingsAsync(int bookId)
+        {
+            try
+            {
+                using var connection = await _connectionFactory.CreateConnectionAsync();
+
+                const string sql = "SELECT COUNT(*) FROM Borrowings WHERE BookId = @bookId AND IsReturned = 1";
+
+                var result = await DatabaseHelper.ExecuteScalarAsync<int>(connection, sql, new { BookId = bookId });
+
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error checking borrowings: {ex.Message}");
+                throw;
+            }
         }
     }
 }
