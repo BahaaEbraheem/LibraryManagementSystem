@@ -1,6 +1,3 @@
-
-<img width="500" height="500" alt="ChatGPT Image Aug 28, 2025, 03_06_02 PM" src="[ERD]([https://github.com/BahaaEbraheem/LibraryManagementSystem/edit/master/erd])" /># تقرير نظام إدارة المكتبة
-
 ## صفحة العنوان
 **نظام إدارة المكتبة**  
 **تطبيق شامل لإدارة الكتب والمستخدمين وعمليات الاستعارة**  
