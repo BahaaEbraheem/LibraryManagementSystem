@@ -1,5 +1,5 @@
 
-<img width="1024" height="500" alt="ChatGPT Image Aug 28, 2025, 03_06_02 PM" src="https://github.com/user-attachments/assets/5be68d15-3a77-4c42-93de-cb950da272be" /># تقرير نظام إدارة المكتبة
+<img width="500" height="500" alt="ChatGPT Image Aug 28, 2025, 03_06_02 PM" src="https://github.com/user-attachments/assets/erd.png" /># تقرير نظام إدارة المكتبة
 
 ## صفحة العنوان
 **نظام إدارة المكتبة**  
