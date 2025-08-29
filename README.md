@@ -16,6 +16,8 @@
 - **طبقة الوصول إلى البيانات**: تستخدم ADO.NET مع نمط Repository للتفاعل مع قاعدة بيانات SQL Server، مع دعم التخزين المؤقت لتحسين الأداء.
 
 النظام مبني على .NET 9.0، مع الالتزام بعدم استخدام Entity Framework، ويوفر معالجة قوية للأخطاء (مثل أخطاء الاتصال، قيود البيانات، وعدم التفويض) عبر وسطاء مخصص (GlobalExceptionHandlingMiddleware). النظام موجه نحو العميل ليعمل كتطبيق حقيقي، ويحتوي على ميزات متقدمة مثل الفهرسة المحسنة والتخزين المؤقت الذكي. المشروع متاح على GitHub في المستودع: [https://github.com/BahaaEbraheem/LibraryManagementSystem](https://github.com/BahaaEbraheem/LibraryManagementSystem).
+تم رفع التطبيق وقاعدة البيانات SQLSERVER على موقع الاستضافة Somee.com على هذا الرابط
+[http://librarymanagementsystem.somee.com/Auth/Login](http://librarymanagementsystem.somee.com/Auth/Login).
 
 ## المتطلبات الرئيسية 
 1. **البحث عن الكتب**: واجهة للبحث حسب العنوان، المؤلف، أو ISBN، مع عرض حالة التوفر (متوفر/معار).
