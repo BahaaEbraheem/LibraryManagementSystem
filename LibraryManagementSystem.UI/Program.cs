@@ -225,7 +225,7 @@ namespace LibraryManagementSystem.UI
             app.UseSession();
 
             // التفويض
-            app.UseAuthentication(); // يجب أن يكون قبل UseAuthorization
+            app.UseAuthentication(); 
             app.UseAuthorization();
 
             // تكوين Razor Pages

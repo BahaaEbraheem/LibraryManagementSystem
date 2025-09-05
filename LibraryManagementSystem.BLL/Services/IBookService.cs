@@ -11,22 +11,10 @@ namespace LibraryManagementSystem.BLL.Services
     public interface IBookService
     {
         /// <summary>
-        /// الحصول على جميع الكتب
-        /// Get all books
-        /// </summary>
-        Task<ServiceResult<IEnumerable<Book>>> GetAllBooksAsync();
-
-        /// <summary>
         /// الحصول على كتاب بالمعرف
         /// Get book by ID
         /// </summary>
         Task<ServiceResult<Book>> GetBookByIdAsync(int id);
-
-        /// <summary>
-        /// الحصول على كتاب بالرقم المعياري
-        /// Get book by ISBN
-        /// </summary>
-        Task<ServiceResult<Book>> GetBookByIsbnAsync(string isbn);
 
         /// <summary>
         /// البحث عن الكتب
@@ -63,12 +51,6 @@ namespace LibraryManagementSystem.BLL.Services
         /// Check if book is available for borrowing
         /// </summary>
         Task<ServiceResult<bool>> IsBookAvailableAsync(int bookId);
-
-        /// <summary>
-        /// الحصول على إحصائيات الكتب
-        /// Get book statistics
-        /// </summary>
-        Task<ServiceResult<BookStatistics>> GetBookStatisticsAsync();
 
         /// <summary>
         /// التحقق من صحة بيانات الكتاب

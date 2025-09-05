@@ -56,14 +56,6 @@ namespace LibraryManagementSystem.DAL.Repositories
         Task<IEnumerable<Book>> GetByAuthorAsync(string author);
 
         /// <summary>
-        /// الحصول على الكتب حسب النوع
-        /// Get books by genre
-        /// </summary>
-        /// <param name="genre">نوع الكتاب - Book genre</param>
-        /// <returns>قائمة بكتب النوع - List of books in genre</returns>
-        Task<IEnumerable<Book>> GetByGenreAsync(string genre);
-
-        /// <summary>
         /// إضافة كتاب جديد
         /// Add a new book
         /// </summary>
@@ -103,11 +95,5 @@ namespace LibraryManagementSystem.DAL.Repositories
         /// <param name="bookId">معرف الكتاب - Book ID</param>
         /// <returns>true إذا كان متاحاً - true if available</returns>
         Task<bool> IsAvailableAsync(int bookId);
-        /// <summary>
-        /// الحصول على إحصائيات الكتب
-        /// Get book statistics
-        /// </summary>
-        /// <returns>إحصائيات الكتب - Book statistics</returns>
-        Task<BookStatistics> GetBookStatisticsAsync();
     }
 }

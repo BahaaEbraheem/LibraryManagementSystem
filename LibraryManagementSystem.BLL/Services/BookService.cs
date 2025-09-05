@@ -35,24 +35,6 @@ namespace LibraryManagementSystem.BLL.Services
 
         #region -------------------- Queries --------------------
 
-        public async Task<ServiceResult<IEnumerable<Book>>> GetAllBooksAsync()
-        {
-            try
-            {
-                _logger.LogDebug("بدء الحصول على جميع الكتب");
-
-                var books = await _bookRepository.GetAllAsync();
-
-                _logger.LogDebug("تم الحصول على {Count} كتاب", books.Count());
-                return ServiceResult<IEnumerable<Book>>.Success(books);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في الحصول على جميع الكتب");
-                return ServiceResult<IEnumerable<Book>>.Failure("حدث خطأ أثناء الحصول على الكتب");
-            }
-        }
-
         public async Task<ServiceResult<Book>> GetBookByIdAsync(int id)
         {
             if (id <= 0)
@@ -69,30 +51,6 @@ namespace LibraryManagementSystem.BLL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "خطأ في الحصول على الكتاب بالمعرف {BookId}", id);
-                return ServiceResult<Book>.Failure("حدث خطأ أثناء البحث عن الكتاب");
-            }
-        }
-
-        public async Task<ServiceResult<Book>> GetBookByIsbnAsync(string isbn)
-        {
-            if (string.IsNullOrWhiteSpace(isbn))
-                return ServiceResult<Book>.Failure("الرقم المعياري مطلوب");
-
-            isbn = CleanIsbn(isbn);
-            if (!IsValidIsbn(isbn))
-                return ServiceResult<Book>.Failure("الرقم المعياري غير صحيح");
-
-            try
-            {
-                var book = await _bookRepository.GetByIsbnAsync(isbn);
-                if (book == null)
-                    return ServiceResult<Book>.Failure("لم يتم العثور على الكتاب");
-
-                return ServiceResult<Book>.Success(book);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في الحصول على الكتاب بالرقم المعياري {ISBN}", isbn);
                 return ServiceResult<Book>.Failure("حدث خطأ أثناء البحث عن الكتاب");
             }
         }
@@ -129,20 +87,6 @@ namespace LibraryManagementSystem.BLL.Services
             {
                 _logger.LogError(ex, "خطأ في الحصول على الكتب المتاحة");
                 return ServiceResult<IEnumerable<Book>>.Failure("حدث خطأ أثناء الحصول على الكتب المتاحة");
-            }
-        }
-
-        public async Task<ServiceResult<BookStatistics>> GetBookStatisticsAsync()
-        {
-            try
-            {
-                var stats = await _bookRepository.GetBookStatisticsAsync();
-                return ServiceResult<BookStatistics>.Success(stats);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في الحصول على إحصائيات الكتب");
-                return ServiceResult<BookStatistics>.Failure("حدث خطأ أثناء الحصول على إحصائيات الكتب");
             }
         }
 

@@ -585,53 +585,6 @@ namespace LibraryManagementSystem.DAL.Repositories
         }
 
         /// <summary>
-        /// الحصول على الكتب حسب النوع
-        /// Get books by genre
-        /// </summary>
-        public async Task<IEnumerable<Book>> GetByGenreAsync(string genre)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(genre))
-                    return new List<Book>();
-
-                var cacheKey = CacheKeys.Books.ByGenre(genre);
-
-                var cachedBooks = await _cacheService.GetAsync<List<Book>>(cacheKey);
-                if (cachedBooks != null)
-                {
-                    return cachedBooks;
-                }
-
-                using var connection = await _connectionFactory.CreateConnectionAsync();
-
-                const string sql = @"
-                    SELECT BookId, Title, Author, ISBN, Publisher, PublicationYear,
-                           Genre, TotalCopies, AvailableCopies, Description,
-                           CreatedDate, ModifiedDate
-                    FROM Books
-                    WHERE Genre LIKE @Genre
-                    ORDER BY Title";
-
-                var books = new List<Book>();
-                using var reader = await DatabaseHelper.ExecuteReaderAsync(connection, sql, new { Genre = $"%{genre}%" });
-
-                while (reader.Read())
-                {
-                    books.Add(MapReaderToBook(reader));
-                }
-
-                await _cacheService.SetAsync(cacheKey, books, _cacheExpiration);
-                return books;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في الحصول على كتب النوع {Genre} - Error getting books by genre {Genre}", genre, genre);
-                throw;
-            }
-        }
-
-        /// <summary>
         /// تحديث بيانات كتاب
         /// Update book data
         /// </summary>
@@ -758,66 +711,6 @@ namespace LibraryManagementSystem.DAL.Repositories
             catch (Exception ex)
             {
                 _logger.LogError(ex, "خطأ في التحقق من توفر الكتاب {BookId} - Error checking book availability {BookId}", bookId, bookId);
-                throw;
-            }
-        }
-     
-        /// <summary>
-        /// الحصول على إحصائيات الكتب
-        /// Get book statistics
-        /// </summary>
-        public async Task<BookStatistics> GetBookStatisticsAsync()
-        {
-            try
-            {
-                // Try cache first
-                var cachedStats = await _cacheService.GetAsync<BookStatistics>(CacheKeys.Books.Statistics);
-                if (cachedStats != null)
-                {
-                    return cachedStats;
-                }
-
-                using var connection = await _connectionFactory.CreateConnectionAsync();
-
-                const string sql = @"
-                    SELECT
-                        COUNT(*) as TotalBooks,
-                        SUM(TotalCopies) as TotalCopies,
-                        SUM(AvailableCopies) as AvailableCopies,
-                        SUM(TotalCopies - AvailableCopies) as BorrowedBooks,
-                        COUNT(DISTINCT Author) as UniqueAuthors,
-                        COUNT(DISTINCT Genre) as UniqueGenres,
-                        (SELECT COUNT(*) FROM Books WHERE MONTH(CreatedDate) = MONTH(GETDATE()) AND YEAR(CreatedDate) = YEAR(GETDATE())) as BooksAddedThisMonth
-                    FROM Books";
-
-                using var reader = await DatabaseHelper.ExecuteReaderAsync(connection, sql);
-
-                if (reader.Read())
-                {
-                    var totalBooks = reader.GetInt32(reader.GetOrdinal("TotalBooks"));
-                    var availableCopies = reader.GetInt32(reader.GetOrdinal("AvailableCopies"));
-
-                    var stats = new BookStatistics
-                    {
-                        TotalBooks = totalBooks,
-                        TotalCopies = reader.GetInt32(reader.GetOrdinal("TotalCopies")),
-                        AvailableCopies = availableCopies,
-                        BorrowedBooks = reader.GetInt32(reader.GetOrdinal("BorrowedBooks")),
-                        AvailableBooks = totalBooks > 0 ? (int)Math.Ceiling((double)availableCopies / totalBooks * totalBooks) : 0,
-                        UniqueAuthors = reader.GetInt32(reader.GetOrdinal("UniqueAuthors")),
-                        UniqueGenres = reader.GetInt32(reader.GetOrdinal("UniqueGenres")),
-                        BooksAddedThisMonth = reader.GetInt32(reader.GetOrdinal("BooksAddedThisMonth"))
-                    };
-
-                    await _cacheService.SetAsync(CacheKeys.Books.Statistics, stats, TimeSpan.FromHours(1));
-                    return stats;
-                }
-
-                return new BookStatistics();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في الحصول على إحصائيات الكتب - Error getting book statistics");
                 throw;
             }
         }

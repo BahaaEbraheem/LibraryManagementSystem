@@ -173,86 +173,6 @@ namespace LibraryManagementSystem.UI.Pages.Books
             }
         }
 
-        /// <summary>
-        /// معالج طلب POST - تنفيذ البحث الجديد
-        /// POST request handler - execute new search
-        /// </summary>
-        public async Task<IActionResult> OnPostAsync()
-        {
-            try
-            {
-                // التحقق من صحة النموذج
-                // Validate model
-                if (!ModelState.IsValid)
-                {
-                    TempData["ErrorMessage"] = "يرجى التحقق من صحة البيانات المدخلة.";
-                    return Page();
-                }
-
-                // إعادة توجيه إلى GET مع معايير البحث
-                // Redirect to GET with search criteria
-                var queryParams = new List<string>();
-
-                if (!string.IsNullOrWhiteSpace(SearchCriteria.SearchTerm))
-                    queryParams.Add($"searchTerm={Uri.EscapeDataString(SearchCriteria.SearchTerm)}");
-
-                if (!string.IsNullOrWhiteSpace(SearchCriteria.Genre))
-                    queryParams.Add($"genre={Uri.EscapeDataString(SearchCriteria.Genre)}");
-
-                queryParams.Add($"availableOnly={SearchCriteria.AvailableOnly}");
-                queryParams.Add($"pageNumber={SearchCriteria.PageNumber}");
-                queryParams.Add($"pageSize={SearchCriteria.PageSize}");
-                queryParams.Add($"sortBy={SearchCriteria.SortBy}");
-                queryParams.Add($"sortDescending={SearchCriteria.SortDescending}");
-
-                var queryString = string.Join("&", queryParams);
-                var redirectUrl = $"/Books?{queryString}";
-                return Redirect(redirectUrl);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في معالجة طلب البحث - Error processing search request");
-                TempData["ErrorMessage"] = "حدث خطأ أثناء معالجة طلب البحث. يرجى المحاولة مرة أخرى.";
-                return Page();
-            }
-        }
-
-        /// <summary>
-        /// معالج طلب POST لاستعارة كتاب
-        /// POST request handler for borrowing a book
-        /// </summary>
-        public async Task<IActionResult> OnPostBorrowAsync(int bookId, int userId, int borrowingDays = 14)
-        {
-            try
-            {
-                if (bookId <= 0 || userId <= 0)
-                {
-                    return new JsonResult(new { success = false, message = "معرفات غير صحيحة - Invalid IDs" });
-                }
-
-                var result = await _borrowingService.BorrowBookAsync(userId, bookId, borrowingDays);
-
-                if (result.IsSuccess)
-                {
-                    _logger.LogInformation("تم استعارة الكتاب {BookId} بواسطة المستخدم {UserId} ",
-                        bookId, userId);
-
-                    return new JsonResult(new { success = true, message = "تم استعارة الكتاب بنجاح - Book borrowed successfully" });
-                }
-                else
-                {
-                    _logger.LogWarning("فشل في استعارة الكتاب {BookId} بواسطة المستخدم {UserId}: {Error} - Failed to borrow book by user",
-                        bookId, userId, result.ErrorMessage);
-
-                    return new JsonResult(new { success = false, message = result.ErrorMessage });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في استعارة الكتاب {BookId} - Error borrowing book {BookId}", bookId, bookId);
-                return new JsonResult(new { success = false, message = "حدث خطأ أثناء الاستعارة - An error occurred during borrowing" });
-            }
-        }
 
         /// <summary>
         /// التحقق من وجود معايير بحث
@@ -266,21 +186,6 @@ namespace LibraryManagementSystem.UI.Pages.Books
                    SearchCriteria.AvailableOnly;
         }
 
-        /// <summary>
-        /// التحقق من وجود معايير بحث صالحة
-        /// Check if valid search criteria exist
-        /// </summary>
-        /// <returns>true إذا كانت هناك معايير بحث صالحة</returns>
-        private bool HasValidSearchCriteria()
-        {
-            return (!string.IsNullOrWhiteSpace(SearchCriteria.SearchTerm) && SearchCriteria.SearchTerm.Trim().Length >= 2) ||
-                   (!string.IsNullOrWhiteSpace(SearchCriteria.Title) && SearchCriteria.Title.Trim().Length >= 2) ||
-                   (!string.IsNullOrWhiteSpace(SearchCriteria.Author) && SearchCriteria.Author.Trim().Length >= 2) ||
-                   (!string.IsNullOrWhiteSpace(SearchCriteria.ISBN) && SearchCriteria.ISBN.Trim().Length >= 3) ||
-                   !string.IsNullOrWhiteSpace(SearchCriteria.Genre) ||
-                   SearchCriteria.AvailableOnly ||
-                   SearchCriteria.IsAvailable.HasValue;
-        }
         /// <summary>
         /// استعارة كتاب
         /// Borrow a book
@@ -371,34 +276,5 @@ namespace LibraryManagementSystem.UI.Pages.Books
             return userId ?? 0;
         }
 
-
-
-        /// <summary>
-        /// الحصول على رابط الصفحة مع رقم صفحة محدد
-        /// Get page URL with specific page number
-        /// </summary>
-        /// <param name="pageNumber">رقم الصفحة</param>
-        /// <returns>رابط الصفحة</returns>
-        public string GetPageUrl(int pageNumber)
-        {
-            var queryParams = new List<string>();
-
-            if (!string.IsNullOrWhiteSpace(SearchCriteria.SearchTerm))
-                queryParams.Add($"searchTerm={Uri.EscapeDataString(SearchCriteria.SearchTerm)}");
-
-            if (!string.IsNullOrWhiteSpace(SearchCriteria.Genre))
-                queryParams.Add($"genre={Uri.EscapeDataString(SearchCriteria.Genre)}");
-
-            if (SearchCriteria.AvailableOnly)
-                queryParams.Add($"availableOnly={SearchCriteria.AvailableOnly}");
-
-            queryParams.Add($"pageNumber={pageNumber}");
-            queryParams.Add($"pageSize={SearchCriteria.PageSize}");
-            queryParams.Add($"sortBy={SearchCriteria.SortBy}");
-            queryParams.Add($"sortDescending={SearchCriteria.SortDescending}");
-
-            var queryString = string.Join("&", queryParams);
-            return $"/Books?{queryString}";
-        }
     }
 }
