@@ -33,10 +33,10 @@
             border-color: #0d6efd;
         }
 
-        .btn-primary:hover {
-            background-color: #0b5ed7;
-            border-color: #0a58ca;
-        }
+            .btn-primary:hover {
+                background-color: #0b5ed7;
+                border-color: #0a58ca;
+            }
 
         .table th {
             background-color: #e9ecef;
@@ -109,16 +109,16 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarNav">
-@{
-    var currentUserId = Context.Session.GetInt32("UserId");
-    var currentUserName = Context.Session.GetString("UserName");
-    var currentUserRole = Context.Session.GetString("UserRole");
-    var isLoggedIn = currentUserId.HasValue;
-    var isAdmin = currentUserRole == "Administrator";
-}
+                    @{
+                        var currentUserId = Context.Session.GetInt32("UserId");
+                        var currentUserName = Context.Session.GetString("UserName");
+                        var currentUserRole = Context.Session.GetString("UserRole");
+                        var isLoggedIn = currentUserId.HasValue;
+                        var isAdmin = currentUserRole == "Administrator";
+                    }
 
-@if (isLoggedIn)
-{
+                    @if (isLoggedIn)
+                    {
                         <ul class="navbar-nav me-auto">
                             <li class="nav-item">
                                 <a class="nav-link" href="/Books/Index">
@@ -126,14 +126,14 @@
                                     الكتب المتاحة
                                 </a>
                             </li>
-                         
-                            
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/Borrowings/Index">
-                                        <i class="fas fa-exchange-alt me-1"></i>
-                                        الاستعارات
-                                    </a>
-                                </li>
+
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Borrowings/Index">
+                                    <i class="fas fa-exchange-alt me-1"></i>
+                                    الاستعارات
+                                </a>
+                            </li>
                             @if (isAdmin)
                             {
                                 <li class="nav-item">
@@ -181,115 +181,115 @@
                         </ul>
                     }
                 </div>
-    </div>
-    </nav>
+            </div>
+        </nav>
     </header>
 
-        <main class="container mt-4">
-            <!-- عرض الرسائل - Display messages -->
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
-                    @TempData["SuccessMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <main class="container mt-4">
+        <!-- عرض الرسائل - Display messages -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["InfoMessage"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                @TempData["InfoMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- محتوى الصفحة الرئيسي - Main page content -->
+        @RenderBody()
+    </main>
+
+    <!-- تذييل الصفحة - Page footer -->
+    <footer class="footer mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>نظام إدارة المكتبة</h5>
+                    <p class="mb-0">نظام شامل لإدارة المكتبات والاستعارات</p>
                 </div>
-            }
-
-            @if (TempData["ErrorMessage"] != null)
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    @TempData["ErrorMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            }
-
-            @if (TempData["InfoMessage"] != null)
-            {
-                <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    <i class="fas fa-info-circle me-2"></i>
-                    @TempData["InfoMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            }
-
-            <!-- محتوى الصفحة الرئيسي - Main page content -->
-            @RenderBody()
-        </main>
-
-        <!-- تذييل الصفحة - Page footer -->
-        <footer class="footer mt-auto">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5>نظام إدارة المكتبة</h5>
-                        <p class="mb-0">نظام شامل لإدارة المكتبات والاستعارات</p>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <p class="mb-0">
-                            <i class="fas fa-envelope me-2"></i>
+                <div class="col-md-6 text-end">
+                    <p class="mb-0">
+                        <i class="fas fa-envelope me-2"></i>
                         bahaa.ebraheem812@gmail.com
-                        </p>
-                        <p class="mb-0">
-                            <i class="fas fa-phone me-2"></i>
+                    </p>
+                    <p class="mb-0">
+                        <i class="fas fa-phone me-2"></i>
                         +963991640012
-                        </p>
-                    </div>
-                </div>
-                <hr class="my-3">
-                <div class="row">
-                    <div class="col-12 text-center">
-                    <p class="mb-0">&copy; @DateTime.Now.Year جميع الحقوق محفوظة - Bahaa Ebraheem</p>
-                    </div>
+                    </p>
                 </div>
             </div>
-        </footer>
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; @DateTime.Now.Year جميع الحقوق محفوظة - Bahaa Ebraheem</p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <!-- JavaScript Libraries -->
     <script src="~/lib/jquery-validation/dist/jquery-3.6.0.min.js"></script>
     <script src="~/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/error-handler.js" asp-append-version="true"></script>
 
-        <!-- تطبيق JavaScript مخصص - Custom JavaScript -->
-        <script>
-            // إخفاء التنبيهات تلقائياً بعد 5 ثوان
-            // Auto-hide alerts after 5 seconds
-            setTimeout(function () {
-                var alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function (alert) {
-                    var bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                });
-            }, 5000);
+    <!-- تطبيق JavaScript مخصص - Custom JavaScript -->
+    <script>
+        // إخفاء التنبيهات تلقائياً بعد 5 ثوان
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function () {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function (alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
 
-            // تحسين تجربة المستخدم للنماذج
-            // Improve user experience for forms
-            document.addEventListener('DOMContentLoaded', function () {
-                // إضافة تأثيرات التحميل للأزرار
-                // Add loading effects to buttons
-                var submitButtons = document.querySelectorAll('button[type="submit"]');
-                submitButtons.forEach(function (button) {
-                    button.addEventListener('click', function (e) {
-                        var form = this.closest('form');
-                        if (form) {
-                            // التحقق من صحة النموذج قبل إظهار التحميل
-                            // Check form validity before showing loading
-                            if (form.checkValidity()) {
-                                // تأخير قصير للسماح بإرسال النموذج
-                                // Short delay to allow form submission
-                                setTimeout(() => {
-                                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري المعالجة...';
-                                    this.disabled = true;
-                                }, 100);
-                            }
+        // تحسين تجربة المستخدم للنماذج
+        // Improve user experience for forms
+        document.addEventListener('DOMContentLoaded', function () {
+            // إضافة تأثيرات التحميل للأزرار
+            // Add loading effects to buttons
+            var submitButtons = document.querySelectorAll('button[type="submit"]');
+            submitButtons.forEach(function (button) {
+                button.addEventListener('click', function (e) {
+                    var form = this.closest('form');
+                    if (form) {
+                        // التحقق من صحة النموذج قبل إظهار التحميل
+                        // Check form validity before showing loading
+                        if (form.checkValidity()) {
+                            // تأخير قصير للسماح بإرسال النموذج
+                            // Short delay to allow form submission
+                            setTimeout(() => {
+                                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>جاري المعالجة...';
+                                this.disabled = true;
+                            }, 100);
                         }
-                    });
+                    }
                 });
             });
-        </script>
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
-    </body>
+</body>
 
-    </html>
+</html>

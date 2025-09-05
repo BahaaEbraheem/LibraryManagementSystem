@@ -2,11 +2,13 @@ using LibraryManagementSystem.BLL.Services;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.DTOs;
 using LibraryManagementSystem.DAL.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace LibraryManagementSystem.UI.Pages.Books
 {
+    [Authorize]
     /// <summary>
     /// نموذج صفحة البحث عن الكتب
     /// Books search page model
@@ -203,12 +205,6 @@ namespace LibraryManagementSystem.UI.Pages.Books
                 if (userId <= 0)
                 {
                     return new JsonResult(new { success = false, message = "يرجى تسجيل الدخول أولاً - Please login first" });
-                }
-
-                var eligibilityResult = await _borrowingService.CheckBorrowingEligibilityAsync(userId, bookId);
-                if (!eligibilityResult.IsSuccess || !eligibilityResult.Data!.CanBorrow)
-                {
-                    return new JsonResult(new { success = false, message = eligibilityResult.ErrorMessage ?? eligibilityResult.Data?.Reason });
                 }
 
                 var borrowResult = await _borrowingService.BorrowBookAsync(userId, bookId, 14);

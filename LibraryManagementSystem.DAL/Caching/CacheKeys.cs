@@ -111,27 +111,7 @@ namespace LibraryManagementSystem.DAL.Caching
             public static string Suggestions(string query) => $"search:suggestions:{query.ToLowerInvariant()}";
         }
 
-        /// <summary>
-        /// مفاتيح تخزين الإحصائيات المؤقت
-        /// Statistics cache keys
-        /// </summary>
-        public static class Statistics
-        {
-            /// <summary>إحصائيات لوحة التحكم - Dashboard statistics</summary>
-            public const string Dashboard = "statistics:dashboard";
-
-            /// <summary>إحصائيات شهرية - Monthly statistics</summary>
-            public static string Monthly(int year, int month) => $"statistics:monthly:{year}:{month}";
-
-            /// <summary>إحصائيات سنوية - Yearly statistics</summary>
-            public static string Yearly(int year) => $"statistics:yearly:{year}";
-
-            /// <summary>الكتب الأكثر استعارة - Most borrowed books</summary>
-            public const string MostBorrowedBooks = "statistics:most-borrowed-books";
-
-            /// <summary>المستخدمين الأكثر نشاطاً - Most active users</summary>
-            public const string MostActiveUsers = "statistics:most-active-users";
-        }
+   
 
         /// <summary>
         /// أنماط مفاتيح التخزين المؤقت للإزالة الجماعية

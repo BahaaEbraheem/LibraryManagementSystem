@@ -184,73 +184,6 @@ namespace LibraryManagementSystem.BLL.Validation
         }
 
         /// <summary>
-        /// التحقق من صحة تجديد استعارة
-        /// Validate borrowing renewal
-        /// </summary>
-        public async Task<ValidationResult> ValidateRenewalAsync(int borrowingId, int userId)
-        {
-            try
-            {
-                _logger.LogDebug("التحقق من صحة تجديد الاستعارة {BorrowingId} للمستخدم {UserId} - Validating renewal of borrowing",
-                    borrowingId, userId);
-
-                // التحقق من وجود الاستعارة
-                // Check borrowing existence
-                var borrowing = await _borrowingRepository.GetByIdAsync(borrowingId);
-                if (borrowing == null)
-                {
-                    return ValidationResult.Failure("الاستعارة غير موجودة - Borrowing not found", BusinessRuleErrorCodes.BorrowingNotFound);
-                }
-
-                // التحقق من ملكية الاستعارة
-                // Check borrowing ownership
-                if (borrowing.UserId != userId)
-                {
-                    return ValidationResult.Failure("غير مصرح لك بتجديد هذا الكتاب - You are not authorized to renew this book", BusinessRuleErrorCodes.UnauthorizedReturn);
-                }
-
-                // التحقق من عدم إرجاع الكتاب
-                // Check if book is not returned
-                if (borrowing.IsReturned)
-                {
-                    return ValidationResult.Failure("لا يمكن تجديد كتاب تم إرجاعه - Cannot renew a returned book", BusinessRuleErrorCodes.BorrowingAlreadyReturned);
-                }
-
-                // التحقق من حد التجديد
-                // Check renewal limit
-                // Note: RenewalCount property not implemented in current model
-                // This validation can be added when renewal functionality is implemented
-
-                // التحقق من عدم وجود تأخير كبير
-                // Check for significant overdue
-                var daysOverdue = (DateTime.Now - borrowing.DueDate).Days;
-                if (daysOverdue > 7) // أكثر من أسبوع متأخر
-                {
-                    return ValidationResult.Failure("لا يمكن تجديد كتاب متأخر أكثر من أسبوع - Cannot renew a book that is more than a week overdue",
-                        BusinessRuleErrorCodes.BorrowingOverdue)
-                        .AddData("daysOverdue", daysOverdue);
-                }
-
-                var result = ValidationResult.Success();
-
-                // تحذير في حالة التأخير البسيط
-                // Warning for minor overdue
-                if (daysOverdue > 0)
-                {
-                    result.AddWarning($"الكتاب متأخر {daysOverdue} يوم - Book is {daysOverdue} days overdue");
-                }
-
-                _logger.LogDebug("تم التحقق من صحة التجديد بنجاح - Renewal validation successful");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في التحقق من صحة التجديد - Error validating renewal");
-                return ValidationResult.Failure("حدث خطأ أثناء التحقق من صحة التجديد - Error occurred while validating renewal");
-            }
-        }
-
-        /// <summary>
         /// التحقق من صحة إضافة كتاب
         /// Validate book addition
         /// </summary>
@@ -478,46 +411,6 @@ namespace LibraryManagementSystem.BLL.Validation
                 return ValidationResult.Failure("حدث خطأ أثناء التحقق من صحة إضافة المستخدم - Error occurred while validating user addition");
             }
         }
-
-        /// <summary>
-        /// التحقق من صحة تحديث مستخدم
-        /// Validate user update
-        /// </summary>
-        public async Task<ValidationResult> ValidateUserUpdateAsync(User user)
-        {
-            try
-            {
-                _logger.LogDebug("التحقق من صحة تحديث المستخدم {UserId}", user.UserId);
-
-                // 1. Validate same rules as Add
-                var result = await ValidateUserAdditionAsync(user);
-
-                // 2. Check existence
-                var existingUser = await _userRepository.GetByIdAsync(user.UserId);
-                if (existingUser == null)
-                {
-                    return ValidationResult.Failure("المستخدم غير موجود - User not found");
-                }
-
-                // 3. If email changed, check duplication
-                if (!string.Equals(existingUser.Email, user.Email, StringComparison.OrdinalIgnoreCase))
-                {
-                    var userWithSameEmail = await _userRepository.GetByEmailAsync(user.Email, user.UserId);
-                    if (userWithSameEmail != null)
-                    {
-                        result.AddError("البريد الإلكتروني موجود مسبقاً - Email already exists");
-                    }
-                }
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في التحقق من صحة تحديث المستخدم - Error validating user update");
-                return ValidationResult.Failure("حدث خطأ أثناء التحقق من صحة تحديث المستخدم - Error occurred while validating user update");
-            }
-        }
-
 
         /// <summary>
         /// التحقق من صحة حذف مستخدم

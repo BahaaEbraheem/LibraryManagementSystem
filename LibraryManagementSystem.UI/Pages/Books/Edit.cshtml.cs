@@ -1,12 +1,14 @@
 using LibraryManagementSystem.BLL.Services;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 
 namespace LibraryManagementSystem.UI.Pages.Books
 {
+    [Authorize(Roles = "Administrator")]
     /// <summary>
     /// نموذج صفحة تعديل الكتاب
     /// Edit book page model

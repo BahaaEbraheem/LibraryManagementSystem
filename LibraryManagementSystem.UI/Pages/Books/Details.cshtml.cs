@@ -1,11 +1,13 @@
 using LibraryManagementSystem.BLL.Services;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace LibraryManagementSystem.UI.Pages.Books
 {
+    [Authorize]
     /// <summary>
     /// نموذج صفحة تفاصيل الكتاب
     /// Book details page model
@@ -95,56 +97,7 @@ namespace LibraryManagementSystem.UI.Pages.Books
             }
         }
 
-        /// <summary>
-        /// معالج طلب POST لاستعارة كتاب
-        /// POST request handler for borrowing a book
-        /// </summary>
-        public async Task<IActionResult> OnPostBorrowBookAsync(int bookId)
-        {
-            try
-            {
-                if (bookId <= 0)
-                {
-                    ErrorMessage = "معرف الكتاب غير صحيح - Invalid book ID";
-                    return RedirectToPage(new { id = bookId });
-                }
 
-                // الحصول على معرف المستخدم الحالي
-                // Get current user ID
-                var userIdString = HttpContext.Session.GetString("UserId");
-                if (!int.TryParse(userIdString, out int userId) || userId <= 0)
-                {
-                    ErrorMessage = "يرجى تسجيل الدخول أولاً - Please login first";
-                    return RedirectToPage(new { id = bookId });
-                }
-
-                _logger.LogInformation("محاولة استعارة الكتاب {BookId} للمستخدم {UserId} - Attempting to borrow book for user",
-                    bookId, userId);
-
-                var result = await _borrowingService.BorrowBookAsync(userId, bookId);
-
-                if (result.IsSuccess)
-                {
-                    SuccessMessage = "تم استعارة الكتاب بنجاح! - Book borrowed successfully!";
-                    _logger.LogInformation("تم استعارة الكتاب {BookId} بواسطة المستخدم {UserId} بنجاح - Book borrowed successfully by user",
-                        bookId, userId);
-                }
-                else
-                {
-                    ErrorMessage = result.ErrorMessage ?? "فشل في استعارة الكتاب - Failed to borrow book";
-                    _logger.LogWarning("فشل في استعارة الكتاب {BookId} للمستخدم {UserId}: {Error} - Failed to borrow book for user",
-                        bookId, userId, ErrorMessage);
-                }
-
-                return RedirectToPage(new { id = bookId });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في استعارة الكتاب {BookId} - Error borrowing book", bookId);
-                ErrorMessage = "حدث خطأ أثناء عملية الاستعارة - An error occurred during the borrowing process";
-                return RedirectToPage(new { id = bookId });
-            }
-        }
 
         /// <summary>
         /// معالج طلب POST - حذف الكتاب

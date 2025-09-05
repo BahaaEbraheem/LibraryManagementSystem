@@ -26,14 +26,6 @@ namespace LibraryManagementSystem.BLL.Validation
         /// <returns>نتيجة التحقق</returns>
         Task<ValidationResult> ValidateReturnAsync(int borrowingId, int userId);
 
-        /// <summary>
-        /// التحقق من صحة تجديد استعارة
-        /// Validate borrowing renewal
-        /// </summary>
-        /// <param name="borrowingId">معرف الاستعارة</param>
-        /// <param name="userId">معرف المستخدم</param>
-        /// <returns>نتيجة التحقق</returns>
-        Task<ValidationResult> ValidateRenewalAsync(int borrowingId, int userId);
 
         /// <summary>
         /// التحقق من صحة إضافة كتاب
@@ -67,13 +59,6 @@ namespace LibraryManagementSystem.BLL.Validation
         /// <returns>نتيجة التحقق</returns>
         Task<ValidationResult> ValidateUserAdditionAsync(User user);
 
-        /// <summary>
-        /// التحقق من صحة تحديث مستخدم
-        /// Validate user update
-        /// </summary>
-        /// <param name="user">بيانات المستخدم</param>
-        /// <returns>نتيجة التحقق</returns>
-        Task<ValidationResult> ValidateUserUpdateAsync(User user);
 
         /// <summary>
         /// التحقق من صحة حذف مستخدم
