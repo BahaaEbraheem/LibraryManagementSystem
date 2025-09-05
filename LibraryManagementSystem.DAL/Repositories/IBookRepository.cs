@@ -103,22 +103,6 @@ namespace LibraryManagementSystem.DAL.Repositories
         /// <param name="bookId">معرف الكتاب - Book ID</param>
         /// <returns>true إذا كان متاحاً - true if available</returns>
         Task<bool> IsAvailableAsync(int bookId);
-
-        /// <summary>
-        /// الحصول على إحصائيات الكتب
-        /// Get book statistics
-        /// </summary>
-        /// <returns>إحصائيات الكتب - Book statistics</returns>
-        Task<object> GetStatisticsAsync();
-
-        /// <summary>
-        /// الحصول على اقتراحات البحث التلقائي
-        /// Get auto-complete search suggestions
-        /// </summary>
-        /// <param name="query">نص البحث - Search query</param>
-        /// <param name="maxResults">الحد الأقصى للنتائج - Maximum results</param>
-        /// <returns>قائمة الاقتراحات - List of suggestions</returns>
-        Task<IEnumerable<string>> GetSearchSuggestionsAsync(string query, int maxResults = 10);
         /// <summary>
         /// الحصول على إحصائيات الكتب
         /// Get book statistics

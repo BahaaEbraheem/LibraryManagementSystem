@@ -3,6 +3,7 @@ using LibraryManagementSystem.BLL.Validation;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.DTOs;
 using LibraryManagementSystem.DAL.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 using static LibraryManagementSystem.DAL.Caching.CacheKeys;
@@ -23,7 +24,7 @@ namespace LibraryManagementSystem.BLL.Services
         public BookService(
             IBookRepository bookRepository,
             IAuthorizationService authorizationService,
-            IBusinessRuleValidator validator, // أضف هذا
+            IBusinessRuleValidator validator, 
             ILogger<BookService> logger)
         {
             _bookRepository = bookRepository ?? throw new ArgumentNullException(nameof(bookRepository));
@@ -168,11 +169,17 @@ namespace LibraryManagementSystem.BLL.Services
         #endregion
 
         #region -------------------- Commands --------------------
-        [JwtAdminOnly]
         public async Task<ServiceResult<int>> AddBookAsync(Book book, int userId)
         {
             if (book == null)
                 return ServiceResult<int>.Failure("بيانات الكتاب مطلوبة");
+
+
+            // التحقق من صلاحيات المستخدم
+            var auth = await CheckAuthorizationAsync(userId);
+            if (!auth.IsSuccess)
+                return ServiceResult<int>.Failure(auth.ErrorMessage);
+
 
             // التحقق من صحة بيانات الكتاب
             var validation = await ValidateBookAsync(book, false);
@@ -183,11 +190,6 @@ namespace LibraryManagementSystem.BLL.Services
             validation = await _validator.ValidateBookAdditionAsync(book,false);
             if (!validation.IsValid)
                 return ServiceResult<int>.ValidationFailure(validation.ErrorMessages);
-
-            // التحقق من صلاحيات المستخدم
-            var auth = await CheckAuthorizationAsync(userId);
-            if (!auth.IsSuccess)
-                return ServiceResult<int>.Failure(auth.ErrorMessage);
 
             // التحقق من وجود كتاب بنفس ISBN
             var existingByIsbn = await _bookRepository.GetByIsbnAsync(book.ISBN);
@@ -206,12 +208,16 @@ namespace LibraryManagementSystem.BLL.Services
             }
         }
 
-
-        [JwtAdminOnly]
         public async Task<ServiceResult<bool>> UpdateBookAsync(Book book, int userId)
         {
             if (book == null)
                 return ServiceResult<bool>.Failure("بيانات الكتاب مطلوبة");
+
+
+            var auth = await CheckAuthorizationAsync(userId);
+            if (!auth.IsSuccess)
+                return ServiceResult<bool>.Failure(auth.ErrorMessage);
+
 
             var validation = await ValidateBookAsync(book, true);
             if (!validation.IsValid)
@@ -221,10 +227,6 @@ namespace LibraryManagementSystem.BLL.Services
             validation = await _validator.ValidateBookUpdateAsync(book);
             if (!validation.IsValid)
                 return ServiceResult<bool>.ValidationFailure(validation.ErrorMessages);
-
-            var auth = await CheckAuthorizationAsync(userId);
-            if (!auth.IsSuccess)
-                return ServiceResult<bool>.Failure(auth.ErrorMessage);
 
             var existing = await _bookRepository.GetByIdAsync(book.BookId);
             if (existing == null)
@@ -250,20 +252,19 @@ namespace LibraryManagementSystem.BLL.Services
             }
         }
 
-        [JwtAdminOnly]
         public async Task<ServiceResult<bool>> DeleteBookAsync(int id, int userId)
         {
             if (id <= 0)
                 return ServiceResult<bool>.Failure("معرف الكتاب غير صحيح");
 
-            // التحقق من قواعد الأعمال المخصصة
-           var validation = await _validator.ValidateBookDeletionAsync(id);
-            if (!validation.IsValid)
-                return ServiceResult<bool>.ValidationFailure(validation.ErrorMessages);
-
             var auth = await CheckAuthorizationAsync(userId);
             if (!auth.IsSuccess)
                 return ServiceResult<bool>.Failure(auth.ErrorMessage);
+
+            // التحقق من قواعد الأعمال المخصصة
+            var validation = await _validator.ValidateBookDeletionAsync(id);
+            if (!validation.IsValid)
+                return ServiceResult<bool>.ValidationFailure(validation.ErrorMessages);
 
             var existing = await _bookRepository.GetByIdAsync(id);
             if (existing == null)

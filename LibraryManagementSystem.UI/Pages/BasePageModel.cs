@@ -1,4 +1,5 @@
 using LibraryManagementSystem.BLL.Services;
+using LibraryManagementSystem.DAL.Models.Enums;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace LibraryManagementSystem.UI.Pages
@@ -27,7 +28,7 @@ namespace LibraryManagementSystem.UI.Pages
             {
                 // البحث عن JWT في الكوكيز أولاً ثم في الجلسة
                 // Look for JWT in cookies first, then in session
-                var jwtToken = Request.Cookies["jwt"] ?? HttpContext.Session.GetString("jwt");
+                var jwtToken = Request.Cookies["jwt"] ;
 
                 if (string.IsNullOrEmpty(jwtToken))
                 {
@@ -42,26 +43,17 @@ namespace LibraryManagementSystem.UI.Pages
             }
         }
 
-        /// <summary>
-        /// التحقق من تسجيل الدخول
-        /// Check if user is logged in
-        /// </summary>
-        /// <returns>true إذا كان مسجل الدخول - true if logged in</returns>
-        protected bool IsLoggedIn()
-        {
-            return GetCurrentUserId().HasValue;
-        }
 
         /// <summary>
         /// الحصول على دور المستخدم الحالي
         /// Get current user role
         /// </summary>
         /// <returns>دور المستخدم أو null - User role or null</returns>
-        protected LibraryManagementSystem.DAL.Models.Enums.UserRole? GetCurrentUserRole()
+        protected UserRole? GetCurrentUserRole()
         {
             try
             {
-                var jwtToken = Request.Cookies["jwt"] ?? HttpContext.Session.GetString("jwt");
+                var jwtToken = Request.Cookies["jwt"];
 
                 if (string.IsNullOrEmpty(jwtToken))
                 {
@@ -84,18 +76,9 @@ namespace LibraryManagementSystem.UI.Pages
         protected bool IsAdmin()
         {
             var role = GetCurrentUserRole();
-            return role == LibraryManagementSystem.DAL.Models.Enums.UserRole.Administrator;
+            return role == UserRole.Administrator;
         }
 
-        /// <summary>
-        /// التحقق من كون المستخدم مستخدم عادي
-        /// Check if current user is regular user
-        /// </summary>
-        /// <returns>true إذا كان مستخدم عادي - true if regular user</returns>
-        protected bool IsUser()
-        {
-            var role = GetCurrentUserRole();
-            return role == LibraryManagementSystem.DAL.Models.Enums.UserRole.User;
-        }
+
     }
 }

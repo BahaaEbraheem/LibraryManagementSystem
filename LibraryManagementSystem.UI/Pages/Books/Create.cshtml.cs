@@ -7,8 +7,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LibraryManagementSystem.UI.Pages.Books
 {
-
-
     /// <summary>
     /// نموذج صفحة إضافة كتاب جديد
     /// Create new book page model

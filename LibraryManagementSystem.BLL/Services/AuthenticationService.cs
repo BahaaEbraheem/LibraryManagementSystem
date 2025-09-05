@@ -1,6 +1,7 @@
 using LibraryManagementSystem.BLL.Validation;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.DTOs;
+using LibraryManagementSystem.DAL.Models.DTOs.AuthenticationDTOs;
 using LibraryManagementSystem.DAL.Models.Enums;
 using LibraryManagementSystem.DAL.Repositories;
 using Microsoft.Extensions.Logging;
@@ -17,9 +18,11 @@ namespace LibraryManagementSystem.BLL.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly ILogger<AuthenticationService> _logger;
+        private readonly IJwtService _jwtService;
 
-        public AuthenticationService(IUserRepository userRepository, ILogger<AuthenticationService> logger)
+        public AuthenticationService(IJwtService jwtService,IUserRepository userRepository, ILogger<AuthenticationService> logger)
         {
+            _jwtService=jwtService;
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -75,6 +78,10 @@ namespace LibraryManagementSystem.BLL.Services
                     Permissions = user.Role.GetPermissions(),
                     IsActive = user.IsActive
                 };
+
+                // ✅ إنشاء رمز JWT وإضافته إلى النموذج
+                loggedInUser.Token = _jwtService.GenerateToken(loggedInUser);
+
 
                 _logger.LogInformation("تم تسجيل الدخول بنجاح للمستخدم: {Email} - Successful login for user: {Email}", 
                     loginDto.Email, loginDto.Email);

@@ -1,3 +1,4 @@
+using LibraryManagementSystem.BLL.Services;
 using LibraryManagementSystem.DAL.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -32,7 +33,7 @@ namespace LibraryManagementSystem.BLL.Authorization
         {
             try
             {
-                var jwtService = context.HttpContext.RequestServices.GetService<BLL.Services.IJwtService>();
+                var jwtService = context.HttpContext.RequestServices.GetService<IJwtService>();
                 if (jwtService == null)
                 {
                     context.Result = new UnauthorizedResult();

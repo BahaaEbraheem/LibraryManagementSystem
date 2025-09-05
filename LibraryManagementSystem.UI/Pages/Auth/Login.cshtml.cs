@@ -1,5 +1,6 @@
 using LibraryManagementSystem.BLL.Services;
 using LibraryManagementSystem.DAL.Models.DTOs;
+using LibraryManagementSystem.DAL.Models.DTOs.AuthenticationDTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -12,13 +13,11 @@ namespace LibraryManagementSystem.UI.Pages.Auth
     public class LoginModel : PageModel
     {
         private readonly IAuthenticationService _authenticationService;
-        private readonly IJwtService _jwtService;
         private readonly ILogger<LoginModel> _logger;
 
         public LoginModel(IAuthenticationService authenticationService, IJwtService jwtService, ILogger<LoginModel> logger)
         {
             _authenticationService = authenticationService ?? throw new ArgumentNullException(nameof(authenticationService));
-            _jwtService = jwtService ?? throw new ArgumentNullException(nameof(jwtService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -98,8 +97,8 @@ namespace LibraryManagementSystem.UI.Pages.Auth
                     var user = result.Data;
 
                     // إنشاء رمز JWT
-                    // Generate JWT token
-                    var jwtToken = _jwtService.GenerateToken(user);
+                    // ✅ استخدم الرمز من LoggedInUserDto مباشرة
+                    var jwtToken = user.Token;
 
                     // حفظ بيانات المستخدم في الجلسة
                     // Save user data in session

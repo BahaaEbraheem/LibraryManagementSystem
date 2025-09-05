@@ -1,6 +1,7 @@
 using LibraryManagementSystem.BLL.Validation;
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.DTOs;
+using LibraryManagementSystem.DAL.Models.DTOs.AuthenticationDTOs;
 using LibraryManagementSystem.DAL.Repositories;
 
 namespace LibraryManagementSystem.BLL.Services

@@ -1,5 +1,6 @@
 using LibraryManagementSystem.BLL.Services;
 using LibraryManagementSystem.DAL.Models.DTOs;
+using LibraryManagementSystem.DAL.Models.DTOs.AuthenticationDTOs;
 using LibraryManagementSystem.DAL.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
