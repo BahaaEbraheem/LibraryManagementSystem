@@ -205,6 +205,8 @@ namespace LibraryManagementSystem.BLL.Services
             {
                 var users = await _userRepository.GetAllAsync();
                 var exists = users.Any(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+
+
                 return ServiceResult<bool>.Success(exists);
             }
             catch (Exception ex)

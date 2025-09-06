@@ -132,42 +132,6 @@
         </div>
     </div>
 
-    <!-- الكتب الأكثر استعارة - Most Borrowed Books -->
-    @if (Model.MostBorrowedBooks != null && Model.MostBorrowedBooks.Any())
-    {
-        <div class="row mb-4">
-            <div class="col-12">
-                <h3 class="mb-3">
-                    <i class="fas fa-star me-2"></i>
-                    الكتب الأكثر استعارة - Most Borrowed Books
-                </h3>
-            </div>
-        </div>
-
-        <div class="row">
-            @foreach (var book in Model.MostBorrowedBooks.Take(6))
-            {
-                <div class="col-lg-4 col-md-6 mb-3">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <h6 class="card-title text-primary">@book.Title</h6>
-                            <p class="card-text">
-                                <strong>المؤلف:</strong> @book.Author<br>
-                                <strong>عدد الاستعارات:</strong> @book.BorrowCount<br>
-                                <strong>الاستعارات النشطة:</strong> @book.CurrentActiveBorrowings
-                            </p>
-                        </div>
-                        <div class="card-footer bg-transparent">
-                            <a href="/Books?searchTerm=@book.ISBN" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-eye me-1"></i>
-                                عرض التفاصيل
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    }
 
     <!-- روابط سريعة - Quick Links -->
     <div class="row mb-4">

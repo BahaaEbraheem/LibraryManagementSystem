@@ -42,17 +42,6 @@ namespace LibraryManagementSystem.UI.Pages
         /// </summary>
         public BorrowingStatistics? BorrowingStatistics { get; set; }
 
-        /// <summary>
-        /// «·ﬂ » «·√ﬂÀ— «” ⁄«—…
-        /// Most borrowed books
-        /// </summary>
-        public IEnumerable<MostBorrowedBook>? MostBorrowedBooks { get; set; }
-
-        /// <summary>
-        /// «·„” Œœ„Ì‰ «·√ﬂÀ— ‰‘«ÿ«
-        /// Most active users
-        /// </summary>
-        public IEnumerable<MostActiveUser>? MostActiveUsers { get; set; }
 
         /// <summary>
         /// —”«·… «·Œÿ√

@@ -47,52 +47,6 @@ namespace LibraryManagementSystem.BLL.Services
         }
 
         /// <summary>
-        /// إنشاء رمز JWT للمستخدم
-        /// Generate JWT token for user
-        /// </summary>
-        public string GenerateToken(User user)
-        {
-            try
-            {
-                _logger.LogDebug("إنشاء رمز JWT للمستخدم {UserId} - Generating JWT token for user", user.UserId);
-
-                var claims = new List<Claim>
-                {
-                    new(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                    new(ClaimTypes.Email, user.Email),
-                    new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
-                    new(ClaimTypes.Role, user.Role.ToString()),
-                    new("IsActive", user.IsActive.ToString()),
-                    new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
-                };
-
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
-                var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(claims),
-                    Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationMinutes),
-                    Issuer = _jwtSettings.Issuer,
-                    Audience = _jwtSettings.Audience,
-                    SigningCredentials = credentials
-                };
-
-                var token = _tokenHandler.CreateToken(tokenDescriptor);
-                var tokenString = _tokenHandler.WriteToken(token);
-
-                _logger.LogDebug("تم إنشاء رمز JWT بنجاح للمستخدم {UserId} - JWT token generated successfully for user", user.UserId);
-                return tokenString;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في إنشاء رمز JWT للمستخدم {UserId} - Error generating JWT token for user", user.UserId);
-                throw;
-            }
-        }
-
-        /// <summary>
         /// إنشاء رمز JWT للمستخدم المسجل دخوله
         /// Generate JWT token for logged in user
         /// </summary>

@@ -92,17 +92,7 @@ namespace LibraryManagementSystem.DAL.Repositories
         /// </summary>
         Task<BorrowingStatistics> GetBorrowingStatisticsAsync();
 
-        /// <summary>
-        /// الحصول على الكتب الأكثر استعارة
-        /// Get most borrowed books
-        /// </summary>
-        Task<IEnumerable<MostBorrowedBook>> GetMostBorrowedBooksAsync(int topCount = 10);
-
-        /// <summary>
-        /// الحصول على المستخدمين الأكثر نشاطاً في الاستعارة
-        /// Get most active borrowing users
-        /// </summary>
-        Task<IEnumerable<MostActiveUser>> GetMostActiveUsersAsync(int topCount = 10);
+ 
         Task<bool> HasBorrowingsAsync(int bookId);
     }
 

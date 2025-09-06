@@ -1,5 +1,6 @@
 using LibraryManagementSystem.DAL.Models;
 using LibraryManagementSystem.DAL.Models.DTOs.AuthenticationDTOs;
+using LibraryManagementSystem.DAL.Models.Enums;
 using System.Security.Claims;
 
 namespace LibraryManagementSystem.BLL.Services
@@ -10,14 +11,6 @@ namespace LibraryManagementSystem.BLL.Services
     /// </summary>
     public interface IJwtService
     {
-        /// <summary>
-        /// إنشاء رمز JWT للمستخدم
-        /// Generate JWT token for user
-        /// </summary>
-        /// <param name="user">بيانات المستخدم</param>
-        /// <returns>رمز JWT</returns>
-        string GenerateToken(User user);
-
         /// <summary>
         /// إنشاء رمز JWT للمستخدم المسجل دخوله
         /// Generate JWT token for logged in user
@@ -48,7 +41,7 @@ namespace LibraryManagementSystem.BLL.Services
         /// </summary>
         /// <param name="token">رمز JWT</param>
         /// <returns>دور المستخدم</returns>
-        DAL.Models.Enums.UserRole? GetUserRoleFromToken(string token);
+        UserRole? GetUserRoleFromToken(string token);
 
 
     }
