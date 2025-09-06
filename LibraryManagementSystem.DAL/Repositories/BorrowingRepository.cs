@@ -676,15 +676,15 @@ namespace LibraryManagementSystem.DAL.Repositories
 
                 const string sql = @"
                     SELECT
-                        COUNT(*) as TotalBorrowings,
-                        SUM(CASE WHEN IsReturned = 0 THEN 1 ELSE 0 END) as ActiveBorrowings,
-                        SUM(CASE WHEN IsReturned = 0 AND DueDate < GETDATE() THEN 1 ELSE 0 END) as OverdueBorrowings,
-                        SUM(CASE WHEN IsReturned = 1 THEN 1 ELSE 0 END) as ReturnedBorrowings,
-                        SUM(LateFee) as TotalLateFees,
-                        AVG(CASE WHEN IsReturned = 1 THEN DATEDIFF(DAY, BorrowDate, ReturnDate) ELSE NULL END) as AverageBorrowingPeriod,
-                        SUM(CASE WHEN BorrowDate >= DATEADD(MONTH, -1, GETDATE()) THEN 1 ELSE 0 END) as BorrowingsThisMonth,
-                        SUM(CASE WHEN IsReturned = 1 AND ReturnDate >= DATEADD(MONTH, -1, GETDATE()) THEN 1 ELSE 0 END) as ReturnsThisMonth
-                    FROM Borrowings";
+       COUNT(*) as TotalBorrowings, -- إجمالي عدد الاستعارات
+       SUM(CASE WHEN IsReturned = 0 THEN 1 ELSE 0 END) as ActiveBorrowings, -- عدد الاستعارات النشطة (غير مُعادة)
+       SUM(CASE WHEN IsReturned = 0 AND DueDate < GETDATE() THEN 1 ELSE 0 END) as OverdueBorrowings, -- عدد الاستعارات المتأخرة (تاريخ الإرجاع انتهى ولم تُعاد)
+       SUM(CASE WHEN IsReturned = 1 THEN 1 ELSE 0 END) as ReturnedBorrowings, -- عدد الكتب المُعادة
+       SUM(LateFee) as TotalLateFees, -- مجموع الغرامات المتأخرة
+       AVG(CASE WHEN IsReturned = 1 THEN DATEDIFF(DAY, BorrowDate, ReturnDate) ELSE NULL END) as AverageBorrowingPeriod, -- متوسط فترة الاستعارة (بالأيام)
+       SUM(CASE WHEN BorrowDate >= DATEADD(MONTH, -1, GETDATE()) THEN 1 ELSE 0 END) as BorrowingsThisMonth, -- عدد الاستعارات خلال هذا الشهر (آخر 30 يوم تقريبًا)
+       SUM(CASE WHEN IsReturned = 1 AND ReturnDate >= DATEADD(MONTH, -1, GETDATE()) THEN 1 ELSE 0 END) as ReturnsThisMonth -- عدد الإرجاعات خلال هذا الشهر
+       FROM Borrowings";
 
                 using var reader = await DatabaseHelper.ExecuteReaderAsync(connection, sql);
 
