@@ -56,9 +56,7 @@ namespace LibraryManagementSystem.UI.Pages
                 var jwtToken = Request.Cookies["jwt"];
 
                 if (string.IsNullOrEmpty(jwtToken))
-                {
                     return null;
-                }
 
                 return _jwtService.GetUserRoleFromToken(jwtToken);
             }
@@ -76,7 +74,7 @@ namespace LibraryManagementSystem.UI.Pages
         protected bool IsAdmin()
         {
             var role = GetCurrentUserRole();
-            return role == UserRole.Administrator;
+            return role.HasValue && role.Value == UserRole.Administrator;
         }
 
 
