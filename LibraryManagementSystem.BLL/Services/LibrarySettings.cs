@@ -28,7 +28,7 @@ namespace LibraryManagementSystem.BLL.Services
         /// رسوم التأخير لكل يوم
         /// Late fee per day
         /// </summary>
-        public decimal LateFeePerDay { get; set; } = 1.00m;
+        public decimal LateFeePerDay { get; set; } = 1.00m;//الحرف m مطلوب في C# لتحديد إن الرقم decimal (مش double).
 
         /// <summary>
         /// عدد أيام السماح قبل فرض الرسوم
