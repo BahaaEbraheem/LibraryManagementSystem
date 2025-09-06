@@ -82,19 +82,7 @@ namespace LibraryManagementSystem.BLL.Services
         /// </summary>
         Task<ServiceResult<BorrowingStatistics>> GetBorrowingStatisticsAsync();
 
-        /// <summary>
-        /// الحصول على الكتب الأكثر استعارة
-        /// Get most borrowed books
-        /// </summary>
-        Task<ServiceResult<IEnumerable<MostBorrowedBook>>> GetMostBorrowedBooksAsync(int topCount = 10);
-
-        /// <summary>
-        /// الحصول على المستخدمين الأكثر نشاطاً
-        /// Get most active users
-        /// </summary>
-        Task<ServiceResult<IEnumerable<MostActiveUser>>> GetMostActiveUsersAsync(int topCount = 10);
-
-    }
+      }
 
 
 

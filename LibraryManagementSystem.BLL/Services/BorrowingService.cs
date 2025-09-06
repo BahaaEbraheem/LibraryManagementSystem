@@ -534,51 +534,6 @@ namespace LibraryManagementSystem.BLL.Services
             }
         }
 
-        /// <summary>
-        /// الحصول على الكتب الأكثر استعارة
-        /// Get most borrowed books
-        /// </summary>
-        public async Task<ServiceResult<IEnumerable<MostBorrowedBook>>> GetMostBorrowedBooksAsync(int topCount = 10)
-        {
-            try
-            {
-                _logger.LogDebug("الحصول على أكثر {TopCount} كتاب استعارة - Getting top most borrowed books", topCount);
-
-                var books = await _borrowingRepository.GetMostBorrowedBooksAsync(topCount);
-
-                _logger.LogDebug("تم الحصول على {Count} كتاب من الأكثر استعارة - Retrieved most borrowed books", books.Count());
-
-                return ServiceResult<IEnumerable<MostBorrowedBook>>.Success(books);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في الحصول على الكتب الأكثر استعارة - Error getting most borrowed books");
-                return ServiceResult<IEnumerable<MostBorrowedBook>>.Failure("حدث خطأ أثناء الحصول على الكتب الأكثر استعارة - An error occurred while retrieving most borrowed books");
-            }
-        }
-
-        /// <summary>
-        /// الحصول على المستخدمين الأكثر نشاطاً
-        /// Get most active users
-        /// </summary>
-        public async Task<ServiceResult<IEnumerable<MostActiveUser>>> GetMostActiveUsersAsync(int topCount = 10)
-        {
-            try
-            {
-                _logger.LogDebug("الحصول على أكثر {TopCount} مستخدم نشاطاً - Getting top most active users", topCount);
-
-                var users = await _borrowingRepository.GetMostActiveUsersAsync(topCount);
-
-                _logger.LogDebug("تم الحصول على {Count} مستخدم من الأكثر نشاطاً - Retrieved most active users", users.Count());
-
-                return ServiceResult<IEnumerable<MostActiveUser>>.Success(users);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في الحصول على المستخدمين الأكثر نشاطاً - Error getting most active users");
-                return ServiceResult<IEnumerable<MostActiveUser>>.Failure("حدث خطأ أثناء الحصول على المستخدمين الأكثر نشاطاً - An error occurred while retrieving most active users");
-            }
-        }
 
         /// <summary>
         /// تمديد فترة الاستعارة
@@ -624,60 +579,6 @@ namespace LibraryManagementSystem.BLL.Services
             }
         }
 
-        /// <summary>
-        /// تجديد استعارة
-        /// Renew borrowing
-        /// </summary>
-        public async Task<ServiceResult<bool>> RenewBorrowingAsync(int borrowingId)
-        {
-            try
-            {
-                _logger.LogDebug("تجديد الاستعارة {BorrowingId} - Renewing borrowing", borrowingId);
 
-                return await ExtendBorrowingAsync(borrowingId, _librarySettings.RenewalDays);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في تجديد الاستعارة {BorrowingId} - Error renewing borrowing", borrowingId);
-                return ServiceResult<bool>.Failure("حدث خطأ أثناء تجديد الاستعارة - An error occurred while renewing the borrowing");
-            }
-        }
-
-        /// <summary>
-        /// إلغاء استعارة
-        /// Cancel borrowing
-        /// </summary>
-        public async Task<ServiceResult<bool>> CancelBorrowingAsync(int borrowingId)
-        {
-            try
-            {
-                _logger.LogDebug("إلغاء الاستعارة {BorrowingId} - Cancelling borrowing", borrowingId);
-
-                var borrowing = await _borrowingRepository.GetByIdAsync(borrowingId);
-                if (borrowing == null)
-                {
-                    return ServiceResult<bool>.Failure("لم يتم العثور على الاستعارة - Borrowing not found");
-                }
-
-                if (borrowing.IsReturned)
-                {
-                    return ServiceResult<bool>.Failure("لا يمكن إلغاء كتاب تم إرجاعه - Cannot cancel a returned book");
-                }
-
-                var success = await _borrowingRepository.DeleteAsync(borrowingId);
-
-                if (success)
-                {
-                    _logger.LogInformation("تم إلغاء الاستعارة {BorrowingId} بنجاح - Successfully cancelled borrowing", borrowingId);
-                }
-
-                return ServiceResult<bool>.Success(success);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "خطأ في إلغاء الاستعارة {BorrowingId} - Error cancelling borrowing", borrowingId);
-                return ServiceResult<bool>.Failure("حدث خطأ أثناء إلغاء الاستعارة - An error occurred while cancelling the borrowing");
-            }
-        }
     }
 }
