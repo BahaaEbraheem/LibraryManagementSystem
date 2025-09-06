@@ -171,7 +171,9 @@ namespace LibraryManagementSystem.DAL.Data
                     new { Title = "إثارة الغموض", Author = "أجاثا كريستي", ISBN = "978-0-06-207348-8", Publisher = "دار النشر", Year = 1934, Genre = "إثارة", Copies = 2, Description = "رواية إثارة وغموض" },
                     new { Title = "خيال علمي المستقبل", Author = "إسحاق أسيموف", ISBN = "978-0-553-80370-9", Publisher = "دار النشر", Year = 1951, Genre = "خيال علمي", Copies = 3, Description = "رواية خيال علمي" },
                     new { Title = "قصص رومانسية", Author = "جين أوستن", ISBN = "978-0-14-143951-8", Publisher = "دار النشر", Year = 1813, Genre = "أدب", Copies = 2, Description = "رواية رومانسية" },
-                    new { Title = "سيرة حياة شخصية مشهورة", Author = "جون سميث", ISBN = "978-0-06-231500-7", Publisher = "دار النشر", Year = 1988, Genre = "سيرة ذاتية", Copies = 3, Description = "سيرة شخصية" }
+                    new { Title = "سيرة حياة شخصية مشهورة", Author = "جون سميث", ISBN = "978-0-06-231500-7", Publisher = "دار النشر", Year = 1988, Genre = "سيرة ذاتية", Copies = 3, Description = "سيرة شخصية" },
+                    new { Title = "الزمن الجميل", Author = "نزار قباني", ISBN = "978-977-09-0789-3", Publisher = "دار النشر", Year = 1975, Genre = "شعر", Copies = 4, Description = "مجموعة شعرية رومانسية" },
+                    new  { Title = "الكون والوجود", Author = "ستيفن هوكينغ", ISBN = "978-0-553-17698-8", Publisher = "دار النشر", Year = 1988, Genre = "علم", Copies = 2, Description = "كتاب علمي في الفيزياء الكونية" }
                 };
 
 
