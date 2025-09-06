@@ -110,13 +110,13 @@ namespace LibraryManagementSystem.UI.Pages.Auth
                     // حفظ JWT في الجلسة والكوكيز
                     // Save JWT in session and cookies
                     HttpContext.Session.SetString("jwt", jwtToken);
-
+                    var isProduction = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production";
                     // إضافة JWT كـ cookie (اختياري - للأمان أكثر)
                     // Add JWT as cookie (optional - for better security)
                     var cookieOptions = new CookieOptions
                     {
                         HttpOnly = true, // منع الوصول من JavaScript
-                        Secure = true,   // HTTPS فقط
+                        Secure = isProduction,   // HTTPS فقط
                         SameSite = SameSiteMode.Strict,
                         Expires = DateTime.UtcNow.AddHours(1) // نفس مدة انتهاء JWT
                     };
