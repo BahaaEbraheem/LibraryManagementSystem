@@ -8,7 +8,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LibraryManagementSystem.UI.Pages.Books
 {
-    [Authorize(Roles = "Administrator")]
     /// <summary>
     /// نموذج صفحة تعديل الكتاب
     /// Edit book page model

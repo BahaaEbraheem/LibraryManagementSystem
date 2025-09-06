@@ -1,0 +1,267 @@
+﻿@page
+@model LibraryManagementSystem.UI.Pages.IndexModel
+@{
+    ViewData["Title"] = "الصفحة الرئيسية - Home";
+}
+
+<div class="container-fluid" dir="rtl">
+    <!-- ترحيب - Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="jumbotron bg-primary text-white p-5 rounded">
+                <div class="text-center">
+                    <h1 class="display-4">
+                        <i class="fas fa-book-open me-3"></i>
+                        مرحباً بك في نظام إدارة المكتبة
+                    </h1>
+                    <p class="lead">نظام شامل لإدارة الكتب والاستعارات في المكتبة</p>
+                    <hr class="my-4">
+                    <p>ابحث عن الكتب، استعر ما تحتاجه، وأدر استعاراتك بسهولة</p>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a class="btn btn-light btn-lg me-md-2" href="/Books/Index" role="button">
+                            <i class="fas fa-search me-2"></i>
+                            البحث عن الكتب
+                        </a>
+                        <a class="btn btn-outline-light btn-lg" href="/Borrowings/Index" role="button">
+                            <i class="fas fa-book-reader me-2"></i>
+                            إدارة الاستعارات
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الإحصائيات السريعة - Quick Statistics -->
+    @if (Model.BookStatistics != null && Model.BorrowingStatistics != null)
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="mb-3">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    إحصائيات سريعة - Quick Statistics
+                </h3>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <!-- إحصائيات الكتب - Book Statistics -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-book fa-2x mb-2"></i>
+                        <h4 class="card-title">@Model.BookStatistics.TotalBooks</h4>
+                        <p class="card-text">إجمالي الكتب</p>
+                        <small>@Model.BookStatistics.AvailableBooks متاح</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-book-reader fa-2x mb-2"></i>
+                        <h4 class="card-title">@Model.BorrowingStatistics.ActiveBorrowings</h4>
+                        <p class="card-text">استعارات نشطة</p>
+                        <small>@Model.BorrowingStatistics.BorrowingsThisMonth هذا الشهر</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-warning text-dark h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                        <h4 class="card-title">@Model.BorrowingStatistics.OverdueBorrowings</h4>
+                        <p class="card-text">استعارات متأخرة</p>
+                        <small>@Model.BorrowingStatistics.TotalLateFees.ToString("C") رسوم</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <h4 class="card-title">@Model.BookStatistics.UniqueAuthors</h4>
+                        <p class="card-text">مؤلفين مختلفين</p>
+                        <small>@Model.BookStatistics.UniqueGenres أنواع</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- البحث السريع - Quick Search -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-search me-2"></i>
+                        البحث السريع - Quick Search
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form action="/Books" method="get">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control form-control-lg" name="searchTerm"
+                                       placeholder="ابحث عن كتاب بالعنوان، المؤلف، أو الرقم المعياري...">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select form-select-lg" name="genre">
+                                    <option value="">جميع الأنواع</option>
+                                    <option value="أدب">أدب</option>
+                                    <option value="رواية">رواية</option>
+                                    <option value="خيال علمي">خيال علمي</option>
+                                    <option value="تاريخ">تاريخ</option>
+                                    <option value="فكر">فكر</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-search me-2"></i>
+                                    بحث
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الكتب الأكثر استعارة - Most Borrowed Books -->
+    @if (Model.MostBorrowedBooks != null && Model.MostBorrowedBooks.Any())
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="mb-3">
+                    <i class="fas fa-star me-2"></i>
+                    الكتب الأكثر استعارة - Most Borrowed Books
+                </h3>
+            </div>
+        </div>
+
+        <div class="row">
+            @foreach (var book in Model.MostBorrowedBooks.Take(6))
+            {
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary">@book.Title</h6>
+                            <p class="card-text">
+                                <strong>المؤلف:</strong> @book.Author<br>
+                                <strong>عدد الاستعارات:</strong> @book.BorrowCount<br>
+                                <strong>الاستعارات النشطة:</strong> @book.CurrentActiveBorrowings
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="/Books?searchTerm=@book.ISBN" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>
+                                عرض التفاصيل
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- روابط سريعة - Quick Links -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-3">
+                <i class="fas fa-link me-2"></i>
+                روابط سريعة - Quick Links
+            </h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center h-100 border-primary">
+                <div class="card-body">
+                    <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">البحث المتقدم</h5>
+                    <p class="card-text">ابحث عن الكتب بمعايير متقدمة</p>
+                    <a href="/Books/Index" class="btn btn-primary">ابدأ البحث</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center h-100 border-success">
+                <div class="card-body">
+                    <i class="fas fa-book-reader fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">استعاراتي</h5>
+                    <p class="card-text">عرض وإدارة استعاراتك الحالية</p>
+                    <a href="/Borrowings/Index" class="btn btn-success">عرض الاستعارات</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center h-100 border-warning">
+                <div class="card-body">
+                    <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">الاستعارات المتأخرة</h5>
+                    <p class="card-text">عرض الكتب المتأخرة في الإرجاع</p>
+                    <a href="/Borrowings?status=overdue" class="btn btn-warning">عرض المتأخرة</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center h-100 border-info">
+                <div class="card-body">
+                    <i class="fas fa-chart-bar fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">الإحصائيات</h5>
+                    <p class="card-text">عرض إحصائيات مفصلة للمكتبة</p>
+                    <a href="/Statistics" class="btn btn-info">عرض الإحصائيات</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- معلومات المكتبة - Library Information -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h5 class="card-title">مكتبة الجامعة المركزية</h5>
+                    <p class="card-text">
+                        نظام إدارة المكتبة الشامل يوفر لك إمكانية البحث عن الكتب واستعارتها وإدارة استعاراتك بسهولة
+                        ويسر.
+                        <br>
+                        للمساعدة والاستفسارات: library@university.edu | +966-11-1234567
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .jumbotron {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
+
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+    .card-body i {
+        transition: transform 0.2s;
+    }
+
+    .card:hover .card-body i {
+        transform: scale(1.1);
+    }
+</style>

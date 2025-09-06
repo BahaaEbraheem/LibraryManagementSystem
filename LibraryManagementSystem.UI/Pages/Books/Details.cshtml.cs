@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace LibraryManagementSystem.UI.Pages.Books
 {
-    [Authorize]
     /// <summary>
     /// نموذج صفحة تفاصيل الكتاب
     /// Book details page model
@@ -62,9 +61,24 @@ namespace LibraryManagementSystem.UI.Pages.Books
             try
             {
                 // التحقق من دور المستخدم
-                // Check user role
-                IsAdmin = HttpContext.Session.GetString("UserRole") == "Administrator";
+                IsAdmin = IsAdmin();
+                // إذا لم يكن المستخدم مدير، عرض استعاراته فقط
+                // If user is not admin, show only their borrowings
+                if (!IsAdmin)
+                {
+                    var currentUserId = HttpContext.Session.GetInt32("UserId");
+                    _logger.LogDebug("Current user ID from session: {UserId}", currentUserId);
 
+                    if (currentUserId.HasValue)
+                    {
+                        _logger.LogDebug("Setting UserId to  for non-admin user");
+                    }
+                    else
+                    {
+                        _logger.LogWarning("No valid user ID found in session, redirecting to login");
+                        return RedirectToPage("/Auth/Login");
+                    }
+                }
                 if (id <= 0)
                 {
                     ErrorMessage = "معرف الكتاب غير صحيح - Invalid book ID";

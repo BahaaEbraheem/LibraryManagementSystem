@@ -89,8 +89,7 @@ namespace LibraryManagementSystem.UI.Pages.Borrowings
 
                 // التحقق من دور المستخدم
                 // Check user role
-                IsAdmin = HttpContext.Session.GetString("UserRole") == "Administrator";
-
+                IsAdmin = IsAdmin();
                 // إذا لم يكن المستخدم مدير، عرض استعاراته فقط
                 // If user is not admin, show only their borrowings
                 if (!IsAdmin)
